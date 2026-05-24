@@ -66,6 +66,16 @@ curl -X POST http://localhost:3000/api/capture/text \
   -d '{"rawText":"今天补录：在展会认识陈总，他想下周了解 OTC 出入金流程。"}'
 ```
 
+Create an image evidence event and attachment record:
+
+```bash
+curl -X POST http://localhost:3000/api/capture/image \
+  -H 'Content-Type: application/json' \
+  -d '{"storageKey":"uploads/demo-screenshot.png","fileName":"demo-screenshot.png","mimeType":"image/png","fileSize":180000,"width":1170,"height":2532,"note":"这是今天跟刘总的微信截图"}'
+```
+
+The current capture API only records metadata and original notes. OCR or Vision extraction is intentionally not connected yet, so no external API key is required at this stage.
+
 ## Non-Negotiables
 
 - Person-first CRM, not company-first for V1.
