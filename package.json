@@ -11,10 +11,15 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "check": "pnpm lint && pnpm typecheck && pnpm test"
+    "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:migrate:local": "DATABASE_URL=postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1 drizzle-kit migrate"
   },
   "dependencies": {
+    "drizzle-orm": "^0.45.2",
     "next": "16.2.6",
+    "postgres": "^3.4.9",
     "react": "19.2.6",
     "react-dom": "19.2.6"
   },
@@ -23,6 +28,7 @@
     "@types/node": "^24.0.0",
     "@types/react": "19.2.15",
     "@types/react-dom": "19.2.3",
+    "drizzle-kit": "^0.31.10",
     "eslint": "^9.0.0",
     "eslint-config-next": "16.2.6",
     "postcss": "8.5.15",

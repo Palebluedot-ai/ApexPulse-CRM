@@ -30,6 +30,23 @@ pnpm lint
 pnpm typecheck
 pnpm test
 pnpm check
+pnpm db:generate
+pnpm db:migrate
+pnpm db:migrate:local
+```
+
+## Local Database
+
+Start local Postgres:
+
+```bash
+docker compose up -d postgres
+```
+
+Run the migration against the local database:
+
+```bash
+pnpm db:migrate:local
 ```
 
 ## Non-Negotiables
