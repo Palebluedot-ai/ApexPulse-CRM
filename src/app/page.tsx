@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 const captureTypes = ["聊天截图", "文字备注", "名片照片"];
 
 const loopSteps = [
@@ -24,6 +26,18 @@ export default function Home() {
               第一版只服务一个核心问题：展会、Telegram、WhatsApp
               里认识的人，不再因为没有记录和提醒而沉睡。
             </p>
+          </div>
+
+          <div className="flex flex-wrap gap-3">
+            <Link
+              className="rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
+              href="/customers"
+            >
+              打开客户列表
+            </Link>
+            <span className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--muted)]">
+              下一步：任务闭环
+            </span>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">

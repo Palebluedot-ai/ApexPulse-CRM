@@ -115,6 +115,29 @@ Confirming a review event with `partyId` refreshes that customer's latest-contac
 - `last_contact_event_id`
 - `followup_status`
 
+## Customer Pages
+
+Open the customer list:
+
+```text
+http://localhost:3000/customers
+```
+
+Open a customer detail first screen:
+
+```text
+http://localhost:3000/customers/CUSTOMER_ID
+```
+
+The first-screen customer detail page shows:
+
+- customer identity and follow-up state
+- latest contact time
+- next follow-up time
+- latest communication summary
+- raw note when available
+- attachment metadata when available
+
 ## Non-Negotiables
 
 - Person-first CRM, not company-first for V1.
