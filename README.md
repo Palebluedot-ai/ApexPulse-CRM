@@ -1,21 +1,42 @@
-# hashkey-otc-crm-v1
+# HashKey OTC CRM V1
 
-V0 的 PWA-first 重写。不依赖 Discord，Web 主入口，serverless 部署。
+PWA-first sales CRM for OTC relationship follow-up.
 
-V0 仓库（仍在生产运行）：[jsui1998-cpu/hashkey-otc-crm](https://github.com/jsui1998-cpu/hashkey-otc-crm)
+This project starts as Chao's personal side project. The first version is not a HashKey internal compliance system. The product can later move to a company server, Vercel, Supabase, AWS, or another host, but V1 should stay local-first and low-cost until the first working loop is proven.
 
-## 当前状态
+## Current Stage
 
-设计阶段。还没写代码。
+Phase 0 engineering skeleton has been created.
 
-## 阅读顺序
+The app can run as a minimal PWA shell. Business logic still needs to follow document-driven development and test-first implementation.
 
-1. **[DESIGN.md](./DESIGN.md)** — 完整设计文档（架构、技术栈、范围、anti-goals、时间预估）
+## First Product Loop
 
-## 下一步
+1. Capture screenshots, text notes, or business card photos.
+2. Keep the original evidence.
+3. Generate a reviewable extracted result.
+4. Let the user confirm or edit the result.
+5. Write a customer timeline event.
+6. Refresh the customer's follow-up state.
+7. Create or update follow-up tasks.
 
-在写任何代码之前，必须完成 [DESIGN.md §7](./DESIGN.md#7-必须在写代码之前验证的-3-件事) 的 3 个前置验证：
+## Development Commands
 
-1. HashKey 合规对境外 vision API 的政策
-2. 视觉 LLM 中文 OCR 准确性实测（5 张真实截图）
-3. iOS PWA Share Target 实测（自己手机上验流程接受度）
+These commands will be available after dependencies are installed:
+
+```bash
+pnpm dev
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm check
+```
+
+## Non-Negotiables
+
+- Person-first CRM, not company-first for V1.
+- Review-first extraction, not automatic ingestion.
+- PWA-first, not Discord-first.
+- Original evidence must be retained.
+- Follow-up state refresh is core, not a nice-to-have.
+- Documents must be self-contained.
