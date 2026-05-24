@@ -97,7 +97,7 @@ Confirm a pending review event:
 ```bash
 curl -X POST http://localhost:3000/api/review/confirm \
   -H 'Content-Type: application/json' \
-  -d '{"eventId":"EVENT_ID","summary":"确认后的沟通摘要","extractedFields":{"nextAction":"下周继续跟进"}}'
+  -d '{"eventId":"EVENT_ID","partyId":"PARTY_ID","summary":"确认后的沟通摘要","extractedFields":{"nextAction":"下周继续跟进"},"followupStatus":"due_soon"}'
 ```
 
 Skip a pending review event:
@@ -108,7 +108,12 @@ curl -X POST http://localhost:3000/api/review/skip \
   -d '{"eventId":"EVENT_ID"}'
 ```
 
-Confirming a review event does not refresh customer latest-contact fields yet. That is the next product loop.
+Confirming a review event with `partyId` refreshes that customer's latest-contact fields:
+
+- `last_contact_at`
+- `last_contact_summary`
+- `last_contact_event_id`
+- `followup_status`
 
 ## Non-Negotiables
 

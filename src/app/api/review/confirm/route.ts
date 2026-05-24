@@ -2,6 +2,24 @@ import { NextResponse } from "next/server";
 import { createDb } from "@/server/db";
 import { confirmReviewEvent } from "@/server/review/review-queue";
 
+const followupStatusValues = [
+  "up_to_date",
+  "due_soon",
+  "overdue",
+  "unknown",
+] as const;
+
+type FollowupStatus = (typeof followupStatusValues)[number];
+
+function followupStatusOrUndefined(
+  value: unknown,
+): FollowupStatus | undefined {
+  if (typeof value !== "string") return undefined;
+  return followupStatusValues.includes(value as FollowupStatus)
+    ? (value as FollowupStatus)
+    : undefined;
+}
+
 function dateOrUndefined(value: unknown): Date | undefined {
   if (typeof value !== "string") return undefined;
 
@@ -23,6 +41,7 @@ export async function POST(request: Request) {
           ? (body.extractedFields as Record<string, unknown>)
           : {},
       occurredAt: dateOrUndefined(body.occurredAt),
+      followupStatus: followupStatusOrUndefined(body.followupStatus),
       reviewedByUserId:
         typeof body.reviewedByUserId === "string"
           ? body.reviewedByUserId

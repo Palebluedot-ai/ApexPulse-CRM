@@ -3,10 +3,15 @@ import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import {
   attachments,
   events,
+  parties,
   type Attachment,
   type Event,
   type NewEvent,
 } from "@/server/db/schema";
+import {
+  buildPartyLastContactUpdate,
+  type PartyLastContactInput,
+} from "./confirm-effects";
 
 type Db = PostgresJsDatabase<typeof import("@/server/db/schema")>;
 type ReviewStatus = "pending_review" | "confirmed" | "skipped";
@@ -20,6 +25,7 @@ export interface ConfirmReviewInput {
   summary: string;
   extractedFields: Record<string, unknown>;
   occurredAt?: Date;
+  followupStatus?: PartyLastContactInput["followupStatus"];
   reviewedByUserId?: string;
   reviewedAt?: Date;
 }
@@ -134,16 +140,36 @@ export async function confirmReviewEvent(
   db: Db,
   input: ConfirmReviewInput & { eventId: string },
 ) {
-  const [event] = await db
-    .update(events)
-    .set(buildConfirmReviewUpdate(input))
-    .where(
-      and(
-        eq(events.id, requireEventId(input.eventId)),
-        eq(events.reviewStatus, "pending_review"),
-      ),
-    )
-    .returning();
+  const event = await db.transaction(async (tx) => {
+    const [confirmedEvent] = await tx
+      .update(events)
+      .set(buildConfirmReviewUpdate(input))
+      .where(
+        and(
+          eq(events.id, requireEventId(input.eventId)),
+          eq(events.reviewStatus, "pending_review"),
+        ),
+      )
+      .returning();
+
+    if (!confirmedEvent) return undefined;
+
+    if (confirmedEvent.partyId) {
+      await tx
+        .update(parties)
+        .set(
+          buildPartyLastContactUpdate({
+            eventId: confirmedEvent.id,
+            summary: confirmedEvent.aiSummary ?? input.summary,
+            contactAt: confirmedEvent.occurredAt ?? confirmedEvent.capturedAt,
+            followupStatus: input.followupStatus,
+          }),
+        )
+        .where(eq(parties.id, confirmedEvent.partyId));
+    }
+
+    return confirmedEvent;
+  });
 
   if (!event) throw new Error("Pending review event not found");
 
