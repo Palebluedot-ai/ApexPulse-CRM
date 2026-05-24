@@ -14,7 +14,8 @@
     "check": "pnpm lint && pnpm typecheck && pnpm test",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
-    "db:migrate:local": "DATABASE_URL=postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1 drizzle-kit migrate"
+    "db:migrate:local": "DATABASE_URL=postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1 drizzle-kit migrate",
+    "db:seed:local": "DATABASE_URL=postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1 tsx src/server/db/seed-local.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
@@ -33,6 +34,7 @@
     "eslint-config-next": "16.2.6",
     "postcss": "8.5.15",
     "tailwindcss": "4.3.0",
+    "tsx": "^4.21.0",
     "typescript": "6.0.3",
     "vitest": "4.1.7"
   },

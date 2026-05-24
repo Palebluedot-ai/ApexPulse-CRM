@@ -33,6 +33,7 @@ pnpm check
 pnpm db:generate
 pnpm db:migrate
 pnpm db:migrate:local
+pnpm db:seed:local
 ```
 
 ## Local Database
@@ -47,6 +48,22 @@ Run the migration against the local database:
 
 ```bash
 pnpm db:migrate:local
+```
+
+Seed one demo user, customer, event, attachment, and task:
+
+```bash
+pnpm db:seed:local
+```
+
+## Capture API
+
+Create a text note event:
+
+```bash
+curl -X POST http://localhost:3000/api/capture/text \
+  -H 'Content-Type: application/json' \
+  -d '{"rawText":"今天补录：在展会认识陈总，他想下周了解 OTC 出入金流程。"}'
 ```
 
 ## Non-Negotiables
