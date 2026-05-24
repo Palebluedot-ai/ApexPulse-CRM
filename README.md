@@ -76,6 +76,40 @@ curl -X POST http://localhost:3000/api/capture/image \
 
 The current capture API only records metadata and original notes. OCR or Vision extraction is intentionally not connected yet, so no external API key is required at this stage.
 
+## Review API
+
+List pending review events:
+
+```bash
+curl 'http://localhost:3000/api/review/pending?limit=10'
+```
+
+Edit a pending review event without confirming it:
+
+```bash
+curl -X POST http://localhost:3000/api/review/edit \
+  -H 'Content-Type: application/json' \
+  -d '{"eventId":"EVENT_ID","summary":"编辑后的待确认摘要","extractedFields":{"topic":"fee"}}'
+```
+
+Confirm a pending review event:
+
+```bash
+curl -X POST http://localhost:3000/api/review/confirm \
+  -H 'Content-Type: application/json' \
+  -d '{"eventId":"EVENT_ID","summary":"确认后的沟通摘要","extractedFields":{"nextAction":"下周继续跟进"}}'
+```
+
+Skip a pending review event:
+
+```bash
+curl -X POST http://localhost:3000/api/review/skip \
+  -H 'Content-Type: application/json' \
+  -d '{"eventId":"EVENT_ID"}'
+```
+
+Confirming a review event does not refresh customer latest-contact fields yet. That is the next product loop.
+
 ## Non-Negotiables
 
 - Person-first CRM, not company-first for V1.
