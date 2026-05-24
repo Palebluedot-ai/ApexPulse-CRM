@@ -138,6 +138,44 @@ The first-screen customer detail page shows:
 - raw note when available
 - attachment metadata when available
 
+## Task API
+
+List tasks:
+
+```bash
+curl http://localhost:3000/api/tasks
+```
+
+Create a follow-up task:
+
+```bash
+curl -X POST http://localhost:3000/api/tasks \
+  -H 'Content-Type: application/json' \
+  -d '{"partyId":"PARTY_ID","taskType":"followup","description":"明天继续跟进客户。","dueAt":"2026-05-25T10:00:00+08:00"}'
+```
+
+Complete a task:
+
+```bash
+curl -X POST http://localhost:3000/api/tasks/complete \
+  -H 'Content-Type: application/json' \
+  -d '{"taskId":"TASK_ID"}'
+```
+
+Reopen a completed task:
+
+```bash
+curl -X POST http://localhost:3000/api/tasks/reopen \
+  -H 'Content-Type: application/json' \
+  -d '{"taskId":"TASK_ID"}'
+```
+
+Open the task page:
+
+```text
+http://localhost:3000/tasks
+```
+
 ## Non-Negotiables
 
 - Person-first CRM, not company-first for V1.

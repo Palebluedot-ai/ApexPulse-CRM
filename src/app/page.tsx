@@ -35,8 +35,14 @@ export default function Home() {
             >
               打开客户列表
             </Link>
+            <Link
+              className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--accent-strong)]"
+              href="/tasks"
+            >
+              查看跟进任务
+            </Link>
             <span className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--muted)]">
-              下一步：任务闭环
+              M1 闭环进行中
             </span>
           </div>
 
