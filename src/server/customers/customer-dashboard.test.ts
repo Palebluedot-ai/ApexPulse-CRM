@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildCustomerActionPanel,
+  buildCustomerMorningBrief,
   buildCustomerDashboardStats,
   buildCustomerListItem,
   buildLatestCommunicationCard,
@@ -180,6 +181,27 @@ describe("customer dashboard", () => {
       openTaskCount: 0,
       nextTask: null,
     });
+  });
+
+  it("builds a morning brief for the customer detail first screen", () => {
+    expect(
+      buildCustomerMorningBrief({
+        customer: buildCustomerListItem(baseParty),
+        latestCommunication: buildLatestCommunicationCard({
+          party: baseParty,
+          event: latestEvent,
+          attachments: [attachment],
+        }),
+        actionPanel: buildCustomerActionPanel({
+          customer: buildCustomerListItem(baseParty),
+          openTasks: [openTask],
+        }),
+      }),
+    ).toEqual([
+      "最近沟通：刘总确认下周继续跟进。",
+      "下一步：下周继续跟进刘总 OTC 出入金流程。",
+      "风险提示：这个客户已经有明确的下一次跟进时间，不要让它自然沉睡。",
+    ]);
   });
 
   it("builds dashboard stats for compact customer scanning", () => {

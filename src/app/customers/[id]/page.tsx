@@ -48,7 +48,13 @@ export default async function CustomerDetailPage({
     const firstScreen = await getCustomerFirstScreen(db, id);
     if (!firstScreen) notFound();
 
-    const { actionPanel, customer, latestCommunication, openTasks } =
+    const {
+      actionPanel,
+      customer,
+      latestCommunication,
+      morningBrief,
+      openTasks,
+    } =
       firstScreen;
 
     return (
@@ -138,6 +144,22 @@ export default async function CustomerDetailPage({
               >
                 {actionPanel.primaryActionLabel}
               </Link>
+            </div>
+
+            <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-white/60 p-5">
+              <p className="text-sm font-semibold text-[var(--accent-strong)]">
+                Morning Brief
+              </p>
+              <ul className="mt-3 grid gap-2">
+                {morningBrief.map((line) => (
+                  <li
+                    className="rounded-2xl border border-[var(--line)] bg-white/65 p-3 leading-7"
+                    key={line}
+                  >
+                    {line}
+                  </li>
+                ))}
+              </ul>
             </div>
 
             <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-3">

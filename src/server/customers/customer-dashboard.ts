@@ -89,6 +89,7 @@ export interface CustomerFirstScreen {
   };
   latestCommunication: LatestCommunicationCard | null;
   actionPanel: CustomerActionPanel;
+  morningBrief: string[];
   openTasks: CustomerActionTask[];
 }
 
@@ -284,6 +285,21 @@ export function buildCustomerActionPanel(input: {
   };
 }
 
+export function buildCustomerMorningBrief(input: {
+  customer: CustomerListItem;
+  latestCommunication: LatestCommunicationCard | null;
+  actionPanel: CustomerActionPanel;
+}): string[] {
+  const latestLine = input.latestCommunication
+    ? `最近沟通：${input.latestCommunication.summary}`
+    : "最近沟通：还没有确认过的沟通。";
+  const nextLine = input.actionPanel.nextTask
+    ? `下一步：${input.actionPanel.nextTask.description}`
+    : "下一步：先补一条明确的跟进任务。";
+
+  return [latestLine, nextLine, `风险提示：${input.actionPanel.reason}`];
+}
+
 export async function listCustomerListItems(db: Db): Promise<CustomerListItem[]> {
   const rows = await db
     .select()
@@ -330,16 +346,24 @@ export async function getCustomerFirstScreen(
     profileSummary: party.profileSummary,
   };
 
+  const latestCommunication = buildLatestCommunicationCard({
+    party,
+    event: latestEvent ?? null,
+    attachments: latestAttachments,
+  });
+  const actionPanel = buildCustomerActionPanel({
+    customer,
+    openTasks,
+  });
+
   return {
     customer,
-    latestCommunication: buildLatestCommunicationCard({
-      party,
-      event: latestEvent ?? null,
-      attachments: latestAttachments,
-    }),
-    actionPanel: buildCustomerActionPanel({
+    latestCommunication,
+    actionPanel,
+    morningBrief: buildCustomerMorningBrief({
       customer,
-      openTasks,
+      latestCommunication,
+      actionPanel,
     }),
     openTasks: openTasks.map(buildActionTask),
   };
