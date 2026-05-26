@@ -31,19 +31,28 @@ export default function Home() {
           <div className="flex flex-wrap gap-3">
             <Link
               className="rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
+              href="/capture"
+            >
+              新增录入
+            </Link>
+            <Link
+              className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--accent-strong)]"
+              href="/review"
+            >
+              待确认
+            </Link>
+            <Link
+              className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--accent-strong)]"
               href="/customers"
             >
-              打开客户列表
+              客户列表
             </Link>
             <Link
               className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--accent-strong)]"
               href="/tasks"
             >
-              查看跟进任务
+              跟进任务
             </Link>
-            <span className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--muted)]">
-              M1 闭环进行中
-            </span>
           </div>
 
           <div className="grid gap-3 sm:grid-cols-3">
