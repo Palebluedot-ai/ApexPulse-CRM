@@ -42,3 +42,8 @@ input,
 textarea {
   font: inherit;
 }
+
+button,
+select {
+  font: inherit;
+}

@@ -1,4 +1,5 @@
 import type { Metadata, Viewport } from "next";
+import { AppNav } from "./app-nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -24,7 +25,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="zh-HK">
-      <body>{children}</body>
+      <body>
+        <AppNav />
+        {children}
+      </body>
     </html>
   );
 }
