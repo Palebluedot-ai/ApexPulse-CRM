@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   buildCustomerSelectOptions,
   buildReviewQueueViewItems,
+  filterReviewQueueViewItems,
 } from "./review-page-model";
 import type { Attachment, Event, Party } from "@/server/db/schema";
 
@@ -90,5 +91,28 @@ describe("review page model", () => {
         label: "刘总 · Demo Capital",
       },
     ]);
+  });
+
+  it("filters review items by query and content type for batch processing", () => {
+    const items = buildReviewQueueViewItems([
+      { event: pendingEvent, attachments: [attachment] },
+      {
+        event: {
+          ...pendingEvent,
+          id: "44444444-4444-4444-4444-444444444444",
+          contentType: "text",
+          rawText: "Telegram 文字备注：客户关心费率",
+          aiSummary: "客户关心 OTC 费率。",
+        },
+        attachments: [],
+      },
+    ]);
+
+    expect(
+      filterReviewQueueViewItems(items, {
+        query: "费率",
+        contentType: "text",
+      }).map((item) => item.id),
+    ).toEqual(["44444444-4444-4444-4444-444444444444"]);
   });
 });

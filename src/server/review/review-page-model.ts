@@ -22,6 +22,8 @@ export interface CustomerSelectOption {
   label: string;
 }
 
+export type ReviewContentTypeFilter = "all" | "image" | "text" | "card_photo";
+
 export function buildReviewQueueViewItems(
   items: PendingReviewItem[],
 ): ReviewQueueViewItem[] {
@@ -45,6 +47,41 @@ export function buildReviewQueueViewItems(
       storageKey: attachment.storageKey,
     })),
   }));
+}
+
+function includesReviewQuery(item: ReviewQueueViewItem, query: string): boolean {
+  const haystack = [
+    item.summary,
+    item.rawText,
+    item.contentType,
+    item.sourceChannel,
+    item.extractedFieldsText,
+    ...item.attachments.map((attachment) => attachment.fileName),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query);
+}
+
+export function filterReviewQueueViewItems(
+  items: ReviewQueueViewItem[],
+  filters: {
+    query?: string;
+    contentType?: ReviewContentTypeFilter;
+  },
+): ReviewQueueViewItem[] {
+  const query = filters.query?.trim().toLowerCase() ?? "";
+  const contentType = filters.contentType ?? "all";
+
+  return items.filter((item) => {
+    const matchesQuery = query ? includesReviewQuery(item, query) : true;
+    const matchesContentType =
+      contentType === "all" || item.contentType === contentType;
+
+    return matchesQuery && matchesContentType;
+  });
 }
 
 export function buildCustomerSelectOptions(

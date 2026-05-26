@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useDeferredValue, useState, type FormEvent } from "react";
 import Link from "next/link";
 import type {
   CustomerSelectOption,
+  ReviewContentTypeFilter,
   ReviewQueueViewItem,
 } from "@/server/review/review-page-model";
+import { filterReviewQueueViewItems } from "@/server/review/review-page-model";
 import { parseReviewExtractedFieldsText } from "@/lib/review-form";
 
 interface ReviewClientProps {
@@ -53,6 +55,14 @@ function formatDate(value: string): string {
 export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
   const [items, setItems] = useState(initialItems);
   const [actionState, setActionState] = useState<ActionState>({});
+  const [query, setQuery] = useState("");
+  const [contentType, setContentType] =
+    useState<ReviewContentTypeFilter>("all");
+  const deferredQuery = useDeferredValue(query);
+  const visibleItems = filterReviewQueueViewItems(items, {
+    query: deferredQuery,
+    contentType,
+  });
 
   function setMessage(
     eventId: string,
@@ -182,8 +192,41 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
             <p className="mt-1 text-sm text-[var(--muted)]">
               建议从上往下处理：先保存必要修改，再确认入库；不值得处理的记录可以跳过，但原始证据不会被删除。
             </p>
+            <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_14rem]">
+              <input
+                className="min-h-11 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="搜索摘要、原始备注、附件名、结构化字段"
+                value={query}
+              />
+              <select
+                className="min-h-11 rounded-2xl border border-[var(--line)] bg-white/65 px-4 font-semibold outline-none focus:border-[var(--accent)]"
+                onChange={(event) =>
+                  setContentType(event.target.value as ReviewContentTypeFilter)
+                }
+                value={contentType}
+              >
+                <option value="all">全部类型</option>
+                <option value="image">只看截图</option>
+                <option value="text">只看文字</option>
+                <option value="card_photo">只看名片照片</option>
+              </select>
+            </div>
+            {visibleItems.length !== items.length ? (
+              <p className="mt-3 text-sm font-semibold text-[var(--accent-strong)]">
+                当前筛出 {visibleItems.length} 条，完整队列还有 {items.length} 条。
+              </p>
+            ) : null}
           </div>
-          {items.map((item, index) => (
+          {visibleItems.length === 0 ? (
+            <div className="rounded-[1.5rem] border border-[var(--line)] bg-[rgba(255,250,240,0.82)] p-6">
+              <h2 className="text-2xl font-semibold">没有匹配的待确认记录。</h2>
+              <p className="mt-2 text-[var(--muted)]">
+                可以清空搜索或切回全部类型。
+              </p>
+            </div>
+          ) : null}
+          {visibleItems.map((item, index) => (
             <article
               className="rounded-[1.8rem] border border-[var(--line)] bg-[rgba(255,250,240,0.82)] p-5 shadow-[0_24px_80px_rgba(25,23,20,0.1)]"
               key={item.id}
