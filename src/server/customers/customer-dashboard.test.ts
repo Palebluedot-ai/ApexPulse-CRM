@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildCustomerActionPanel,
   buildCustomerDashboardStats,
   buildCustomerListItem,
   buildLatestCommunicationCard,
   filterCustomerListItems,
   sortCustomerListItems,
 } from "./customer-dashboard";
-import type { Attachment, Event, Party } from "@/server/db/schema";
+import type { Attachment, Event, Party, Task } from "@/server/db/schema";
 
 const baseParty: Party = {
   id: "11111111-1111-1111-1111-111111111111",
@@ -57,6 +58,21 @@ const attachment: Attachment = {
   width: 1170,
   height: 2532,
   createdAt: new Date("2026-05-24T12:00:00+08:00"),
+};
+
+const openTask: Task = {
+  id: "44444444-4444-4444-4444-444444444444",
+  partyId: baseParty.id,
+  sourceEventId: latestEvent.id,
+  taskType: "followup",
+  description: "下周继续跟进刘总 OTC 出入金流程。",
+  dueAt: new Date("2026-05-31T12:00:00+08:00"),
+  status: "open",
+  createdByUserId: null,
+  completedByUserId: null,
+  completedAt: null,
+  createdAt: new Date("2026-05-24T12:00:00+08:00"),
+  updatedAt: new Date("2026-05-24T12:00:00+08:00"),
 };
 
 describe("customer dashboard", () => {
@@ -123,6 +139,47 @@ describe("customer dashboard", () => {
         attachments: [],
       }),
     ).toBeNull();
+  });
+
+  it("builds a first-screen action panel from follow-up state and open tasks", () => {
+    expect(
+      buildCustomerActionPanel({
+        customer: buildCustomerListItem(baseParty),
+        openTasks: [openTask],
+      }),
+    ).toEqual({
+      headline: "近期要跟进",
+      urgency: "due_soon",
+      reason: "这个客户已经有明确的下一次跟进时间，不要让它自然沉睡。",
+      primaryActionLabel: "处理下一步",
+      nextFollowupAt: baseParty.nextFollowupAt,
+      openTaskCount: 1,
+      nextTask: {
+        id: openTask.id,
+        description: "下周继续跟进刘总 OTC 出入金流程。",
+        dueAt: openTask.dueAt,
+        taskType: "followup",
+      },
+    });
+  });
+
+  it("keeps unknown customers visible as missing follow-up plans", () => {
+    expect(
+      buildCustomerActionPanel({
+        customer: buildCustomerListItem({
+          ...baseParty,
+          followupStatus: "unknown",
+          nextFollowupAt: null,
+        }),
+        openTasks: [],
+      }),
+    ).toMatchObject({
+      headline: "还没有跟进计划",
+      urgency: "missing",
+      primaryActionLabel: "补一条任务",
+      openTaskCount: 0,
+      nextTask: null,
+    });
   });
 
   it("builds dashboard stats for compact customer scanning", () => {

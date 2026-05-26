@@ -1,12 +1,14 @@
-import { asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import {
   attachments,
   events,
   parties,
+  tasks,
   type Attachment,
   type Event,
   type Party,
+  type Task,
 } from "@/server/db/schema";
 
 type Db = PostgresJsDatabase<typeof import("@/server/db/schema")>;
@@ -63,12 +65,31 @@ export interface LatestCommunicationCard {
   }>;
 }
 
+export interface CustomerActionTask {
+  id: string;
+  description: string;
+  dueAt: Date | null;
+  taskType: Task["taskType"];
+}
+
+export interface CustomerActionPanel {
+  headline: string;
+  urgency: "overdue" | "due_soon" | "healthy" | "missing";
+  reason: string;
+  primaryActionLabel: string;
+  nextFollowupAt: Date | null;
+  openTaskCount: number;
+  nextTask: CustomerActionTask | null;
+}
+
 export interface CustomerFirstScreen {
   customer: CustomerListItem & {
     handles: Party["handlesJson"];
     profileSummary: string | null;
   };
   latestCommunication: LatestCommunicationCard | null;
+  actionPanel: CustomerActionPanel;
+  openTasks: CustomerActionTask[];
 }
 
 export function buildCustomerListItem(party: Party): CustomerListItem {
@@ -196,6 +217,73 @@ export function buildLatestCommunicationCard(input: {
   };
 }
 
+function buildActionTask(task: Task): CustomerActionTask {
+  return {
+    id: task.id,
+    description: task.description,
+    dueAt: task.dueAt,
+    taskType: task.taskType,
+  };
+}
+
+export function buildCustomerActionPanel(input: {
+  customer: CustomerListItem;
+  openTasks: Task[];
+}): CustomerActionPanel {
+  const sortedOpenTasks = [...input.openTasks].sort(
+    (a, b) =>
+      dateValue(a.dueAt, Number.POSITIVE_INFINITY) -
+      dateValue(b.dueAt, Number.POSITIVE_INFINITY),
+  );
+  const nextTask = sortedOpenTasks[0] ? buildActionTask(sortedOpenTasks[0]) : null;
+
+  if (input.customer.followupStatus === "overdue") {
+    return {
+      headline: "已经逾期",
+      urgency: "overdue",
+      reason: "这个客户已经越过预期跟进时间，需要优先处理。",
+      primaryActionLabel: "今天处理",
+      nextFollowupAt: input.customer.nextFollowupAt,
+      openTaskCount: input.openTasks.length,
+      nextTask,
+    };
+  }
+
+  if (input.customer.followupStatus === "due_soon") {
+    return {
+      headline: "近期要跟进",
+      urgency: "due_soon",
+      reason: "这个客户已经有明确的下一次跟进时间，不要让它自然沉睡。",
+      primaryActionLabel: "处理下一步",
+      nextFollowupAt: input.customer.nextFollowupAt,
+      openTaskCount: input.openTasks.length,
+      nextTask,
+    };
+  }
+
+  if (input.customer.followupStatus === "unknown") {
+    return {
+      headline: "还没有跟进计划",
+      urgency: "missing",
+      reason: "这个客户还没有明确分层或下一步，最好补一条可执行任务。",
+      primaryActionLabel: "补一条任务",
+      nextFollowupAt: input.customer.nextFollowupAt,
+      openTaskCount: input.openTasks.length,
+      nextTask,
+    };
+  }
+
+  return {
+    headline: "状态健康",
+    urgency: "healthy",
+    reason: "这个客户当前没有紧急跟进信号，保持节奏即可。",
+    primaryActionLabel: "记录新进展",
+    nextFollowupAt: input.customer.nextFollowupAt,
+    openTaskCount: input.openTasks.length,
+    nextTask,
+  };
+}
+
 export async function listCustomerListItems(db: Db): Promise<CustomerListItem[]> {
   const rows = await db
     .select()
@@ -231,17 +319,28 @@ export async function getCustomerFirstScreen(
         .from(attachments)
         .where(eq(attachments.eventId, latestEvent.id))
     : [];
+  const openTasks = await db
+    .select()
+    .from(tasks)
+    .where(and(eq(tasks.partyId, customerId), eq(tasks.status, "open")))
+    .orderBy(asc(tasks.dueAt), asc(tasks.createdAt));
+  const customer = {
+    ...buildCustomerListItem(party),
+    handles: party.handlesJson,
+    profileSummary: party.profileSummary,
+  };
 
   return {
-    customer: {
-      ...buildCustomerListItem(party),
-      handles: party.handlesJson,
-      profileSummary: party.profileSummary,
-    },
+    customer,
     latestCommunication: buildLatestCommunicationCard({
       party,
       event: latestEvent ?? null,
       attachments: latestAttachments,
     }),
+    actionPanel: buildCustomerActionPanel({
+      customer,
+      openTasks,
+    }),
+    openTasks: openTasks.map(buildActionTask),
   };
 }
