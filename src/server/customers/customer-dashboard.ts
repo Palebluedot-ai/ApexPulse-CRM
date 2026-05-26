@@ -24,6 +24,25 @@ export interface CustomerListItem {
   nextFollowupAt: Date | null;
 }
 
+export interface CustomerDashboardStats {
+  total: number;
+  dueSoon: number;
+  overdue: number;
+  unknown: number;
+}
+
+export type CustomerFollowupFilter =
+  | "all"
+  | "up_to_date"
+  | "due_soon"
+  | "overdue"
+  | "unknown";
+
+export type CustomerSort =
+  | "last_contact_desc"
+  | "next_followup_asc"
+  | "name_asc";
+
 export interface LatestCommunicationCard {
   eventId: string;
   summary: string;
@@ -65,6 +84,82 @@ export function buildCustomerListItem(party: Party): CustomerListItem {
     lastContactSummary: party.lastContactSummary,
     nextFollowupAt: party.nextFollowupAt,
   };
+}
+
+export function buildCustomerDashboardStats(
+  customers: CustomerListItem[],
+): CustomerDashboardStats {
+  return {
+    total: customers.length,
+    dueSoon: customers.filter((customer) => customer.followupStatus === "due_soon")
+      .length,
+    overdue: customers.filter((customer) => customer.followupStatus === "overdue")
+      .length,
+    unknown: customers.filter((customer) => customer.followupStatus === "unknown")
+      .length,
+  };
+}
+
+function includesQuery(customer: CustomerListItem, query: string): boolean {
+  const haystack = [
+    customer.displayName,
+    customer.companyName,
+    customer.referralSourceTag,
+    customer.statusLabel,
+    customer.lastContactSummary,
+    ...customer.tags,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return haystack.includes(query);
+}
+
+export function filterCustomerListItems(
+  customers: CustomerListItem[],
+  filters: {
+    query?: string;
+    followupStatus?: CustomerFollowupFilter;
+  },
+): CustomerListItem[] {
+  const query = filters.query?.trim().toLowerCase() ?? "";
+  const followupStatus = filters.followupStatus ?? "all";
+
+  return customers.filter((customer) => {
+    const matchesQuery = query ? includesQuery(customer, query) : true;
+    const matchesStatus =
+      followupStatus === "all" || customer.followupStatus === followupStatus;
+
+    return matchesQuery && matchesStatus;
+  });
+}
+
+function dateValue(date: Date | null, nullFallback: number): number {
+  return date ? date.getTime() : nullFallback;
+}
+
+export function sortCustomerListItems(
+  customers: CustomerListItem[],
+  sort: CustomerSort,
+): CustomerListItem[] {
+  return [...customers].sort((a, b) => {
+    if (sort === "name_asc") {
+      return a.displayName.localeCompare(b.displayName, "zh-HK");
+    }
+
+    if (sort === "next_followup_asc") {
+      return (
+        dateValue(a.nextFollowupAt, Number.POSITIVE_INFINITY) -
+        dateValue(b.nextFollowupAt, Number.POSITIVE_INFINITY)
+      );
+    }
+
+    return (
+      dateValue(b.lastContactAt, Number.NEGATIVE_INFINITY) -
+      dateValue(a.lastContactAt, Number.NEGATIVE_INFINITY)
+    );
+  });
 }
 
 export function buildLatestCommunicationCard(input: {

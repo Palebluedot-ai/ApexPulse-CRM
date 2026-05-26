@@ -1,7 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildCustomerDashboardStats,
   buildCustomerListItem,
   buildLatestCommunicationCard,
+  filterCustomerListItems,
+  sortCustomerListItems,
 } from "./customer-dashboard";
 import type { Attachment, Event, Party } from "@/server/db/schema";
 
@@ -120,5 +123,80 @@ describe("customer dashboard", () => {
         attachments: [],
       }),
     ).toBeNull();
+  });
+
+  it("builds dashboard stats for compact customer scanning", () => {
+    expect(
+      buildCustomerDashboardStats([
+        buildCustomerListItem(baseParty),
+        buildCustomerListItem({
+          ...baseParty,
+          id: "44444444-4444-4444-4444-444444444444",
+          displayName: "陈总",
+          followupStatus: "overdue",
+        }),
+        buildCustomerListItem({
+          ...baseParty,
+          id: "55555555-5555-5555-5555-555555555555",
+          displayName: "Stan",
+          followupStatus: "unknown",
+        }),
+      ]),
+    ).toEqual({
+      total: 3,
+      dueSoon: 1,
+      overdue: 1,
+      unknown: 1,
+    });
+  });
+
+  it("filters customers by search text and follow-up status", () => {
+    const customers = [
+      buildCustomerListItem(baseParty),
+      buildCustomerListItem({
+        ...baseParty,
+        id: "44444444-4444-4444-4444-444444444444",
+        displayName: "陈总",
+        companyName: "Amber Fund",
+        followupStatus: "overdue",
+        tags: ["VIP"],
+      }),
+    ];
+
+    expect(
+      filterCustomerListItems(customers, {
+        query: "amber",
+        followupStatus: "overdue",
+      }).map((customer) => customer.displayName),
+    ).toEqual(["陈总"]);
+  });
+
+  it("sorts customers for dashboard scanning", () => {
+    const older = buildCustomerListItem({
+      ...baseParty,
+      id: "44444444-4444-4444-4444-444444444444",
+      displayName: "A 客户",
+      lastContactAt: new Date("2026-05-20T12:00:00+08:00"),
+      nextFollowupAt: new Date("2026-05-29T12:00:00+08:00"),
+    });
+    const newer = buildCustomerListItem({
+      ...baseParty,
+      id: "55555555-5555-5555-5555-555555555555",
+      displayName: "B 客户",
+      lastContactAt: new Date("2026-05-25T12:00:00+08:00"),
+      nextFollowupAt: new Date("2026-05-27T12:00:00+08:00"),
+    });
+
+    expect(
+      sortCustomerListItems([older, newer], "last_contact_desc").map(
+        (customer) => customer.displayName,
+      ),
+    ).toEqual(["B 客户", "A 客户"]);
+
+    expect(
+      sortCustomerListItems([older, newer], "next_followup_asc").map(
+        (customer) => customer.displayName,
+      ),
+    ).toEqual(["B 客户", "A 客户"]);
   });
 });
