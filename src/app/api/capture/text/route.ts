@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  isUnauthorizedError,
+  requireCurrentUser,
+} from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import { createTextCapture } from "@/server/capture/text-capture";
 
@@ -24,9 +28,11 @@ export async function POST(request: Request) {
   const { client, db } = createDb();
 
   try {
+    const currentUser = await requireCurrentUser(db);
     const event = await createTextCapture(db, {
       rawText: body.rawText,
       occurredAt: parseOptionalDate(body.occurredAt),
+      createdByUserId: currentUser.id,
     });
 
     return NextResponse.json(
@@ -37,6 +43,10 @@ export async function POST(request: Request) {
       { status: 201 },
     );
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
     if (error instanceof Error && error.message === "Text note is required") {
       return NextResponse.json({ error: "raw_text_required" }, { status: 400 });
     }

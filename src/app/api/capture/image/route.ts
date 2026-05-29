@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  isUnauthorizedError,
+  requireCurrentUser,
+} from "@/server/auth/current-user";
 import { createImageCapture } from "@/server/capture/image-capture";
 import {
   buildLocalImageStoragePlan,
@@ -9,7 +13,10 @@ import { createDb } from "@/server/db";
 export const runtime = "nodejs";
 
 export async function POST(request: Request) {
+  const { client, db } = createDb();
+
   try {
+    const currentUser = await requireCurrentUser(db);
     const form = await request.formData();
     const imageFile = form.get("imageFile");
 
@@ -25,32 +32,31 @@ export async function POST(request: Request) {
     const bytes = Buffer.from(await imageFile.arrayBuffer());
     await writeLocalAttachment(storagePlan.storageKey, bytes);
 
-    const { client, db } = createDb();
+    const result = await createImageCapture(db, {
+      storageKey: storagePlan.storageKey,
+      fileName: storagePlan.fileName,
+      mimeType: storagePlan.mimeType,
+      fileSize: storagePlan.fileSize,
+      note:
+        typeof form.get("note") === "string"
+          ? String(form.get("note"))
+          : undefined,
+      createdByUserId: currentUser.id,
+    });
 
-    try {
-      const result = await createImageCapture(db, {
-        storageKey: storagePlan.storageKey,
-        fileName: storagePlan.fileName,
-        mimeType: storagePlan.mimeType,
-        fileSize: storagePlan.fileSize,
-        note:
-          typeof form.get("note") === "string"
-            ? String(form.get("note"))
-            : undefined,
-      });
-
-      return NextResponse.json(
-        {
-          eventId: result.event.id,
-          attachmentId: result.attachment.id,
-          reviewStatus: result.event.reviewStatus,
-        },
-        { status: 201 },
-      );
-    } finally {
-      await client.end();
-    }
+    return NextResponse.json(
+      {
+        eventId: result.event.id,
+        attachmentId: result.attachment.id,
+        reviewStatus: result.event.reviewStatus,
+      },
+      { status: 201 },
+    );
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
     if (error instanceof Error) {
       const badRequestMessages = new Set([
         "Image file is required",
@@ -66,5 +72,7 @@ export async function POST(request: Request) {
     }
 
     throw error;
+  } finally {
+    await client.end();
   }
 }

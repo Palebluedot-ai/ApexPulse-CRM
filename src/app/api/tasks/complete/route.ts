@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  isUnauthorizedError,
+  requireCurrentUser,
+} from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import { completeTask } from "@/server/tasks/task-workflow";
 
@@ -7,16 +11,18 @@ export async function POST(request: Request) {
   const { client, db } = createDb();
 
   try {
+    const currentUser = await requireCurrentUser(db);
     const task = await completeTask(db, {
       taskId: typeof body.taskId === "string" ? body.taskId : "",
-      completedByUserId:
-        typeof body.completedByUserId === "string"
-          ? body.completedByUserId
-          : undefined,
+      completedByUserId: currentUser.id,
     });
 
     return NextResponse.json({ task });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
     if (error instanceof Error) {
       const badRequestMessages = new Set(["Task id is required", "Task not found"]);
 

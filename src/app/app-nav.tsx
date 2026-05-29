@@ -18,6 +18,7 @@ function isActive(pathname: string, href: string): boolean {
 
 export function AppNav() {
   const pathname = usePathname();
+  const isLoginPage = pathname === "/login";
 
   return (
     <header className="sticky top-0 z-20 border-b border-[var(--line)] bg-[rgba(244,239,229,0.86)] px-4 py-3 backdrop-blur-xl sm:px-8">
@@ -48,6 +49,16 @@ export function AppNav() {
               </Link>
             );
           })}
+          {isLoginPage ? null : (
+            <form action="/api/auth/logout" method="post">
+              <button
+                className="shrink-0 rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]"
+                type="submit"
+              >
+                退出
+              </button>
+            </form>
+          )}
         </div>
       </nav>
     </header>

@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  isUnauthorizedError,
+  requireCurrentUser,
+} from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import { confirmReviewEvent } from "@/server/review/review-queue";
 import type { ReviewNaturalFields } from "@/lib/review-form";
@@ -57,6 +61,7 @@ export async function POST(request: Request) {
   const { client, db } = createDb();
 
   try {
+    const currentUser = await requireCurrentUser(db);
     const event = await confirmReviewEvent(db, {
       eventId: typeof body.eventId === "string" ? body.eventId : "",
       partyId: typeof body.partyId === "string" ? body.partyId : undefined,
@@ -68,14 +73,15 @@ export async function POST(request: Request) {
       naturalFields: naturalFieldsOrUndefined(body.naturalFields),
       occurredAt: dateOrUndefined(body.occurredAt),
       followupStatus: followupStatusOrUndefined(body.followupStatus),
-      reviewedByUserId:
-        typeof body.reviewedByUserId === "string"
-          ? body.reviewedByUserId
-          : undefined,
+      reviewedByUserId: currentUser.id,
     });
 
     return NextResponse.json({ event });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
     if (error instanceof Error) {
       const badRequestMessages = new Set([
         "Event id is required",

@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  isUnauthorizedError,
+  requireCurrentUser,
+} from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import { editReviewEvent } from "@/server/review/review-queue";
 
@@ -7,6 +11,7 @@ export async function POST(request: Request) {
   const { client, db } = createDb();
 
   try {
+    await requireCurrentUser(db);
     const event = await editReviewEvent(db, {
       eventId: typeof body.eventId === "string" ? body.eventId : "",
       summary: typeof body.summary === "string" ? body.summary : "",
@@ -18,6 +23,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ event });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
     if (error instanceof Error) {
       const badRequestMessages = new Set([
         "Event id is required",

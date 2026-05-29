@@ -1,4 +1,8 @@
 import { NextResponse } from "next/server";
+import {
+  isUnauthorizedError,
+  requireCurrentUser,
+} from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import { createTask, listTasks } from "@/server/tasks/task-workflow";
 
@@ -22,6 +26,7 @@ export async function GET() {
   const { client, db } = createDb();
 
   try {
+    await requireCurrentUser(db);
     const items = await listTasks(db);
     return NextResponse.json({ items });
   } finally {
@@ -34,6 +39,7 @@ export async function POST(request: Request) {
   const { client, db } = createDb();
 
   try {
+    const currentUser = await requireCurrentUser(db);
     const task = await createTask(db, {
       partyId: typeof body.partyId === "string" ? body.partyId : undefined,
       sourceEventId:
@@ -42,14 +48,15 @@ export async function POST(request: Request) {
       description:
         typeof body.description === "string" ? body.description : "",
       dueAt: dateOrUndefined(body.dueAt),
-      createdByUserId:
-        typeof body.createdByUserId === "string"
-          ? body.createdByUserId
-          : undefined,
+      createdByUserId: currentUser.id,
     });
 
     return NextResponse.json({ task }, { status: 201 });
   } catch (error) {
+    if (isUnauthorizedError(error)) {
+      return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+    }
+
     if (error instanceof Error && error.message === "Task description is required") {
       return NextResponse.json({ error: error.message }, { status: 400 });
     }
