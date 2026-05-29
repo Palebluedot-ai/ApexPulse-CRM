@@ -23,6 +23,13 @@ type ActionState = Record<
   { tone: "success" | "error"; message: string }
 >;
 
+interface VisionExtractResponse {
+  eventId: string;
+  summary: string;
+  extractedFields: Record<string, unknown>;
+  naturalFields: ReviewNaturalFields;
+}
+
 const contentTypeLabels: Record<string, string> = {
   image: "截图",
   text: "文字",
@@ -78,6 +85,7 @@ function submitIntent(event: FormEvent<HTMLFormElement>): "confirm" | "edit" {
 export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
   const [items, setItems] = useState(initialItems);
   const [actionState, setActionState] = useState<ActionState>({});
+  const [extractingIds, setExtractingIds] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
   const [contentType, setContentType] =
     useState<ReviewContentTypeFilter>("all");
@@ -152,6 +160,48 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
         error instanceof Error ? error.message : "跳过失败",
         "error",
       );
+    }
+  }
+
+  async function extractWithAi(item: ReviewQueueViewItem) {
+    setExtractingIds((current) => new Set(current).add(item.id));
+    setMessage(item.id, "AI 正在读取图片，只会回填待确认字段。");
+
+    try {
+      const payload = (await postJson("/api/review/vision-extract", {
+        eventId: item.id,
+      })) as unknown as VisionExtractResponse;
+
+      setItems((current) =>
+        current.map((currentItem) =>
+          currentItem.id === item.id
+            ? {
+                ...currentItem,
+                summary: payload.summary,
+                extractedFields: payload.extractedFields,
+                extractedFieldsText: JSON.stringify(
+                  payload.extractedFields,
+                  null,
+                  2,
+                ),
+                naturalFields: payload.naturalFields,
+              }
+            : currentItem,
+        ),
+      );
+      setMessage(item.id, "AI 已回填字段，请你检查后再确认入库。");
+    } catch (error) {
+      setMessage(
+        item.id,
+        error instanceof Error ? error.message : "AI 提取失败",
+        "error",
+      );
+    } finally {
+      setExtractingIds((current) => {
+        const next = new Set(current);
+        next.delete(item.id);
+        return next;
+      });
     }
   }
 
@@ -325,6 +375,9 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                 <div className="grid gap-4">
                   <form
                     className="rounded-2xl border border-[var(--line)] bg-white/55 p-4"
+                    key={`${item.id}:${item.summary}:${JSON.stringify(
+                      item.naturalFields,
+                    )}`}
                     onSubmit={(event) => edit(event, item)}
                   >
                     <p className="font-semibold">确认业务字段</p>
@@ -400,6 +453,20 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                       空字段不会强行写入；未展示的底层字段会保留，避免丢信息。
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
+                      {item.attachments.some(
+                        (attachment) => attachment.canPreviewInline,
+                      ) ? (
+                        <button
+                          className="rounded-full border border-[var(--accent)] bg-white px-4 py-2 text-sm font-semibold text-[var(--accent-strong)] disabled:opacity-60"
+                          disabled={extractingIds.has(item.id)}
+                          onClick={() => void extractWithAi(item)}
+                          type="button"
+                        >
+                          {extractingIds.has(item.id)
+                            ? "AI 提取中"
+                            : "AI 提取字段"}
+                        </button>
+                      ) : null}
                       <button
                         className="rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]"
                         name="intent"
