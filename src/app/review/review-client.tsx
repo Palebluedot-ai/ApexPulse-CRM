@@ -271,8 +271,23 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                     {item.attachments.length > 0 ? (
                       <ul className="mt-2 space-y-2 text-sm">
                         {item.attachments.map((attachment) => (
-                          <li key={attachment.id}>
-                            {attachment.fileName} · {attachment.mimeType}
+                          <li
+                            className="flex flex-wrap items-center gap-2"
+                            key={attachment.id}
+                          >
+                            <span>
+                              {attachment.fileName} · {attachment.mimeType}
+                            </span>
+                            {attachment.previewUrl ? (
+                              <a
+                                className="rounded-full border border-[var(--line)] bg-white px-3 py-1 text-xs font-semibold text-[var(--accent-strong)]"
+                                href={attachment.previewUrl}
+                                rel="noreferrer"
+                                target="_blank"
+                              >
+                                打开图片证据
+                              </a>
+                            ) : null}
                           </li>
                         ))}
                       </ul>

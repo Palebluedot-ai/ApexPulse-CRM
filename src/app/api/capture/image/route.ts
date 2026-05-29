@@ -1,38 +1,59 @@
 import { NextResponse } from "next/server";
 import { createImageCapture } from "@/server/capture/image-capture";
+import {
+  buildLocalImageStoragePlan,
+  writeLocalAttachment,
+} from "@/server/capture/local-image-storage";
 import { createDb } from "@/server/db";
 
-function numberOrUndefined(value: unknown): number | undefined {
-  return typeof value === "number" ? value : undefined;
-}
+export const runtime = "nodejs";
 
 export async function POST(request: Request) {
-  const body = (await request.json()) as Record<string, unknown>;
-
-  const { client, db } = createDb();
-
   try {
-    const result = await createImageCapture(db, {
-      storageKey: typeof body.storageKey === "string" ? body.storageKey : "",
-      fileName: typeof body.fileName === "string" ? body.fileName : "",
-      mimeType: typeof body.mimeType === "string" ? body.mimeType : "",
-      fileSize: typeof body.fileSize === "number" ? body.fileSize : 0,
-      width: numberOrUndefined(body.width),
-      height: numberOrUndefined(body.height),
-      note: typeof body.note === "string" ? body.note : undefined,
-    });
+    const form = await request.formData();
+    const imageFile = form.get("imageFile");
 
-    return NextResponse.json(
-      {
-        eventId: result.event.id,
-        attachmentId: result.attachment.id,
-        reviewStatus: result.event.reviewStatus,
-      },
-      { status: 201 },
-    );
+    if (!(imageFile instanceof File) || !imageFile.name) {
+      throw new Error("Image file is required");
+    }
+
+    const storagePlan = buildLocalImageStoragePlan({
+      fileName: imageFile.name,
+      mimeType: imageFile.type,
+      fileSize: imageFile.size,
+    });
+    const bytes = Buffer.from(await imageFile.arrayBuffer());
+    await writeLocalAttachment(storagePlan.storageKey, bytes);
+
+    const { client, db } = createDb();
+
+    try {
+      const result = await createImageCapture(db, {
+        storageKey: storagePlan.storageKey,
+        fileName: storagePlan.fileName,
+        mimeType: storagePlan.mimeType,
+        fileSize: storagePlan.fileSize,
+        note:
+          typeof form.get("note") === "string"
+            ? String(form.get("note"))
+            : undefined,
+      });
+
+      return NextResponse.json(
+        {
+          eventId: result.event.id,
+          attachmentId: result.attachment.id,
+          reviewStatus: result.event.reviewStatus,
+        },
+        { status: 201 },
+      );
+    } finally {
+      await client.end();
+    }
   } catch (error) {
     if (error instanceof Error) {
       const badRequestMessages = new Set([
+        "Image file is required",
         "Storage key is required",
         "File name is required",
         "Image mime type is required",
@@ -45,7 +66,5 @@ export async function POST(request: Request) {
     }
 
     throw error;
-  } finally {
-    await client.end();
   }
 }

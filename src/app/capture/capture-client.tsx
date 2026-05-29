@@ -32,7 +32,7 @@ export function CaptureClient() {
   });
   const [imageState, setImageState] = useState<SubmissionState>({
     status: "idle",
-    message: "当前是本地占位上传：文件不会真正上传，只会保存文件名和备注到待确认队列。",
+    message: "图片会保存到本机 data/attachments/，并进入待确认队列。",
   });
 
   async function submitText(event: FormEvent<HTMLFormElement>) {
@@ -78,13 +78,18 @@ export function CaptureClient() {
     }
 
     try {
-      const result = await postJson("/api/capture/image", {
-        storageKey: `local-placeholder/${Date.now()}-${imageFile.name}`,
-        fileName: imageFile.name,
-        mimeType: imageFile.type,
-        fileSize: imageFile.size,
-        note: String(form.get("note") ?? ""),
+      const response = await fetch("/api/capture/image", {
+        method: "POST",
+        body: form,
       });
+      const result = (await response.json()) as Record<string, unknown>;
+
+      if (!response.ok) {
+        throw new Error(
+          typeof result.error === "string" ? result.error : "提交失败",
+        );
+      }
+
       setImageState({
         status: "success",
         message: `已创建待确认事件：${String(result.eventId)}`,
@@ -158,7 +163,7 @@ export function CaptureClient() {
         >
           <h2 className="text-2xl font-semibold">上传截图 / 名片照片</h2>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            这里现在是产品占位版：你像真实上传一样选择图片，但文件本体暂时不会上传；系统只保存文件名、大小、类型和备注，后面再接真实文件存储和 OCR。
+            当前已经是真实本地上传：图片会保存到本机项目的 data/attachments/，系统会保留文件记录并送入待确认队列。
           </p>
           <div className="mt-5 grid gap-3">
             <label className="rounded-2xl border border-dashed border-[var(--accent)] bg-white/65 p-5">
@@ -166,7 +171,7 @@ export function CaptureClient() {
                 选择图片
               </span>
               <span className="mt-1 block text-sm leading-6 text-[var(--muted)]">
-                未来这里会是真实上传；当前先用文件信息模拟完整入口。
+                当前支持截图和名片照片。先不接 OCR，下一步在 Review 里人工确认字段。
               </span>
               <input
                 accept="image/*"

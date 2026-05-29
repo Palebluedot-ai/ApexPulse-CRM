@@ -101,6 +101,7 @@ describe("review page model", () => {
             id: attachment.id,
             fileName: "demo.png",
             mimeType: "image/png",
+            previewUrl: null,
             storageKey: "uploads/demo.png",
           },
         ],
@@ -138,5 +139,23 @@ describe("review page model", () => {
         contentType: "text",
       }).map((item) => item.id),
     ).toEqual(["44444444-4444-4444-4444-444444444444"]);
+  });
+
+  it("exposes preview urls only for locally stored attachments", () => {
+    const [item] = buildReviewQueueViewItems([
+      {
+        event: pendingEvent,
+        attachments: [
+          {
+            ...attachment,
+            storageKey: "local-images/2026/05/29/demo.png",
+          },
+        ],
+      },
+    ]);
+
+    expect(item?.attachments[0]?.previewUrl).toBe(
+      `/api/attachments/${attachment.id}`,
+    );
   });
 });

@@ -20,6 +20,7 @@ export interface ReviewQueueViewItem {
     fileName: string;
     mimeType: string;
     storageKey: string;
+    previewUrl: string | null;
   }>;
 }
 
@@ -53,6 +54,9 @@ export function buildReviewQueueViewItems(
       fileName: attachment.fileName,
       mimeType: attachment.mimeType,
       storageKey: attachment.storageKey,
+      previewUrl: attachment.storageKey.startsWith("local-images/")
+        ? `/api/attachments/${attachment.id}`
+        : null,
     })),
   }));
 }
