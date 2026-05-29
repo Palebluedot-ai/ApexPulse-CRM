@@ -21,6 +21,8 @@ export interface ReviewQueueViewItem {
     mimeType: string;
     storageKey: string;
     previewUrl: string | null;
+    canPreviewInline: boolean;
+    unavailableReason: string | null;
   }>;
 }
 
@@ -57,6 +59,12 @@ export function buildReviewQueueViewItems(
       previewUrl: attachment.storageKey.startsWith("local-images/")
         ? `/api/attachments/${attachment.id}`
         : null,
+      canPreviewInline:
+        attachment.storageKey.startsWith("local-images/") &&
+        attachment.mimeType.startsWith("image/"),
+      unavailableReason: attachment.storageKey.startsWith("local-images/")
+        ? null
+        : "这份附件不是本地图片，暂时只能保留文件记录。",
     })),
   }));
 }

@@ -102,6 +102,8 @@ describe("review page model", () => {
             fileName: "demo.png",
             mimeType: "image/png",
             previewUrl: null,
+            canPreviewInline: false,
+            unavailableReason: "这份附件不是本地图片，暂时只能保留文件记录。",
             storageKey: "uploads/demo.png",
           },
         ],
@@ -157,5 +159,27 @@ describe("review page model", () => {
     expect(item?.attachments[0]?.previewUrl).toBe(
       `/api/attachments/${attachment.id}`,
     );
+    expect(item?.attachments[0]?.canPreviewInline).toBe(true);
+    expect(item?.attachments[0]?.unavailableReason).toBeNull();
+  });
+
+  it("marks non-local attachments as evidence records without inline preview", () => {
+    const [item] = buildReviewQueueViewItems([
+      {
+        event: pendingEvent,
+        attachments: [
+          {
+            ...attachment,
+            storageKey: "legacy/demo.png",
+          },
+        ],
+      },
+    ]);
+
+    expect(item?.attachments[0]).toMatchObject({
+      previewUrl: null,
+      canPreviewInline: false,
+      unavailableReason: "这份附件不是本地图片，暂时只能保留文件记录。",
+    });
   });
 });

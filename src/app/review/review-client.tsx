@@ -273,21 +273,43 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                       <ul className="mt-2 space-y-2 text-sm">
                         {item.attachments.map((attachment) => (
                           <li
-                            className="flex flex-wrap items-center gap-2"
+                            className="rounded-2xl border border-[var(--line)] bg-white/60 p-3"
                             key={attachment.id}
                           >
-                            <span>
-                              {attachment.fileName} · {attachment.mimeType}
-                            </span>
-                            {attachment.previewUrl ? (
+                            <div className="flex flex-wrap items-center gap-2">
+                              <span className="font-semibold">
+                                {attachment.fileName} · {attachment.mimeType}
+                              </span>
+                              {attachment.previewUrl ? (
+                                <a
+                                  className="rounded-full border border-[var(--line)] bg-white px-3 py-1 text-xs font-semibold text-[var(--accent-strong)]"
+                                  href={attachment.previewUrl}
+                                  rel="noreferrer"
+                                  target="_blank"
+                                >
+                                  打开原图
+                                </a>
+                              ) : null}
+                            </div>
+                            {attachment.canPreviewInline &&
+                            attachment.previewUrl ? (
                               <a
-                                className="rounded-full border border-[var(--line)] bg-white px-3 py-1 text-xs font-semibold text-[var(--accent-strong)]"
+                                className="mt-3 block overflow-hidden rounded-xl border border-[var(--line)] bg-[var(--panel)]"
                                 href={attachment.previewUrl}
                                 rel="noreferrer"
                                 target="_blank"
                               >
-                                打开图片证据
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  alt={`图片证据预览：${attachment.fileName}`}
+                                  className="max-h-96 w-full object-contain"
+                                  src={attachment.previewUrl}
+                                />
                               </a>
+                            ) : attachment.unavailableReason ? (
+                              <p className="mt-2 text-sm text-[var(--muted)]">
+                                {attachment.unavailableReason}
+                              </p>
                             ) : null}
                           </li>
                         ))}

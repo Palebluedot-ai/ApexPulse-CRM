@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 
 type SubmissionState =
@@ -26,6 +26,10 @@ async function postJson(url: string, body: Record<string, unknown>) {
 }
 
 export function CaptureClient() {
+  const [selectedImagePreview, setSelectedImagePreview] = useState<{
+    url: string;
+    name: string;
+  } | null>(null);
   const [textState, setTextState] = useState<SubmissionState>({
     status: "idle",
     message: "文字备注会保存为 pending review 事件。",
@@ -34,6 +38,14 @@ export function CaptureClient() {
     status: "idle",
     message: "图片会保存到本机 data/attachments/，并进入待确认队列。",
   });
+
+  useEffect(() => {
+    return () => {
+      if (selectedImagePreview) {
+        URL.revokeObjectURL(selectedImagePreview.url);
+      }
+    };
+  }, [selectedImagePreview]);
 
   async function submitText(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -92,8 +104,9 @@ export function CaptureClient() {
 
       setImageState({
         status: "success",
-        message: `已创建待确认事件：${String(result.eventId)}`,
+        message: `已创建待确认事件：${String(result.eventId)}。下一步去待确认里补客户名、需求和下一步。`,
       });
+      setSelectedImagePreview(null);
       event.currentTarget.reset();
     } catch (error) {
       setImageState({
@@ -101,6 +114,22 @@ export function CaptureClient() {
         message: error instanceof Error ? error.message : "提交失败",
       });
     }
+  }
+
+  function selectImagePreview(file: File | null) {
+    if (selectedImagePreview) {
+      URL.revokeObjectURL(selectedImagePreview.url);
+    }
+
+    if (!file || !file.type.startsWith("image/")) {
+      setSelectedImagePreview(null);
+      return;
+    }
+
+    setSelectedImagePreview({
+      url: URL.createObjectURL(file),
+      name: file.name,
+    });
   }
 
   return (
@@ -114,7 +143,7 @@ export function CaptureClient() {
             新增录入
           </h1>
           <p className="mt-3 max-w-2xl text-[var(--muted)]">
-            第一版先把原始内容送进待确认队列。真实文件上传和 OCR 后面再接。
+            第一版先把原始内容送进待确认队列。截图和名片会保存到本机，识别结果仍然需要你在 Review 里确认。
           </p>
         </div>
         <Link
@@ -177,10 +206,26 @@ export function CaptureClient() {
                 accept="image/*"
                 className="mt-4 w-full text-sm"
                 name="imageFile"
+                onChange={(event) =>
+                  selectImagePreview(event.target.files?.[0] ?? null)
+                }
                 required
                 type="file"
               />
             </label>
+            {selectedImagePreview ? (
+              <div className="overflow-hidden rounded-2xl border border-[var(--line)] bg-white/65">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  alt={`待上传预览：${selectedImagePreview.name}`}
+                  className="max-h-80 w-full object-contain"
+                  src={selectedImagePreview.url}
+                />
+                <p className="border-t border-[var(--line)] px-4 py-3 text-sm font-semibold text-[var(--muted)]">
+                  已选择：{selectedImagePreview.name}
+                </p>
+              </div>
+            ) : null}
             <textarea
               className="min-h-28 rounded-2xl border border-[var(--line)] bg-white/65 p-4 leading-7 outline-none focus:border-[var(--accent)]"
               name="note"
@@ -202,6 +247,14 @@ export function CaptureClient() {
           >
             {imageState.message}
           </p>
+          {imageState.status === "success" ? (
+            <Link
+              className="mt-3 inline-flex rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]"
+              href="/review"
+            >
+              去待确认处理这张图片
+            </Link>
+          ) : null}
         </form>
       </section>
     </main>
