@@ -4,14 +4,19 @@ import {
   attachments,
   events,
   parties,
+  tasks,
   type Attachment,
   type Event,
   type NewEvent,
 } from "@/server/db/schema";
 import {
+  buildAutoFollowupTaskFromReviewFields,
+  buildNewPartyFromReviewFields,
   buildPartyLastContactUpdate,
+  parseNextFollowupAt,
   type PartyLastContactInput,
 } from "./confirm-effects";
+import type { ReviewNaturalFields } from "@/lib/review-form";
 
 type Db = PostgresJsDatabase<typeof import("@/server/db/schema")>;
 type ReviewStatus = "pending_review" | "confirmed" | "skipped";
@@ -24,6 +29,7 @@ export interface ConfirmReviewInput {
   partyId?: string;
   summary: string;
   extractedFields: Record<string, unknown>;
+  naturalFields?: ReviewNaturalFields;
   occurredAt?: Date;
   followupStatus?: PartyLastContactInput["followupStatus"];
   reviewedByUserId?: string;
@@ -141,9 +147,54 @@ export async function confirmReviewEvent(
   input: ConfirmReviewInput & { eventId: string },
 ) {
   const event = await db.transaction(async (tx) => {
+    const [pendingEvent] = await tx
+      .select()
+      .from(events)
+      .where(
+        and(
+          eq(events.id, requireEventId(input.eventId)),
+          eq(events.reviewStatus, "pending_review"),
+        ),
+      )
+      .limit(1);
+
+    if (!pendingEvent) return undefined;
+
+    const contactAt =
+      input.occurredAt ?? pendingEvent.occurredAt ?? pendingEvent.capturedAt;
+    const nextFollowupAt = parseNextFollowupAt(
+      input.naturalFields?.nextFollowupAt,
+    );
+    let partyId = input.partyId;
+
+    if (!partyId && input.naturalFields) {
+      const newParty = buildNewPartyFromReviewFields({
+        eventId: pendingEvent.id,
+        summary: input.summary,
+        naturalFields: input.naturalFields,
+        contactAt,
+        nextFollowupAt,
+        followupStatus: input.followupStatus,
+        createdByUserId: input.reviewedByUserId,
+        reviewedByUserId: input.reviewedByUserId,
+        updatedAt: input.reviewedAt,
+      });
+
+      if (newParty) {
+        const [party] = await tx.insert(parties).values(newParty).returning();
+        partyId = party.id;
+      }
+    }
+
     const [confirmedEvent] = await tx
       .update(events)
-      .set(buildConfirmReviewUpdate(input))
+      .set(
+        buildConfirmReviewUpdate({
+          ...input,
+          partyId,
+          occurredAt: input.occurredAt,
+        }),
+      )
       .where(
         and(
           eq(events.id, requireEventId(input.eventId)),
@@ -162,10 +213,25 @@ export async function confirmReviewEvent(
             eventId: confirmedEvent.id,
             summary: confirmedEvent.aiSummary ?? input.summary,
             contactAt: confirmedEvent.occurredAt ?? confirmedEvent.capturedAt,
+            nextFollowupAt,
             followupStatus: input.followupStatus,
           }),
         )
         .where(eq(parties.id, confirmedEvent.partyId));
+
+      if (input.naturalFields) {
+        const task = buildAutoFollowupTaskFromReviewFields({
+          partyId: confirmedEvent.partyId,
+          sourceEventId: confirmedEvent.id,
+          naturalFields: input.naturalFields,
+          dueAt: nextFollowupAt,
+          createdByUserId: input.reviewedByUserId,
+        });
+
+        if (task) {
+          await tx.insert(tasks).values(task);
+        }
+      }
     }
 
     return confirmedEvent;

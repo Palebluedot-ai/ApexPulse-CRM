@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { createDb } from "@/server/db";
 import { confirmReviewEvent } from "@/server/review/review-queue";
+import type { ReviewNaturalFields } from "@/lib/review-form";
 
 const followupStatusValues = [
   "up_to_date",
@@ -27,6 +28,30 @@ function dateOrUndefined(value: unknown): Date | undefined {
   return Number.isNaN(date.getTime()) ? undefined : date;
 }
 
+function naturalFieldsOrUndefined(
+  value: unknown,
+): ReviewNaturalFields | undefined {
+  if (typeof value !== "object" || value == null || Array.isArray(value)) {
+    return undefined;
+  }
+
+  const fields = value as Record<string, unknown>;
+
+  return {
+    customerName:
+      typeof fields.customerName === "string" ? fields.customerName : "",
+    companyName:
+      typeof fields.companyName === "string" ? fields.companyName : "",
+    sourceTag: typeof fields.sourceTag === "string" ? fields.sourceTag : "",
+    needSummary:
+      typeof fields.needSummary === "string" ? fields.needSummary : "",
+    nextAction:
+      typeof fields.nextAction === "string" ? fields.nextAction : "",
+    nextFollowupAt:
+      typeof fields.nextFollowupAt === "string" ? fields.nextFollowupAt : "",
+  };
+}
+
 export async function POST(request: Request) {
   const body = (await request.json()) as Record<string, unknown>;
   const { client, db } = createDb();
@@ -40,6 +65,7 @@ export async function POST(request: Request) {
         typeof body.extractedFields === "object" && body.extractedFields != null
           ? (body.extractedFields as Record<string, unknown>)
           : {},
+      naturalFields: naturalFieldsOrUndefined(body.naturalFields),
       occurredAt: dateOrUndefined(body.occurredAt),
       followupStatus: followupStatusOrUndefined(body.followupStatus),
       reviewedByUserId:

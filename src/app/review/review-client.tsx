@@ -117,6 +117,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
           partyId: String(form.get("partyId") ?? "") || undefined,
           summary: String(form.get("summary") ?? ""),
           extractedFields,
+          naturalFields: naturalFieldsFromForm(form),
           followupStatus:
             String(form.get("followupStatus") ?? "") || undefined,
         });
