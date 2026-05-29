@@ -75,28 +75,31 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
     }));
   }
 
-  async function edit(event: FormEvent<HTMLFormElement>, itemId: string) {
+  async function edit(
+    event: FormEvent<HTMLFormElement>,
+    item: ReviewQueueViewItem,
+  ) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const extractedFields = parseReviewExtractedFieldsText(
-      String(form.get("extractedFields") ?? ""),
+      item.extractedFieldsText,
     );
 
     if (!extractedFields.ok) {
-      setMessage(itemId, extractedFields.message, "error");
+      setMessage(item.id, extractedFields.message, "error");
       return;
     }
 
     try {
       await postJson("/api/review/edit", {
-        eventId: itemId,
+        eventId: item.id,
         summary: String(form.get("summary") ?? ""),
         extractedFields: extractedFields.value,
       });
-      setMessage(itemId, "已保存修改，仍在待确认队列。");
+      setMessage(item.id, "已保存修改，仍在待确认队列。");
     } catch (error) {
       setMessage(
-        itemId,
+        item.id,
         error instanceof Error ? error.message : "保存失败",
         "error",
       );
@@ -116,30 +119,35 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
     }
   }
 
-  async function confirm(event: FormEvent<HTMLFormElement>, itemId: string) {
+  async function confirm(
+    event: FormEvent<HTMLFormElement>,
+    item: ReviewQueueViewItem,
+  ) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
     const extractedFields = parseReviewExtractedFieldsText(
-      String(form.get("extractedFields") ?? ""),
+      item.extractedFieldsText,
     );
 
     if (!extractedFields.ok) {
-      setMessage(itemId, extractedFields.message, "error");
+      setMessage(item.id, extractedFields.message, "error");
       return;
     }
 
     try {
       await postJson("/api/review/confirm", {
-        eventId: itemId,
+        eventId: item.id,
         partyId: String(form.get("partyId") ?? "") || undefined,
         summary: String(form.get("summary") ?? ""),
         extractedFields: extractedFields.value,
         followupStatus: String(form.get("followupStatus") ?? "") || undefined,
       });
-      setItems((current) => current.filter((item) => item.id !== itemId));
+      setItems((current) =>
+        current.filter((currentItem) => currentItem.id !== item.id),
+      );
     } catch (error) {
       setMessage(
-        itemId,
+        item.id,
         error instanceof Error ? error.message : "确认失败",
         "error",
       );
@@ -279,22 +287,17 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                 <div className="grid gap-4">
                   <form
                     className="rounded-2xl border border-[var(--line)] bg-white/55 p-4"
-                    onSubmit={(event) => edit(event, item.id)}
+                    onSubmit={(event) => edit(event, item)}
                   >
-                    <p className="font-semibold">编辑待确认字段</p>
+                    <p className="font-semibold">调整摘要</p>
                     <input
                       className="mt-3 min-h-11 w-full rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                       defaultValue={item.summary}
                       name="summary"
-                      placeholder="摘要"
-                    />
-                    <textarea
-                      className="mt-3 min-h-28 w-full rounded-xl border border-[var(--line)] bg-white p-3 font-mono text-sm outline-none focus:border-[var(--accent)]"
-                      defaultValue={item.extractedFieldsText}
-                      name="extractedFields"
+                      placeholder="这条沟通的可读摘要"
                     />
                     <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-                      结构化字段必须是 JSON object。输错时不会提交，会先提示你修正。
+                      第一版只让你确认人能读懂的摘要。技术字段已经隐藏，不需要手写 JSON。
                     </p>
                     <button
                       className="mt-3 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold"
@@ -306,14 +309,14 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
 
                   <form
                     className="rounded-2xl border border-[var(--line)] bg-white/55 p-4"
-                    onSubmit={(event) => confirm(event, item.id)}
+                    onSubmit={(event) => confirm(event, item)}
                   >
                     <p className="font-semibold">确认入库</p>
                     <select
                       className="mt-3 min-h-11 w-full rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                       name="partyId"
                     >
-                      <option value="">不绑定客户</option>
+                      <option value="">新客户 / 暂不匹配现有客户</option>
                       {customers.map((customer) => (
                         <option key={customer.id} value={customer.id}>
                           {customer.label}
@@ -326,16 +329,11 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                       name="summary"
                       placeholder="确认摘要"
                     />
-                    <textarea
-                      className="mt-3 min-h-28 w-full rounded-xl border border-[var(--line)] bg-white p-3 font-mono text-sm outline-none focus:border-[var(--accent)]"
-                      defaultValue={item.extractedFieldsText}
-                      name="extractedFields"
-                    />
                     <select
                       className="mt-3 min-h-11 w-full rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                       name="followupStatus"
                     >
-                      <option value="">默认 up_to_date</option>
+                      <option value="">默认：已跟进</option>
                       <option value="up_to_date">已跟进</option>
                       <option value="due_soon">即将跟进</option>
                       <option value="overdue">已逾期</option>

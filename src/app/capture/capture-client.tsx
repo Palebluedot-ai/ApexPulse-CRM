@@ -32,7 +32,7 @@ export function CaptureClient() {
   });
   const [imageState, setImageState] = useState<SubmissionState>({
     status: "idle",
-    message: "当前先保存图片证据元数据，不上传真实文件。",
+    message: "当前是本地占位上传：文件不会真正上传，只会保存文件名和备注到待确认队列。",
   });
 
   async function submitText(event: FormEvent<HTMLFormElement>) {
@@ -59,15 +59,30 @@ export function CaptureClient() {
   async function submitImage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const imageFile = form.get("imageFile");
+
+    if (!(imageFile instanceof File) || !imageFile.name) {
+      setImageState({
+        status: "error",
+        message: "请先选择一张截图或名片照片。",
+      });
+      return;
+    }
+
+    if (!imageFile.type.startsWith("image/")) {
+      setImageState({
+        status: "error",
+        message: "当前只支持图片文件。",
+      });
+      return;
+    }
 
     try {
       const result = await postJson("/api/capture/image", {
-        storageKey: String(form.get("storageKey") ?? ""),
-        fileName: String(form.get("fileName") ?? ""),
-        mimeType: String(form.get("mimeType") ?? "image/png"),
-        fileSize: Number(form.get("fileSize") ?? 0),
-        width: Number(form.get("width") ?? 0),
-        height: Number(form.get("height") ?? 0),
+        storageKey: `local-placeholder/${Date.now()}-${imageFile.name}`,
+        fileName: imageFile.name,
+        mimeType: imageFile.type,
+        fileSize: imageFile.size,
         note: String(form.get("note") ?? ""),
       });
       setImageState({
@@ -141,54 +156,26 @@ export function CaptureClient() {
           className="rounded-[1.8rem] border border-[var(--line)] bg-[rgba(255,250,240,0.82)] p-6 shadow-[0_24px_80px_rgba(25,23,20,0.1)]"
           onSubmit={submitImage}
         >
-          <h2 className="text-2xl font-semibold">图片证据元数据</h2>
+          <h2 className="text-2xl font-semibold">上传截图 / 名片照片</h2>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            当前先记录截图或名片照片的证据信息，真实上传路径后面补。
+            这里现在是产品占位版：你像真实上传一样选择图片，但文件本体暂时不会上传；系统只保存文件名、大小、类型和备注，后面再接真实文件存储和 OCR。
           </p>
           <div className="mt-5 grid gap-3">
-            <input
-              className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-              name="storageKey"
-              placeholder="storage key，例如 uploads/demo-screenshot.png"
-              required
-            />
-            <input
-              className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-              name="fileName"
-              placeholder="文件名，例如 demo-screenshot.png"
-              required
-            />
-            <input
-              className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-              defaultValue="image/png"
-              name="mimeType"
-              placeholder="MIME type"
-              required
-            />
-            <div className="grid gap-3 sm:grid-cols-3">
+            <label className="rounded-2xl border border-dashed border-[var(--accent)] bg-white/65 p-5">
+              <span className="block text-sm font-semibold text-[var(--accent-strong)]">
+                选择图片
+              </span>
+              <span className="mt-1 block text-sm leading-6 text-[var(--muted)]">
+                未来这里会是真实上传；当前先用文件信息模拟完整入口。
+              </span>
               <input
-                className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-                min="1"
-                name="fileSize"
-                placeholder="文件大小"
+                accept="image/*"
+                className="mt-4 w-full text-sm"
+                name="imageFile"
                 required
-                type="number"
+                type="file"
               />
-              <input
-                className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-                min="1"
-                name="width"
-                placeholder="宽"
-                type="number"
-              />
-              <input
-                className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-                min="1"
-                name="height"
-                placeholder="高"
-                type="number"
-              />
-            </div>
+            </label>
             <textarea
               className="min-h-28 rounded-2xl border border-[var(--line)] bg-white/65 p-4 leading-7 outline-none focus:border-[var(--accent)]"
               name="note"

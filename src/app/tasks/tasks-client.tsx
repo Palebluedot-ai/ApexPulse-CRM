@@ -188,67 +188,7 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
         </div>
       </header>
 
-      <section className="grid gap-5 lg:grid-cols-[0.82fr_1.18fr]">
-        <form
-          className="h-fit rounded-[1.8rem] border border-[var(--line)] bg-[rgba(255,250,240,0.86)] p-6 shadow-[0_24px_80px_rgba(25,23,20,0.1)]"
-          onSubmit={create}
-        >
-          <h2 className="text-2xl font-semibold">创建任务</h2>
-          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            第一版先做手动创建。后续如果要从确认记录自动生成任务，再单独设计规则。
-          </p>
-          <div className="mt-5 grid gap-3">
-            <select
-              className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-              name="partyId"
-            >
-              <option value="">不绑定客户</option>
-              {customers.map((customer) => (
-                <option key={customer.id} value={customer.id}>
-                  {customer.label}
-                </option>
-              ))}
-            </select>
-            <select
-              className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-              defaultValue="followup"
-              name="taskType"
-            >
-              <option value="followup">跟进</option>
-              <option value="reminder">提醒</option>
-              <option value="commitment">承诺事项</option>
-            </select>
-            <textarea
-              className="min-h-36 rounded-2xl border border-[var(--line)] bg-white/65 p-4 leading-7 outline-none focus:border-[var(--accent)]"
-              name="description"
-              placeholder="例如：明天发开户材料清单给刘总，并确认预计交易体量。"
-              required
-            />
-            <input
-              className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
-              name="dueAt"
-              type="datetime-local"
-            />
-          </div>
-          <button
-            className="mt-4 rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
-            type="submit"
-          >
-            创建任务
-          </button>
-          {message ? (
-            <p
-              className={
-                message.tone === "error"
-                  ? "mt-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700"
-                  : "mt-4 rounded-2xl border border-[var(--line)] bg-white/55 p-3 text-sm font-semibold text-[var(--accent-strong)]"
-              }
-            >
-              {message.text}
-            </p>
-          ) : null}
-        </form>
-
+      <section className="grid gap-5 lg:grid-cols-[1.22fr_0.78fr]">
         <section className="grid gap-4">
           {tasks.length > 0 ? (
             tasks.map((task) => (
@@ -310,6 +250,66 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
             </div>
           )}
         </section>
+
+        <form
+          className="h-fit rounded-[1.8rem] border border-[var(--line)] bg-[rgba(255,250,240,0.86)] p-5 shadow-[0_18px_54px_rgba(25,23,20,0.08)]"
+          onSubmit={create}
+        >
+          <h2 className="text-2xl font-semibold">创建任务</h2>
+          <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
+            保留手动创建，但不抢主视觉；主要任务列表放左边。
+          </p>
+          <div className="mt-4 grid gap-3">
+            <select
+              className="min-h-11 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
+              name="partyId"
+            >
+              <option value="">不绑定客户</option>
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.id}>
+                  {customer.label}
+                </option>
+              ))}
+            </select>
+            <select
+              className="min-h-11 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
+              defaultValue="followup"
+              name="taskType"
+            >
+              <option value="followup">跟进</option>
+              <option value="reminder">提醒</option>
+              <option value="commitment">承诺事项</option>
+            </select>
+            <textarea
+              className="min-h-24 rounded-2xl border border-[var(--line)] bg-white/65 p-4 leading-7 outline-none focus:border-[var(--accent)]"
+              name="description"
+              placeholder="例如：明天发开户材料清单。"
+              required
+            />
+            <input
+              className="min-h-11 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
+              name="dueAt"
+              type="datetime-local"
+            />
+          </div>
+          <button
+            className="mt-4 rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
+            type="submit"
+          >
+            创建任务
+          </button>
+          {message ? (
+            <p
+              className={
+                message.tone === "error"
+                  ? "mt-4 rounded-2xl border border-red-200 bg-red-50 p-3 text-sm font-semibold text-red-700"
+                  : "mt-4 rounded-2xl border border-[var(--line)] bg-white/55 p-3 text-sm font-semibold text-[var(--accent-strong)]"
+              }
+            >
+              {message.text}
+            </p>
+          ) : null}
+        </form>
       </section>
     </main>
   );

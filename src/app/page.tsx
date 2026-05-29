@@ -1,7 +1,5 @@
 import Link from "next/link";
 
-const captureTypes = ["聊天截图", "文字备注", "名片照片"];
-
 const loopSteps = [
   "保留原始证据",
   "进入待确认队列",
@@ -53,20 +51,6 @@ export default function Home() {
             >
               跟进任务
             </Link>
-          </div>
-
-          <div className="grid gap-3 sm:grid-cols-3">
-            {captureTypes.map((item) => (
-              <div
-                className="rounded-2xl border border-[var(--line)] bg-white/58 p-4"
-                key={item}
-              >
-                <p className="text-sm font-semibold text-[var(--accent-strong)]">
-                  输入
-                </p>
-                <p className="mt-2 text-xl font-semibold">{item}</p>
-              </div>
-            ))}
           </div>
         </div>
 
