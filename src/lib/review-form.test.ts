@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { parseReviewExtractedFieldsText } from "./review-form";
+import {
+  buildReviewNaturalFields,
+  mergeReviewNaturalFields,
+  parseReviewExtractedFieldsText,
+} from "./review-form";
 
 describe("review form helpers", () => {
   it("parses blank extracted fields as an empty object", () => {
@@ -29,6 +33,54 @@ describe("review form helpers", () => {
     expect(parseReviewExtractedFieldsText("[]")).toEqual({
       ok: false,
       message: "结构化字段必须是 JSON object，例如 { \"nextAction\": \"下周跟进\" }。",
+    });
+  });
+
+  it("builds natural review fields from canonical and legacy extracted keys", () => {
+    expect(
+      buildReviewNaturalFields({
+        name: "刘总",
+        company: "Demo Capital",
+        referralSourceTag: "Token2049",
+        requirement: "想了解 OTC 费率",
+        nextStep: "下周发报价",
+        nextFollowupDate: "2026-06-01",
+      }),
+    ).toEqual({
+      customerName: "刘总",
+      companyName: "Demo Capital",
+      sourceTag: "Token2049",
+      needSummary: "想了解 OTC 费率",
+      nextAction: "下周发报价",
+      nextFollowupAt: "2026-06-01",
+    });
+  });
+
+  it("merges natural fields back into extracted fields without keeping blank values", () => {
+    expect(
+      mergeReviewNaturalFields(
+        {
+          confidence: "medium",
+          customerName: "旧客户",
+          topic: "fee",
+        },
+        {
+          customerName: " 刘总 ",
+          companyName: "Demo Capital",
+          sourceTag: "",
+          needSummary: "想了解 OTC 费率",
+          nextAction: "下周发报价",
+          nextFollowupAt: "2026-06-01T09:00",
+        },
+      ),
+    ).toEqual({
+      confidence: "medium",
+      topic: "fee",
+      customerName: "刘总",
+      companyName: "Demo Capital",
+      needSummary: "想了解 OTC 费率",
+      nextAction: "下周发报价",
+      nextFollowupAt: "2026-06-01T09:00",
     });
   });
 });

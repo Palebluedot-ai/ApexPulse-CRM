@@ -8,7 +8,10 @@ import type {
   ReviewQueueViewItem,
 } from "@/server/review/review-page-model";
 import { filterReviewQueueViewItems } from "@/server/review/review-page-model";
-import { parseReviewExtractedFieldsText } from "@/lib/review-form";
+import {
+  mergeReviewNaturalFields,
+  type ReviewNaturalFields,
+} from "@/lib/review-form";
 
 interface ReviewClientProps {
   customers: CustomerSelectOption[];
@@ -52,6 +55,26 @@ function formatDate(value: string): string {
   }).format(new Date(value));
 }
 
+function naturalFieldsFromForm(form: FormData): ReviewNaturalFields {
+  return {
+    customerName: String(form.get("customerName") ?? ""),
+    companyName: String(form.get("companyName") ?? ""),
+    sourceTag: String(form.get("sourceTag") ?? ""),
+    needSummary: String(form.get("needSummary") ?? ""),
+    nextAction: String(form.get("nextAction") ?? ""),
+    nextFollowupAt: String(form.get("nextFollowupAt") ?? ""),
+  };
+}
+
+function submitIntent(event: FormEvent<HTMLFormElement>): "confirm" | "edit" {
+  const nativeEvent = event.nativeEvent as SubmitEvent;
+  const submitter = nativeEvent.submitter;
+
+  return submitter instanceof HTMLButtonElement && submitter.value === "confirm"
+    ? "confirm"
+    : "edit";
+}
+
 export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
   const [items, setItems] = useState(initialItems);
   const [actionState, setActionState] = useState<ActionState>({});
@@ -81,26 +104,38 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
   ) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const extractedFields = parseReviewExtractedFieldsText(
-      item.extractedFieldsText,
+    const intent = submitIntent(event);
+    const extractedFields = mergeReviewNaturalFields(
+      item.extractedFields,
+      naturalFieldsFromForm(form),
     );
 
-    if (!extractedFields.ok) {
-      setMessage(item.id, extractedFields.message, "error");
-      return;
-    }
-
     try {
+      if (intent === "confirm") {
+        await postJson("/api/review/confirm", {
+          eventId: item.id,
+          partyId: String(form.get("partyId") ?? "") || undefined,
+          summary: String(form.get("summary") ?? ""),
+          extractedFields,
+          followupStatus:
+            String(form.get("followupStatus") ?? "") || undefined,
+        });
+        setItems((current) =>
+          current.filter((currentItem) => currentItem.id !== item.id),
+        );
+        return;
+      }
+
       await postJson("/api/review/edit", {
         eventId: item.id,
         summary: String(form.get("summary") ?? ""),
-        extractedFields: extractedFields.value,
+        extractedFields,
       });
-      setMessage(item.id, "已保存修改，仍在待确认队列。");
+      setMessage(item.id, "已保存字段，仍在待确认队列。");
     } catch (error) {
       setMessage(
         item.id,
-        error instanceof Error ? error.message : "保存失败",
+        error instanceof Error ? error.message : "操作失败",
         "error",
       );
     }
@@ -114,41 +149,6 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
       setMessage(
         itemId,
         error instanceof Error ? error.message : "跳过失败",
-        "error",
-      );
-    }
-  }
-
-  async function confirm(
-    event: FormEvent<HTMLFormElement>,
-    item: ReviewQueueViewItem,
-  ) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const extractedFields = parseReviewExtractedFieldsText(
-      item.extractedFieldsText,
-    );
-
-    if (!extractedFields.ok) {
-      setMessage(item.id, extractedFields.message, "error");
-      return;
-    }
-
-    try {
-      await postJson("/api/review/confirm", {
-        eventId: item.id,
-        partyId: String(form.get("partyId") ?? "") || undefined,
-        summary: String(form.get("summary") ?? ""),
-        extractedFields: extractedFields.value,
-        followupStatus: String(form.get("followupStatus") ?? "") || undefined,
-      });
-      setItems((current) =>
-        current.filter((currentItem) => currentItem.id !== item.id),
-      );
-    } catch (error) {
-      setMessage(
-        item.id,
-        error instanceof Error ? error.message : "确认失败",
         "error",
       );
     }
@@ -289,29 +289,10 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                     className="rounded-2xl border border-[var(--line)] bg-white/55 p-4"
                     onSubmit={(event) => edit(event, item)}
                   >
-                    <p className="font-semibold">调整摘要</p>
-                    <input
-                      className="mt-3 min-h-11 w-full rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
-                      defaultValue={item.summary}
-                      name="summary"
-                      placeholder="这条沟通的可读摘要"
-                    />
-                    <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
-                      第一版只让你确认人能读懂的摘要。技术字段已经隐藏，不需要手写 JSON。
+                    <p className="font-semibold">确认业务字段</p>
+                    <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                      这里确认人能读懂、后续能跟进的字段；不会让你看 JSON。
                     </p>
-                    <button
-                      className="mt-3 rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold"
-                      type="submit"
-                    >
-                      保存修改
-                    </button>
-                  </form>
-
-                  <form
-                    className="rounded-2xl border border-[var(--line)] bg-white/55 p-4"
-                    onSubmit={(event) => confirm(event, item)}
-                  >
-                    <p className="font-semibold">确认入库</p>
                     <select
                       className="mt-3 min-h-11 w-full rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                       name="partyId"
@@ -327,7 +308,45 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                       className="mt-3 min-h-11 w-full rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
                       defaultValue={item.summary}
                       name="summary"
-                      placeholder="确认摘要"
+                      placeholder="这条沟通的可读摘要"
+                    />
+                    <div className="mt-3 grid gap-3 sm:grid-cols-2">
+                      <input
+                        className="min-h-11 rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                        defaultValue={item.naturalFields.customerName}
+                        name="customerName"
+                        placeholder="客户名，例如 刘总"
+                      />
+                      <input
+                        className="min-h-11 rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                        defaultValue={item.naturalFields.companyName}
+                        name="companyName"
+                        placeholder="公司，例如 Demo Capital"
+                      />
+                      <input
+                        className="min-h-11 rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                        defaultValue={item.naturalFields.sourceTag}
+                        name="sourceTag"
+                        placeholder="来源，例如 Token2049"
+                      />
+                      <input
+                        className="min-h-11 rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
+                        defaultValue={item.naturalFields.nextFollowupAt}
+                        name="nextFollowupAt"
+                        placeholder="下次跟进，例如 2026-06-01 09:00"
+                      />
+                    </div>
+                    <textarea
+                      className="mt-3 min-h-20 w-full rounded-xl border border-[var(--line)] bg-white p-3 outline-none focus:border-[var(--accent)]"
+                      defaultValue={item.naturalFields.needSummary}
+                      name="needSummary"
+                      placeholder="需求，例如 想了解 OTC 费率和出入金流程"
+                    />
+                    <textarea
+                      className="mt-3 min-h-20 w-full rounded-xl border border-[var(--line)] bg-white p-3 outline-none focus:border-[var(--accent)]"
+                      defaultValue={item.naturalFields.nextAction}
+                      name="nextAction"
+                      placeholder="下一步，例如 下周发报价并约一次电话"
                     />
                     <select
                       className="mt-3 min-h-11 w-full rounded-xl border border-[var(--line)] bg-white px-3 outline-none focus:border-[var(--accent)]"
@@ -339,12 +358,25 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                       <option value="overdue">已逾期</option>
                       <option value="unknown">未分层</option>
                     </select>
+                    <p className="mt-2 text-xs leading-5 text-[var(--muted)]">
+                      空字段不会强行写入；未展示的底层字段会保留，避免丢信息。
+                    </p>
                     <div className="mt-3 flex flex-wrap gap-2">
                       <button
                         className="rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]"
+                        name="intent"
                         type="submit"
+                        value="confirm"
                       >
-                        确认
+                        确认入库
+                      </button>
+                      <button
+                        className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold"
+                        name="intent"
+                        type="submit"
+                        value="edit"
+                      >
+                        只保存字段
                       </button>
                       <button
                         className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold"

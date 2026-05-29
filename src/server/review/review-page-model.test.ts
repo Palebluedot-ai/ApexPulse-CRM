@@ -13,7 +13,14 @@ const pendingEvent: Event = {
   contentType: "image",
   rawText: "这是今天跟刘总的微信截图",
   aiSummary: "刘总想下周了解 OTC 出入金流程。",
-  extractedFieldsJson: { nextAction: "下周继续跟进" },
+  extractedFieldsJson: {
+    customerName: "刘总",
+    companyName: "Demo Capital",
+    sourceTag: "Token2049",
+    needSummary: "了解 OTC 出入金流程",
+    nextAction: "下周继续跟进",
+    nextFollowupAt: "2026-06-01T09:00",
+  },
   reviewStatus: "pending_review",
   occurredAt: null,
   capturedAt: new Date("2026-05-26T10:00:00+08:00"),
@@ -70,7 +77,24 @@ describe("review page model", () => {
         sourceChannel: "pwa",
         rawText: "这是今天跟刘总的微信截图",
         summary: "刘总想下周了解 OTC 出入金流程。",
-        extractedFieldsText: '{\n  "nextAction": "下周继续跟进"\n}',
+        extractedFields: {
+          customerName: "刘总",
+          companyName: "Demo Capital",
+          sourceTag: "Token2049",
+          needSummary: "了解 OTC 出入金流程",
+          nextAction: "下周继续跟进",
+          nextFollowupAt: "2026-06-01T09:00",
+        },
+        naturalFields: {
+          customerName: "刘总",
+          companyName: "Demo Capital",
+          sourceTag: "Token2049",
+          needSummary: "了解 OTC 出入金流程",
+          nextAction: "下周继续跟进",
+          nextFollowupAt: "2026-06-01T09:00",
+        },
+        extractedFieldsText:
+          '{\n  "customerName": "刘总",\n  "companyName": "Demo Capital",\n  "sourceTag": "Token2049",\n  "needSummary": "了解 OTC 出入金流程",\n  "nextAction": "下周继续跟进",\n  "nextFollowupAt": "2026-06-01T09:00"\n}',
         capturedAt: "2026-05-26T02:00:00.000Z",
         attachments: [
           {
