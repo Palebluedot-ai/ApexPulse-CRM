@@ -67,6 +67,18 @@ describe("vision provider", () => {
         nextAction: "",
         nextFollowupAt: "",
       },
+      contactFields: {
+        phone: "",
+        email: "",
+        telegram: "",
+        wechatAlias: "",
+      },
+      crmHints: {
+        actionRequired: false,
+        confidence: "unknown",
+        evidenceNotes: "",
+        leadQuality: "unknown",
+      },
     });
     expect(fetchMock).toHaveBeenCalledWith(
       "https://example.test/v1/chat/completions",

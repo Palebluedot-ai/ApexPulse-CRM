@@ -36,4 +36,5 @@ Thumbs.db
 # Misc
 *.pid
 *.dump
+data/
 data/attachments/

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildVisionExtractionFields,
+  buildVisionExtractionPrompt,
   extractProviderText,
   parseVisionExtractionText,
 } from "./vision-extraction";
@@ -10,12 +11,20 @@ describe("vision extraction helpers", () => {
     expect(
       parseVisionExtractionText(`{
         "summary": "客户想了解 OTC 费率。",
-        "customerName": "刘总",
+        "counterpartyName": "刘总",
         "companyName": "Demo Capital",
         "sourceTag": "Token2049",
         "needSummary": "想了解 OTC 费率和出入金流程",
         "nextAction": "下周发报价",
-        "nextFollowupAt": "2026-06-01 09:00"
+        "nextFollowupAt": "2026-06-01 09:00",
+        "phone": "13424285333",
+        "email": "demo@example.com",
+        "telegram": "@demo",
+        "wechatAlias": "demo_wechat",
+        "leadQuality": "warm",
+        "confidence": "high",
+        "actionRequired": true,
+        "evidenceNotes": "截图里明确询问费率。"
       }`),
     ).toEqual({
       summary: "客户想了解 OTC 费率。",
@@ -26,6 +35,18 @@ describe("vision extraction helpers", () => {
         needSummary: "想了解 OTC 费率和出入金流程",
         nextAction: "下周发报价",
         nextFollowupAt: "2026-06-01 09:00",
+      },
+      contactFields: {
+        phone: "13424285333",
+        email: "demo@example.com",
+        telegram: "@demo",
+        wechatAlias: "demo_wechat",
+      },
+      crmHints: {
+        actionRequired: true,
+        confidence: "high",
+        evidenceNotes: "截图里明确询问费率。",
+        leadQuality: "warm",
       },
     });
   });
@@ -45,6 +66,33 @@ describe("vision extraction helpers", () => {
         nextAction: "",
         nextFollowupAt: "",
       },
+      contactFields: {
+        phone: "",
+        email: "",
+        telegram: "",
+        wechatAlias: "",
+      },
+      crmHints: {
+        actionRequired: false,
+        confidence: "unknown",
+        evidenceNotes: "",
+        leadQuality: "unknown",
+      },
+    });
+  });
+
+  it("drops vague follow-up dates instead of inventing a concrete date", () => {
+    expect(
+      parseVisionExtractionText(`{
+        "summary": "约下周再聊。",
+        "customerName": "王总",
+        "nextAction": "下周再联系确认时间",
+        "nextFollowupAt": "下周一"
+      }`).naturalFields,
+    ).toMatchObject({
+      customerName: "王总",
+      nextAction: "下周再联系确认时间",
+      nextFollowupAt: "",
     });
   });
 
@@ -72,13 +120,40 @@ describe("vision extraction helpers", () => {
           nextAction: "",
           nextFollowupAt: "",
         },
+        contactFields: {
+          phone: "13424285333",
+          email: "",
+          telegram: "",
+          wechatAlias: "",
+        },
+        crmHints: {
+          actionRequired: false,
+          confidence: "high",
+          evidenceNotes: "截图里问了 OTC 费率。",
+          leadQuality: "warm",
+        },
       }),
     ).toEqual({
       customerName: "刘总",
       sourceTag: "展会",
       needSummary: "客户问费率。",
+      phone: "13424285333",
+      leadQuality: "warm",
+      confidence: "high",
+      evidenceNotes: "截图里问了 OTC 费率。",
       aiExtractionSource: "vision_api",
     });
+  });
+
+  it("documents the stricter CRM extraction rules in the prompt", () => {
+    const prompt = buildVisionExtractionPrompt();
+
+    expect(prompt).toContain("companyName 只有明确属于对方");
+    expect(prompt).toContain("不能把 HashKey、群名、我方公司");
+    expect(prompt).toContain("nextFollowupAt 只有截图里有明确日期");
+    expect(prompt).toContain("actionRequired");
+    expect(prompt).toContain("phone, email, telegram, wechatAlias");
+    expect(prompt).toContain("confidence 只能是 high, medium, low");
   });
 
   it("extracts text from an OpenAI-compatible chat completion response", () => {

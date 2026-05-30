@@ -18,6 +18,18 @@ describe("vision review patch", () => {
             nextAction: "发报价",
             nextFollowupAt: "",
           },
+          contactFields: {
+            phone: "",
+            email: "",
+            telegram: "",
+            wechatAlias: "",
+          },
+          crmHints: {
+            actionRequired: true,
+            confidence: "high",
+            evidenceNotes: "截图里问了 OTC 费率。",
+            leadQuality: "warm",
+          },
         },
       }),
     ).toEqual({
@@ -28,7 +40,11 @@ describe("vision review patch", () => {
         companyName: "Demo Capital",
         needSummary: "想了解费率",
         nextAction: "发报价",
+        actionRequired: true,
         aiExtractionSource: "vision_api",
+        confidence: "high",
+        evidenceNotes: "截图里问了 OTC 费率。",
+        leadQuality: "warm",
       },
     });
   });
@@ -48,6 +64,18 @@ describe("vision review patch", () => {
             needSummary: "",
             nextAction: "",
             nextFollowupAt: "",
+          },
+          contactFields: {
+            phone: "",
+            email: "",
+            telegram: "",
+            wechatAlias: "",
+          },
+          crmHints: {
+            actionRequired: false,
+            confidence: "unknown",
+            evidenceNotes: "",
+            leadQuality: "unknown",
           },
         },
       }).summary,
