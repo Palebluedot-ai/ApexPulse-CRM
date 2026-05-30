@@ -154,6 +154,7 @@ describe("vision extraction helpers", () => {
     expect(prompt).toContain("actionRequired");
     expect(prompt).toContain("phone, email, telegram, wechatAlias");
     expect(prompt).toContain("confidence 只能是 high, medium, low");
+    expect(prompt).toContain("不要把我方自我介绍");
   });
 
   it("extracts text from an OpenAI-compatible chat completion response", () => {
