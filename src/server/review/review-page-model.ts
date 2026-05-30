@@ -1,6 +1,8 @@
 import type { CustomerListItem } from "@/server/customers/customer-dashboard";
 import {
+  buildReviewAiFields,
   buildReviewNaturalFields,
+  type ReviewAiFields,
   type ReviewNaturalFields,
 } from "@/lib/review-form";
 import type { PendingReviewItem } from "./review-queue";
@@ -13,6 +15,7 @@ export interface ReviewQueueViewItem {
   summary: string;
   extractedFields: Record<string, unknown>;
   naturalFields: ReviewNaturalFields;
+  aiFields: ReviewAiFields;
   extractedFieldsText: string;
   capturedAt: string;
   attachments: Array<{
@@ -45,6 +48,7 @@ export function buildReviewQueueViewItems(
       item.event.aiSummary ?? item.event.rawText ?? "这条记录还没有摘要。",
     extractedFields: item.event.extractedFieldsJson,
     naturalFields: buildReviewNaturalFields(item.event.extractedFieldsJson),
+    aiFields: buildReviewAiFields(item.event.extractedFieldsJson),
     extractedFieldsText: JSON.stringify(
       item.event.extractedFieldsJson,
       null,

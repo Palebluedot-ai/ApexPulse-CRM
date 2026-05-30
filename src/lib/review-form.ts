@@ -11,6 +11,17 @@ export interface ReviewNaturalFields {
   nextFollowupAt: string;
 }
 
+export interface ReviewAiFields {
+  phone: string;
+  email: string;
+  telegram: string;
+  wechatAlias: string;
+  leadQuality: "hot" | "warm" | "cold" | "not_a_lead" | "unknown";
+  confidence: "high" | "medium" | "low" | "unknown";
+  actionRequired: boolean;
+  evidenceNotes: string;
+}
+
 const emptyNaturalFields: ReviewNaturalFields = {
   customerName: "",
   companyName: "",
@@ -20,9 +31,22 @@ const emptyNaturalFields: ReviewNaturalFields = {
   nextFollowupAt: "",
 };
 
+const emptyAiFields: ReviewAiFields = {
+  phone: "",
+  email: "",
+  telegram: "",
+  wechatAlias: "",
+  leadQuality: "unknown",
+  confidence: "unknown",
+  actionRequired: false,
+  evidenceNotes: "",
+};
+
 const naturalFieldKeys = Object.keys(
   emptyNaturalFields,
 ) as (keyof ReviewNaturalFields)[];
+
+const aiFieldKeys = Object.keys(emptyAiFields) as (keyof ReviewAiFields)[];
 
 const naturalFieldAliases: Record<keyof ReviewNaturalFields, string[]> = {
   customerName: ["customerName", "displayName", "name", "clientName"],
@@ -35,6 +59,22 @@ const naturalFieldAliases: Record<keyof ReviewNaturalFields, string[]> = {
 
 function stringFromUnknown(value: unknown): string {
   return typeof value === "string" ? value.trim() : "";
+}
+
+function enumFromUnknown<const T extends readonly string[]>(
+  value: unknown,
+  allowed: T,
+  fallback: T[number],
+): T[number] {
+  const normalized = stringFromUnknown(value);
+  return allowed.includes(normalized) ? normalized : fallback;
+}
+
+function booleanFromUnknown(value: unknown): boolean {
+  if (typeof value === "boolean") return value;
+  if (typeof value !== "string") return false;
+
+  return ["true", "yes", "需要", "是"].includes(value.trim().toLowerCase());
 }
 
 export function parseReviewExtractedFieldsText(
@@ -86,6 +126,29 @@ export function buildReviewNaturalFields(
   return naturalFields;
 }
 
+export function buildReviewAiFields(
+  extractedFields: Record<string, unknown>,
+): ReviewAiFields {
+  return {
+    phone: stringFromUnknown(extractedFields.phone),
+    email: stringFromUnknown(extractedFields.email),
+    telegram: stringFromUnknown(extractedFields.telegram),
+    wechatAlias: stringFromUnknown(extractedFields.wechatAlias),
+    leadQuality: enumFromUnknown(
+      extractedFields.leadQuality,
+      ["hot", "warm", "cold", "not_a_lead", "unknown"] as const,
+      "unknown",
+    ),
+    confidence: enumFromUnknown(
+      extractedFields.confidence,
+      ["high", "medium", "low", "unknown"] as const,
+      "unknown",
+    ),
+    actionRequired: booleanFromUnknown(extractedFields.actionRequired),
+    evidenceNotes: stringFromUnknown(extractedFields.evidenceNotes),
+  };
+}
+
 export function mergeReviewNaturalFields(
   originalFields: Record<string, unknown>,
   naturalFields: ReviewNaturalFields,
@@ -102,6 +165,34 @@ export function mergeReviewNaturalFields(
   ][]) {
     const normalized = value.trim();
     if (normalized) {
+      merged[fieldKey] = normalized;
+    }
+  }
+
+  return merged;
+}
+
+export function mergeReviewAiFields(
+  originalFields: Record<string, unknown>,
+  aiFields: ReviewAiFields,
+): Record<string, unknown> {
+  const merged = { ...originalFields };
+
+  for (const fieldKey of aiFieldKeys) {
+    delete merged[fieldKey];
+  }
+
+  for (const [fieldKey, value] of Object.entries(aiFields) as [
+    keyof ReviewAiFields,
+    ReviewAiFields[keyof ReviewAiFields],
+  ][]) {
+    if (typeof value === "boolean") {
+      merged[fieldKey] = value;
+      continue;
+    }
+
+    const normalized = value.trim();
+    if (normalized && normalized !== "unknown") {
       merged[fieldKey] = normalized;
     }
   }

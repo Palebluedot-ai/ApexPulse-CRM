@@ -12,7 +12,7 @@ import {
   buildVisionProviderConfig,
   extractImageWithVisionProvider,
 } from "@/server/ai/vision-provider";
-import { buildReviewNaturalFields } from "@/lib/review-form";
+import { buildReviewAiFields, buildReviewNaturalFields } from "@/lib/review-form";
 import { editReviewEvent } from "@/server/review/review-queue";
 import { buildVisionReviewPatch } from "@/server/review/vision-review";
 
@@ -81,6 +81,7 @@ export async function POST(request: Request) {
       summary: event.aiSummary,
       extractedFields: event.extractedFieldsJson,
       naturalFields: buildReviewNaturalFields(event.extractedFieldsJson),
+      aiFields: buildReviewAiFields(event.extractedFieldsJson),
       reviewStatus: event.reviewStatus,
     });
   } catch (error) {

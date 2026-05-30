@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildReviewAiFields,
   buildReviewNaturalFields,
+  mergeReviewAiFields,
   mergeReviewNaturalFields,
   parseReviewExtractedFieldsText,
 } from "./review-form";
@@ -81,6 +83,75 @@ describe("review form helpers", () => {
       needSummary: "想了解 OTC 费率",
       nextAction: "下周发报价",
       nextFollowupAt: "2026-06-01T09:00",
+    });
+  });
+
+  it("builds AI review fields from extracted fields", () => {
+    expect(
+      buildReviewAiFields({
+        phone: " 13424285333 ",
+        email: "demo@example.com",
+        telegram: "@demo",
+        wechatAlias: "demo_wechat",
+        leadQuality: "warm",
+        confidence: "high",
+        actionRequired: true,
+        evidenceNotes: "截图里主动询问开户手续。",
+      }),
+    ).toEqual({
+      phone: "13424285333",
+      email: "demo@example.com",
+      telegram: "@demo",
+      wechatAlias: "demo_wechat",
+      leadQuality: "warm",
+      confidence: "high",
+      actionRequired: true,
+      evidenceNotes: "截图里主动询问开户手续。",
+    });
+  });
+
+  it("normalizes unknown AI select values instead of trusting model output", () => {
+    expect(
+      buildReviewAiFields({
+        leadQuality: "maybe",
+        confidence: 75,
+        actionRequired: "true",
+      }),
+    ).toMatchObject({
+      leadQuality: "unknown",
+      confidence: "unknown",
+      actionRequired: true,
+    });
+  });
+
+  it("merges AI review fields back into extracted fields without keeping blank values", () => {
+    expect(
+      mergeReviewAiFields(
+        {
+          customerName: "刘总",
+          phone: "old-phone",
+          leadQuality: "cold",
+          evidenceNotes: "旧备注",
+        },
+        {
+          phone: " 13424285333 ",
+          email: "",
+          telegram: "@demo",
+          wechatAlias: "",
+          leadQuality: "warm",
+          confidence: "medium",
+          actionRequired: false,
+          evidenceNotes: "截图里问开户手续。",
+        },
+      ),
+    ).toEqual({
+      customerName: "刘总",
+      phone: "13424285333",
+      telegram: "@demo",
+      leadQuality: "warm",
+      confidence: "medium",
+      actionRequired: false,
+      evidenceNotes: "截图里问开户手续。",
     });
   });
 });
