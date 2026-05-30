@@ -85,6 +85,7 @@ describe("review page model", () => {
         sourceChannel: "pwa",
         rawText: "这是今天跟刘总的微信截图",
         summary: "刘总想下周了解 OTC 出入金流程。",
+        isTestRecord: false,
         extractedFields: {
           customerName: "刘总",
           companyName: "Demo Capital",
@@ -167,6 +168,68 @@ describe("review page model", () => {
         contentType: "text",
       }).map((item) => item.id),
     ).toEqual(["44444444-4444-4444-4444-444444444444"]);
+  });
+
+  it("marks obvious dogfood and demo records as test records", () => {
+    const [dogfoodItem, demoAttachmentItem] = buildReviewQueueViewItems([
+      {
+        event: {
+          ...pendingEvent,
+          id: "55555555-5555-5555-5555-555555555555",
+          rawText: "M1.18 dogfood：32x32 demo image",
+          aiSummary: "M1.18 dogfood：32x32 demo image",
+        },
+        attachments: [],
+      },
+      {
+        event: {
+          ...pendingEvent,
+          id: "66666666-6666-6666-6666-666666666666",
+          rawText: "普通截图",
+          aiSummary: "普通截图",
+        },
+        attachments: [
+          {
+            ...attachment,
+            fileName: "m118-demo-32.png",
+            storageKey: "local-images/2026/05/29/m118-demo-32.png",
+          },
+        ],
+      },
+    ]);
+
+    expect(dogfoodItem?.isTestRecord).toBe(true);
+    expect(demoAttachmentItem?.isTestRecord).toBe(true);
+  });
+
+  it("hides test records by default while keeping them accessible", () => {
+    const realEvent = pendingEvent;
+    const testEvent = {
+      ...pendingEvent,
+      id: "55555555-5555-5555-5555-555555555555",
+      rawText: "M1.18 dogfood：32x32 demo image",
+      aiSummary: "M1.18 dogfood：32x32 demo image",
+    };
+    const items = buildReviewQueueViewItems([
+      { event: realEvent, attachments: [] },
+      { event: testEvent, attachments: [] },
+    ]);
+
+    expect(
+      filterReviewQueueViewItems(items, {
+        recordScope: "real",
+      }).map((item) => item.id),
+    ).toEqual([realEvent.id]);
+    expect(
+      filterReviewQueueViewItems(items, {
+        recordScope: "test",
+      }).map((item) => item.id),
+    ).toEqual([testEvent.id]);
+    expect(
+      filterReviewQueueViewItems(items, {
+        recordScope: "all",
+      }).map((item) => item.id),
+    ).toEqual([realEvent.id, testEvent.id]);
   });
 
   it("exposes preview urls only for locally stored attachments", () => {

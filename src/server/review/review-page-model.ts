@@ -13,6 +13,7 @@ export interface ReviewQueueViewItem {
   sourceChannel: string;
   rawText: string | null;
   summary: string;
+  isTestRecord: boolean;
   extractedFields: Record<string, unknown>;
   naturalFields: ReviewNaturalFields;
   aiFields: ReviewAiFields;
@@ -35,6 +36,40 @@ export interface CustomerSelectOption {
 }
 
 export type ReviewContentTypeFilter = "all" | "image" | "text" | "card_photo";
+export type ReviewRecordScopeFilter = "real" | "test" | "all";
+
+const testTextPatterns = [
+  "dogfood",
+  "api 实测",
+  "step",
+  "m1.",
+  "m1_",
+];
+
+const testAttachmentPatterns = ["m116-demo", "m118-demo", "demo-api-image"];
+
+function isObviousTestRecord(item: PendingReviewItem): boolean {
+  const textHaystack = [
+    item.event.rawText,
+    item.event.aiSummary,
+    JSON.stringify(item.event.extractedFieldsJson),
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  const attachmentHaystack = item.attachments
+    .flatMap((attachment) => [attachment.fileName, attachment.storageKey])
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+
+  return (
+    testTextPatterns.some((pattern) => textHaystack.includes(pattern)) ||
+    testAttachmentPatterns.some((pattern) =>
+      attachmentHaystack.includes(pattern),
+    )
+  );
+}
 
 export function buildReviewQueueViewItems(
   items: PendingReviewItem[],
@@ -46,6 +81,7 @@ export function buildReviewQueueViewItems(
     rawText: item.event.rawText,
     summary:
       item.event.aiSummary ?? item.event.rawText ?? "这条记录还没有摘要。",
+    isTestRecord: isObviousTestRecord(item),
     extractedFields: item.event.extractedFieldsJson,
     naturalFields: buildReviewNaturalFields(item.event.extractedFieldsJson),
     aiFields: buildReviewAiFields(item.event.extractedFieldsJson),
@@ -94,17 +130,23 @@ export function filterReviewQueueViewItems(
   filters: {
     query?: string;
     contentType?: ReviewContentTypeFilter;
+    recordScope?: ReviewRecordScopeFilter;
   },
 ): ReviewQueueViewItem[] {
   const query = filters.query?.trim().toLowerCase() ?? "";
   const contentType = filters.contentType ?? "all";
+  const recordScope = filters.recordScope ?? "real";
 
   return items.filter((item) => {
     const matchesQuery = query ? includesReviewQuery(item, query) : true;
     const matchesContentType =
       contentType === "all" || item.contentType === contentType;
+    const matchesRecordScope =
+      recordScope === "all" ||
+      (recordScope === "real" && !item.isTestRecord) ||
+      (recordScope === "test" && item.isTestRecord);
 
-    return matchesQuery && matchesContentType;
+    return matchesQuery && matchesContentType && matchesRecordScope;
   });
 }
 

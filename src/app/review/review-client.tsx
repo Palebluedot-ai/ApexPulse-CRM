@@ -6,6 +6,7 @@ import type {
   CustomerSelectOption,
   ReviewContentTypeFilter,
   ReviewQueueViewItem,
+  ReviewRecordScopeFilter,
 } from "@/server/review/review-page-model";
 import { filterReviewQueueViewItems } from "@/server/review/review-page-model";
 import {
@@ -52,6 +53,12 @@ const confidenceLabels: Record<ReviewAiFields["confidence"], string> = {
   medium: "中",
   low: "低",
   unknown: "未知",
+};
+
+const recordScopeLabels: Record<ReviewRecordScopeFilter, string> = {
+  real: "真实记录",
+  test: "测试记录",
+  all: "全部记录",
 };
 
 async function postJson(url: string, body: Record<string, unknown>) {
@@ -137,10 +144,15 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
   const [query, setQuery] = useState("");
   const [contentType, setContentType] =
     useState<ReviewContentTypeFilter>("all");
+  const [recordScope, setRecordScope] =
+    useState<ReviewRecordScopeFilter>("real");
   const deferredQuery = useDeferredValue(query);
+  const testRecordCount = items.filter((item) => item.isTestRecord).length;
+  const realRecordCount = items.length - testRecordCount;
   const visibleItems = filterReviewQueueViewItems(items, {
     query: deferredQuery,
     contentType,
+    recordScope,
   });
 
   function setMessage(
@@ -295,12 +307,13 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
         <section className="grid gap-5">
           <div className="rounded-[1.5rem] border border-[var(--line)] bg-white/55 p-4">
             <p className="font-semibold">
-              当前还有 {items.length} 条待确认记录。
+              当前还有 {items.length} 条待确认记录，其中真实记录{" "}
+              {realRecordCount} 条，测试记录 {testRecordCount} 条。
             </p>
             <p className="mt-1 text-sm text-[var(--muted)]">
               建议从上往下处理：先保存必要修改，再确认入库；不值得处理的记录可以跳过，但原始证据不会被删除。
             </p>
-            <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_14rem]">
+            <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_12rem_12rem]">
               <input
                 className="min-h-11 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
                 onChange={(event) => setQuery(event.target.value)}
@@ -319,10 +332,31 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                 <option value="text">只看文字</option>
                 <option value="card_photo">只看名片照片</option>
               </select>
+              <select
+                className="min-h-11 rounded-2xl border border-[var(--line)] bg-white/65 px-4 font-semibold outline-none focus:border-[var(--accent)]"
+                onChange={(event) =>
+                  setRecordScope(
+                    event.target.value as ReviewRecordScopeFilter,
+                  )
+                }
+                value={recordScope}
+              >
+                <option value="real">真实记录</option>
+                <option value="test">测试记录</option>
+                <option value="all">全部记录</option>
+              </select>
             </div>
+            {recordScope === "real" && testRecordCount > 0 ? (
+              <p className="mt-3 text-sm text-[var(--muted)]">
+                默认隐藏 {testRecordCount} 条明显测试记录。需要回看历史
+                dogfood 时，可以切到“测试记录”或“全部记录”。
+              </p>
+            ) : null}
             {visibleItems.length !== items.length ? (
               <p className="mt-3 text-sm font-semibold text-[var(--accent-strong)]">
-                当前筛出 {visibleItems.length} 条，完整队列还有 {items.length} 条。
+                当前筛出 {visibleItems.length} 条（
+                {recordScopeLabels[recordScope]}），完整队列还有{" "}
+                {items.length} 条。
               </p>
             ) : null}
           </div>
@@ -330,7 +364,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
             <div className="rounded-[1.5rem] border border-[var(--line)] bg-[rgba(255,250,240,0.82)] p-6">
               <h2 className="text-2xl font-semibold">没有匹配的待确认记录。</h2>
               <p className="mt-2 text-[var(--muted)]">
-                可以清空搜索或切回全部类型。
+                可以清空搜索、切回全部类型，或改看全部记录。
               </p>
             </div>
           ) : null}
@@ -357,6 +391,11 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                     <span className="rounded-full border border-[var(--line)] bg-white/55 px-3 py-1 text-xs font-semibold text-[var(--muted)]">
                       附件 {item.attachments.length}
                     </span>
+                    {item.isTestRecord ? (
+                      <span className="rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-800">
+                        测试记录
+                      </span>
+                    ) : null}
                   </div>
                   <h2 className="mt-4 text-2xl font-semibold">{item.summary}</h2>
                   {hasAiSignal(item.aiFields) ? (
