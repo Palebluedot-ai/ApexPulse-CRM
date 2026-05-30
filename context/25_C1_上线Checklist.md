@@ -32,6 +32,8 @@ Chao 可以用手机真实记录微信截图，并把客户跟进闭环跑起来
 - Mac 上 Postgres 正在运行
 - Mac 上 Next dev server 正在运行
 - 手机可以访问 Network URL
+- `/dogfood/mobile` 可以打开
+- `/dogfood/mobile` 不显示可被手机误用的 localhost 地址，或明确提示需要 Network URL
 - `.env.local` 已配置视觉 API
 - `.env.local` 没有进入 Git
 - `data/` 没有进入 Git

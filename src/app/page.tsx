@@ -51,6 +51,12 @@ export default function Home() {
             >
               跟进任务
             </Link>
+            <Link
+              className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--accent-strong)]"
+              href="/dogfood/mobile"
+            >
+              手机测试
+            </Link>
           </div>
         </div>
 

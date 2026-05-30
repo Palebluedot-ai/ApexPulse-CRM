@@ -10,6 +10,7 @@ const navItems = [
   { href: "/customers", label: "客户" },
   { href: "/tasks", label: "任务" },
   { href: "/reports/weekly", label: "周报" },
+  { href: "/dogfood/mobile", label: "手机测试" },
 ];
 
 function isActive(pathname: string, href: string): boolean {
