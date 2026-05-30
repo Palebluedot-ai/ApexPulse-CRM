@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import {
+  appendImageUploadResult,
+  buildImageUploadSuccessMessage,
+  type ImageUploadResult,
+} from "@/lib/capture-feedback";
 
 type SubmissionState =
   | { status: "idle"; message: string }
@@ -26,10 +31,14 @@ async function postJson(url: string, body: Record<string, unknown>) {
 }
 
 export function CaptureClient() {
+  const imageFileInputRef = useRef<HTMLInputElement>(null);
   const [selectedImagePreview, setSelectedImagePreview] = useState<{
     url: string;
     name: string;
   } | null>(null);
+  const [imageUploadResults, setImageUploadResults] = useState<
+    ImageUploadResult[]
+  >([]);
   const [textState, setTextState] = useState<SubmissionState>({
     status: "idle",
     message: "文字备注会保存为 pending review 事件。",
@@ -102,9 +111,20 @@ export function CaptureClient() {
         );
       }
 
+      const eventId = String(result.eventId);
+      const uploadedCount = imageUploadResults.length + 1;
+      setImageUploadResults((current) =>
+        appendImageUploadResult(current, {
+          eventId,
+          fileName: imageFile.name,
+        }),
+      );
       setImageState({
         status: "success",
-        message: `已创建待确认事件：${String(result.eventId)}。下一步去待确认里补客户名、需求和下一步。`,
+        message: buildImageUploadSuccessMessage({
+          eventId,
+          uploadedCount,
+        }),
       });
       setSelectedImagePreview(null);
       event.currentTarget.reset();
@@ -114,6 +134,14 @@ export function CaptureClient() {
         message: error instanceof Error ? error.message : "提交失败",
       });
     }
+  }
+
+  function continueUploadingImage() {
+    setImageState({
+      status: "idle",
+      message: "继续选择下一张截图。每张图片都会单独进入待确认队列。",
+    });
+    imageFileInputRef.current?.click();
   }
 
   function selectImagePreview(file: File | null) {
@@ -192,7 +220,7 @@ export function CaptureClient() {
         >
           <h2 className="text-2xl font-semibold">上传截图 / 名片照片</h2>
           <p className="mt-2 text-sm leading-6 text-[var(--muted)]">
-            当前已经是真实本地上传：图片会保存到本机项目的 data/attachments/，系统会保留文件记录并送入待确认队列。
+            当前已经是真实本地上传：图片会保存到本机项目的 data/attachments/，系统会保留文件记录并送入待确认队列。一张图对应一条待确认记录，避免批量误入库。
           </p>
           <div className="mt-5 grid gap-3">
             <label className="rounded-2xl border border-dashed border-[var(--accent)] bg-white/65 p-5">
@@ -209,6 +237,7 @@ export function CaptureClient() {
                 onChange={(event) =>
                   selectImagePreview(event.target.files?.[0] ?? null)
                 }
+                ref={imageFileInputRef}
                 required
                 type="file"
               />
@@ -248,12 +277,41 @@ export function CaptureClient() {
             {imageState.message}
           </p>
           {imageState.status === "success" ? (
-            <Link
-              className="mt-3 inline-flex rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]"
-              href="/review"
-            >
-              去待确认处理这张图片
-            </Link>
+            <div className="mt-3 flex flex-wrap gap-2">
+              <button
+                className="rounded-full border border-[var(--line)] bg-white px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]"
+                onClick={continueUploadingImage}
+                type="button"
+              >
+                继续上传下一张
+              </button>
+              <Link
+                className="inline-flex rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]"
+                href="/review"
+              >
+                去待确认处理
+              </Link>
+            </div>
+          ) : null}
+          {imageUploadResults.length > 0 ? (
+            <div className="mt-5 rounded-2xl border border-[var(--line)] bg-white/55 p-4">
+              <p className="text-sm font-semibold text-[var(--accent-strong)]">
+                本轮已送入待确认 {imageUploadResults.length} 张
+              </p>
+              <ul className="mt-3 space-y-2 text-sm text-[var(--muted)]">
+                {imageUploadResults.map((item, index) => (
+                  <li
+                    className="rounded-xl border border-[var(--line)] bg-white/60 px-3 py-2"
+                    key={item.eventId}
+                  >
+                    第 {index + 1} 张：{item.fileName}
+                    <span className="mt-1 block break-all text-xs">
+                      待确认事件：{item.eventId}
+                    </span>
+                  </li>
+                ))}
+              </ul>
+            </div>
           ) : null}
         </form>
       </section>

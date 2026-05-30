@@ -2,25 +2,28 @@
 
 PWA-first personal CRM for OTC relationship follow-up.
 
-This project starts as Chao's side project. V1 is not a HashKey internal compliance system. The current priority is proving one local-first working loop before adding cloud deployment, team permissions, OCR, or AI extraction.
+This project starts as Chao's side project. V1 is not a HashKey internal compliance system. The current priority is proving one mobile-first, local-first working loop before adding cloud deployment or team permissions.
 
 ## Current Stage
 
-M1 is now dogfoodable locally.
+M1 is now dogfoodable locally, and C1 is focused on mobile launch dogfood.
 
 The app can run these page-level flows:
 
 - Capture text notes and image evidence metadata.
+- Upload real image evidence to local storage.
 - Review pending records before they enter customer history.
+- Run Vision API extraction from a pending image review item.
 - Confirm, edit, or skip review items.
 - Browse customers in a compact card dashboard.
 - Open a customer detail action page with latest communication, Morning Brief, open tasks, and next step.
 - Create, complete, and reopen follow-up tasks.
+- View a weekly report and weekly to-do list.
 
 ## First Product Loop
 
 ```text
-新增录入 -> 待确认 -> 确认入库 -> 客户详情 -> 任务 -> 下一次跟进
+手机上传截图 -> 待确认 -> AI 提取 -> 人工确认 -> 客户详情 -> 任务 -> 周报回顾
 ```
 
 This loop is intentionally review-first. Nothing is auto-ingested into customer history without confirmation.
@@ -67,6 +70,7 @@ If port `3000` is occupied, Next.js may use another port. If it says another dev
 /review    待确认
 /customers 客户列表
 /tasks     跟进任务
+/reports/weekly 周报
 ```
 
 Customer detail pages use:
@@ -77,7 +81,19 @@ Customer detail pages use:
 
 ## Dogfood Guide
 
-Use this document for the full local manual test:
+Use this document for the current mobile dogfood runbook:
+
+```text
+context/24_M1_22A_手机端Dogfood_Runbook.md
+```
+
+Use this checklist before calling C1 ready for real use:
+
+```text
+context/25_C1_上线Checklist.md
+```
+
+The older local manual test is:
 
 ```text
 context/14_M1本地Dogfood指南.md
@@ -129,22 +145,32 @@ Do not casually drop tables, delete volumes, or redo migrations. Stop and review
 
 ## What Exists Today
 
+Auth:
+
+- `/login` local password login
+- `/api/auth/login`
+- `/api/auth/logout`
+- Auth gate for business pages and APIs
+
 Capture:
 
 - `/capture` text note form
-- `/capture` image evidence metadata form
+- `/capture` real local image upload
 - `/api/capture/text`
 - `/api/capture/image`
+- Uploaded images are stored under `data/attachments/`
 
 Review:
 
 - `/review` pending queue page
-- search and content-type filter
-- JSON object validation before edit or confirm
+- search, content-type filter, and real/test/all record scope filter
+- natural business fields instead of JSON editing
+- Vision API extraction button for local image evidence
 - `/api/review/pending`
 - `/api/review/edit`
 - `/api/review/confirm`
 - `/api/review/skip`
+- `/api/review/vision-extract`
 
 Customers:
 
@@ -164,19 +190,25 @@ Tasks:
 - `/api/tasks/complete`
 - `/api/tasks/reopen`
 
+Reports:
+
+- `/reports/weekly`
+- Weekly customer activity
+- Weekly open to-do list
+
 ## What Does Not Exist Yet
 
 Current V1 intentionally does not include:
 
-- real file upload
 - OCR
-- Vision API
-- real API keys
-- real customer data
 - complex team permissions
 - cloud deployment
 - final lead segmentation rules
 - automatic ingestion
+- automatic customer merge
+- batch confirm
+- batch delete
+- offline PWA support
 
 ## Non-Negotiables
 
@@ -205,5 +237,5 @@ context/system_logs/
 The current working plan is:
 
 ```text
-context/13_M1_working_plan.md
+context/23_Cycle_Goal_手机端上线冲刺.md
 ```
