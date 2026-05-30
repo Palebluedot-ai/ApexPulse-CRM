@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   buildCustomerSelectOptions,
+  buildReviewQueueScopeSummary,
   buildReviewQueueViewItems,
   filterReviewQueueViewItems,
 } from "./review-page-model";
@@ -230,6 +231,40 @@ describe("review page model", () => {
         recordScope: "all",
       }).map((item) => item.id),
     ).toEqual([realEvent.id, testEvent.id]);
+  });
+
+  it("summarizes visible review scope for continuous processing", () => {
+    const realEvent = pendingEvent;
+    const testEvent = {
+      ...pendingEvent,
+      id: "55555555-5555-5555-5555-555555555555",
+      rawText: "M1.18 dogfood：32x32 demo image",
+      aiSummary: "M1.18 dogfood：32x32 demo image",
+    };
+    const items = buildReviewQueueViewItems([
+      { event: realEvent, attachments: [] },
+      { event: testEvent, attachments: [] },
+    ]);
+    const visibleItems = filterReviewQueueViewItems(items, {
+      recordScope: "real",
+    });
+
+    expect(
+      buildReviewQueueScopeSummary({
+        allItems: items,
+        visibleItems,
+        recordScope: "real",
+      }),
+    ).toEqual({
+      totalCount: 2,
+      visibleCount: 1,
+      realCount: 1,
+      testCount: 1,
+      hiddenTestCount: 1,
+      scopeLabel: "真实记录",
+      progressText: "当前范围：真实记录，待处理 1 条。",
+      hiddenText: "已隐藏 1 条明显测试记录。",
+    });
   });
 
   it("exposes preview urls only for locally stored attachments", () => {

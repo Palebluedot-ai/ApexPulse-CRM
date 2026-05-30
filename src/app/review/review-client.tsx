@@ -8,7 +8,10 @@ import type {
   ReviewQueueViewItem,
   ReviewRecordScopeFilter,
 } from "@/server/review/review-page-model";
-import { filterReviewQueueViewItems } from "@/server/review/review-page-model";
+import {
+  buildReviewQueueScopeSummary,
+  filterReviewQueueViewItems,
+} from "@/server/review/review-page-model";
 import {
   mergeReviewAiFields,
   mergeReviewNaturalFields,
@@ -53,12 +56,6 @@ const confidenceLabels: Record<ReviewAiFields["confidence"], string> = {
   medium: "中",
   low: "低",
   unknown: "未知",
-};
-
-const recordScopeLabels: Record<ReviewRecordScopeFilter, string> = {
-  real: "真实记录",
-  test: "测试记录",
-  all: "全部记录",
 };
 
 async function postJson(url: string, body: Record<string, unknown>) {
@@ -147,11 +144,14 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
   const [recordScope, setRecordScope] =
     useState<ReviewRecordScopeFilter>("real");
   const deferredQuery = useDeferredValue(query);
-  const testRecordCount = items.filter((item) => item.isTestRecord).length;
-  const realRecordCount = items.length - testRecordCount;
   const visibleItems = filterReviewQueueViewItems(items, {
     query: deferredQuery,
     contentType,
+    recordScope,
+  });
+  const queueSummary = buildReviewQueueScopeSummary({
+    allItems: items,
+    visibleItems,
     recordScope,
   });
 
@@ -307,12 +307,21 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
         <section className="grid gap-5">
           <div className="rounded-[1.5rem] border border-[var(--line)] bg-white/55 p-4">
             <p className="font-semibold">
-              当前还有 {items.length} 条待确认记录，其中真实记录{" "}
-              {realRecordCount} 条，测试记录 {testRecordCount} 条。
+              当前还有 {queueSummary.totalCount} 条待确认记录，其中真实记录{" "}
+              {queueSummary.realCount} 条，测试记录 {queueSummary.testCount} 条。
             </p>
             <p className="mt-1 text-sm text-[var(--muted)]">
               建议从上往下处理：先保存必要修改，再确认入库；不值得处理的记录可以跳过，但原始证据不会被删除。
             </p>
+            <div className="mt-4 rounded-2xl border border-[var(--line)] bg-[rgba(255,250,240,0.72)] p-4">
+              <p className="font-semibold text-[var(--accent-strong)]">
+                {queueSummary.progressText}
+              </p>
+              <p className="mt-1 text-sm leading-6 text-[var(--muted)]">
+                每次只处理当前这一条；确认或跳过后，下一条会自动上移。AI
+                只回填待确认字段，不会自动入库。
+              </p>
+            </div>
             <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_12rem_12rem]">
               <input
                 className="min-h-11 rounded-2xl border border-[var(--line)] bg-white/65 px-4 outline-none focus:border-[var(--accent)]"
@@ -346,17 +355,16 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                 <option value="all">全部记录</option>
               </select>
             </div>
-            {recordScope === "real" && testRecordCount > 0 ? (
+            {queueSummary.hiddenText ? (
               <p className="mt-3 text-sm text-[var(--muted)]">
-                默认隐藏 {testRecordCount} 条明显测试记录。需要回看历史
-                dogfood 时，可以切到“测试记录”或“全部记录”。
+                {queueSummary.hiddenText} 需要回看历史 dogfood 时，可以切到“测试记录”或“全部记录”。
               </p>
             ) : null}
-            {visibleItems.length !== items.length ? (
+            {queueSummary.visibleCount !== queueSummary.totalCount ? (
               <p className="mt-3 text-sm font-semibold text-[var(--accent-strong)]">
-                当前筛出 {visibleItems.length} 条（
-                {recordScopeLabels[recordScope]}），完整队列还有{" "}
-                {items.length} 条。
+                当前筛出 {queueSummary.visibleCount} 条（
+                {queueSummary.scopeLabel}），完整队列还有{" "}
+                {queueSummary.totalCount} 条。
               </p>
             ) : null}
           </div>
@@ -377,7 +385,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                 <div>
                   <div className="flex flex-wrap gap-2">
                     <span className="rounded-full bg-[var(--foreground)] px-3 py-1 text-xs font-semibold text-[var(--panel)]">
-                      第 {index + 1} 条
+                      第 {index + 1} / {queueSummary.visibleCount} 条
                     </span>
                     <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white">
                       {contentTypeLabels[item.contentType] ?? item.contentType}
@@ -662,16 +670,21 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                       {item.attachments.some(
                         (attachment) => attachment.canPreviewInline,
                       ) ? (
-                        <button
-                          className="rounded-full border border-[var(--accent)] bg-white px-4 py-2 text-sm font-semibold text-[var(--accent-strong)] disabled:opacity-60"
-                          disabled={extractingIds.has(item.id)}
-                          onClick={() => void extractWithAi(item)}
-                          type="button"
-                        >
-                          {extractingIds.has(item.id)
-                            ? "AI 提取中"
-                            : "AI 提取字段"}
-                        </button>
+                        <div className="flex flex-col gap-1">
+                          <button
+                            className="rounded-full border border-[var(--accent)] bg-white px-4 py-2 text-sm font-semibold text-[var(--accent-strong)] disabled:opacity-60"
+                            disabled={extractingIds.has(item.id)}
+                            onClick={() => void extractWithAi(item)}
+                            type="button"
+                          >
+                            {extractingIds.has(item.id)
+                              ? "AI 提取中"
+                              : "AI 提取字段"}
+                          </button>
+                          <span className="max-w-52 text-xs leading-5 text-[var(--muted)]">
+                            只回填字段，不会确认入库。
+                          </span>
+                        </div>
                       ) : null}
                       <button
                         className="rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]"

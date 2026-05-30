@@ -38,6 +38,23 @@ export interface CustomerSelectOption {
 export type ReviewContentTypeFilter = "all" | "image" | "text" | "card_photo";
 export type ReviewRecordScopeFilter = "real" | "test" | "all";
 
+export interface ReviewQueueScopeSummary {
+  totalCount: number;
+  visibleCount: number;
+  realCount: number;
+  testCount: number;
+  hiddenTestCount: number;
+  scopeLabel: string;
+  progressText: string;
+  hiddenText: string | null;
+}
+
+const recordScopeLabels: Record<ReviewRecordScopeFilter, string> = {
+  real: "真实记录",
+  test: "测试记录",
+  all: "全部记录",
+};
+
 const testTextPatterns = [
   "dogfood",
   "api 实测",
@@ -148,6 +165,34 @@ export function filterReviewQueueViewItems(
 
     return matchesQuery && matchesContentType && matchesRecordScope;
   });
+}
+
+export function buildReviewQueueScopeSummary(input: {
+  allItems: ReviewQueueViewItem[];
+  visibleItems: ReviewQueueViewItem[];
+  recordScope: ReviewRecordScopeFilter;
+}): ReviewQueueScopeSummary {
+  const totalCount = input.allItems.length;
+  const testCount = input.allItems.filter((item) => item.isTestRecord).length;
+  const realCount = totalCount - testCount;
+  const visibleCount = input.visibleItems.length;
+  const hiddenTestCount =
+    input.recordScope === "real" ? Math.max(testCount, 0) : 0;
+  const scopeLabel = recordScopeLabels[input.recordScope];
+
+  return {
+    totalCount,
+    visibleCount,
+    realCount,
+    testCount,
+    hiddenTestCount,
+    scopeLabel,
+    progressText: `当前范围：${scopeLabel}，待处理 ${visibleCount} 条。`,
+    hiddenText:
+      hiddenTestCount > 0
+        ? `已隐藏 ${hiddenTestCount} 条明显测试记录。`
+        : null,
+  };
 }
 
 export function buildCustomerSelectOptions(
