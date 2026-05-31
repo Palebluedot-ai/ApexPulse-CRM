@@ -130,6 +130,14 @@ pnpm env:check production
 
 These commands do not print secret values. They only show configured key names, missing required keys, and cloud safety warnings.
 
+Check database readiness:
+
+```bash
+pnpm db:check
+```
+
+This command only reads public table names and reports whether the five core CRM tables exist.
+
 Run `pnpm check` and `pnpm build` before saying a milestone is complete.
 
 ## Database Commands
@@ -144,6 +152,18 @@ Run local migrations:
 
 ```bash
 pnpm db:migrate:local
+```
+
+Run migrations using `DATABASE_URL` or `MIGRATION_DATABASE_URL`:
+
+```bash
+pnpm db:migrate
+```
+
+For Supabase pooler runtime connections, set:
+
+```text
+DATABASE_PREPARE=false
 ```
 
 Seed local demo data:

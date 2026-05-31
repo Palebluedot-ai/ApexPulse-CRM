@@ -8,8 +8,10 @@ type EnvKey =
   | "AUTH_SESSION_SECRET"
   | "AUTH_STRICT_ENV"
   | "DATABASE_URL"
+  | "DATABASE_PREPARE"
   | "LOCAL_AUTH_EMAIL"
   | "LOCAL_AUTH_PASSWORD"
+  | "MIGRATION_DATABASE_URL"
   | "STORAGE_PROVIDER"
   | "SUPABASE_SERVICE_ROLE_KEY"
   | "SUPABASE_STORAGE_BUCKET"
@@ -42,6 +44,18 @@ export const deploymentEnvSpecs: DeploymentEnvSpec[] = [
     requiredIn: localRequired,
     secret: true,
     description: "Postgres connection string.",
+  },
+  {
+    key: "MIGRATION_DATABASE_URL",
+    requiredIn: [],
+    secret: true,
+    description: "Optional direct Postgres connection string for migrations.",
+  },
+  {
+    key: "DATABASE_PREPARE",
+    requiredIn: [],
+    secret: false,
+    description: "Set to false for Supabase pooler runtime connections.",
   },
   {
     key: "LOCAL_AUTH_EMAIL",
