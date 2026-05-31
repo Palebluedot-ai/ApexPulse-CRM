@@ -2,11 +2,11 @@
 
 PWA-first personal CRM for OTC relationship follow-up.
 
-This project starts as Chao's side project. V1 is not a HashKey internal compliance system. The current priority is proving one mobile-first, local-first working loop before adding cloud deployment or team permissions.
+This project starts as Chao's side project. V1 is not a HashKey internal compliance system. The current priority is proving one mobile-first working loop and moving the dogfood environment to a stable HTTPS staging URL before adding team permissions.
 
 ## Current Stage
 
-M1 is now dogfoodable locally, and C1 is focused on mobile launch dogfood.
+M1 is now dogfoodable locally, and C1 is focused on mobile launch dogfood. The deployment direction for M1.23 is Vercel + Supabase + Cloudflare, while local development remains supported.
 
 The app can run these page-level flows:
 
@@ -120,7 +120,17 @@ Run production build:
 pnpm build
 ```
 
-These are the two commands to run before saying a milestone is complete.
+Check environment variables:
+
+```bash
+pnpm env:check
+pnpm env:check staging
+pnpm env:check production
+```
+
+These commands do not print secret values. They only show configured key names, missing required keys, and cloud safety warnings.
+
+Run `pnpm check` and `pnpm build` before saying a milestone is complete.
 
 ## Database Commands
 
@@ -159,7 +169,8 @@ Capture:
 - `/capture` real local image upload
 - `/api/capture/text`
 - `/api/capture/image`
-- Uploaded images are stored under `data/attachments/`
+- Uploaded images are stored under `data/attachments/` in local development
+- M1.23 will add Supabase Storage for Vercel staging uploads
 
 Review:
 
@@ -203,7 +214,7 @@ Current V1 intentionally does not include:
 
 - OCR
 - complex team permissions
-- cloud deployment
+- completed cloud deployment
 - final lead segmentation rules
 - automatic ingestion
 - automatic customer merge
@@ -216,7 +227,7 @@ Current V1 intentionally does not include:
 - Person-first CRM, not company-first for V1.
 - Review-first extraction, not automatic ingestion.
 - PWA-first, not Discord-first.
-- Local-first until the loop is proven.
+- Local development remains supported, but mobile dogfood now targets HTTPS staging.
 - Original evidence must be retained.
 - Follow-up state refresh is core, not a nice-to-have.
 - Documents must be self-contained.
@@ -238,5 +249,5 @@ context/system_logs/
 The current working plan is:
 
 ```text
-context/23_Cycle_Goal_手机端上线冲刺.md
+context/27_M1_23A_环境变量与云端部署Checklist.md
 ```

@@ -12,6 +12,7 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "check": "pnpm lint && pnpm typecheck && pnpm test",
+    "env:check": "tsx scripts/check-env.ts",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:local": "DATABASE_URL=postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1 drizzle-kit migrate",
