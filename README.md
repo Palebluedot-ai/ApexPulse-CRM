@@ -72,6 +72,7 @@ If port `3000` is occupied, Next.js may use another port. If it says another dev
 /tasks     跟进任务
 /reports/weekly 周报
 /dogfood/mobile 手机端测试入口
+/api/health 部署健康检查
 ```
 
 Customer detail pages use:
