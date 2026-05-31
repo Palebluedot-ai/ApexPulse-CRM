@@ -11,3 +11,22 @@ export function sanitizeLoginRedirect(value: FormDataEntryValue | string | null)
 
   return value;
 }
+
+export function buildLoginRedirectUrl(input: {
+  next: string;
+  requestUrl: string;
+  host: string | null;
+  protocol: string | null;
+}): URL {
+  const fallbackUrl = new URL(input.requestUrl);
+  const host = input.host?.trim();
+
+  if (!host) {
+    return new URL(input.next, fallbackUrl);
+  }
+
+  const protocol =
+    input.protocol?.trim() || fallbackUrl.protocol.replace(":", "") || "http";
+
+  return new URL(input.next, `${protocol}://${host}`);
+}

@@ -1,6 +1,9 @@
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { sanitizeLoginRedirect } from "@/server/auth/login";
+import {
+  buildLoginRedirectUrl,
+  sanitizeLoginRedirect,
+} from "@/server/auth/login";
 import {
   AUTH_SESSION_COOKIE,
   createSessionToken,
@@ -77,9 +80,19 @@ export async function POST(request: Request) {
     );
     const response = payload.wantsJson
       ? NextResponse.json({ ok: true, userId: user.id })
-      : NextResponse.redirect(new URL(payload.next, request.url), {
-          status: 303,
-        });
+      : NextResponse.redirect(
+          buildLoginRedirectUrl({
+            next: payload.next,
+            requestUrl: request.url,
+            host:
+              request.headers.get("x-forwarded-host") ??
+              request.headers.get("host"),
+            protocol: request.headers.get("x-forwarded-proto"),
+          }),
+          {
+            status: 303,
+          },
+        );
 
     response.cookies.set(AUTH_SESSION_COOKIE, token, {
       httpOnly: true,
