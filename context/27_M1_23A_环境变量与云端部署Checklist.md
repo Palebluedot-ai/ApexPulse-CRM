@@ -424,16 +424,24 @@ M1.23A 不做：
 
 ## 10. 下一步
 
+M1.23B 已经完成：
+
+```text
+Storage Provider 抽象。
+```
+
+已经实现：
+
+- local provider
+- supabase provider
+- 上传 API 接入 provider
+- 附件读取 API 接入 provider
+- Review 页面支持 Supabase 图片预览
+
 下一步建议进入：
 
 ```text
-M1.23B：Storage Provider 抽象。
-```
-
-M1.23B 的目标是：
-
-```text
-让上传业务不关心图片保存到本地还是 Supabase Storage。
+M1.23C：Supabase Postgres 迁移验证。
 ```
 
 完成 M1.23B 后，Vercel 才能真正处理手机上传截图。

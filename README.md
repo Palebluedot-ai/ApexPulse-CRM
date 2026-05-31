@@ -166,11 +166,11 @@ Auth:
 Capture:
 
 - `/capture` text note form
-- `/capture` real local image upload
+- `/capture` real image upload
 - `/api/capture/text`
 - `/api/capture/image`
 - Uploaded images are stored under `data/attachments/` in local development
-- M1.23 will add Supabase Storage for Vercel staging uploads
+- Vercel staging can use Supabase Storage through `STORAGE_PROVIDER=supabase`
 
 Review:
 

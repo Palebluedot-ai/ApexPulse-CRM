@@ -1,7 +1,6 @@
-import { readFile } from "node:fs/promises";
 import { eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
-import { localAttachmentPath } from "@/server/capture/local-image-storage";
+import { readImageEvidence } from "@/server/capture/image-storage-provider";
 import { createDb } from "@/server/db";
 import { attachments } from "@/server/db/schema";
 
@@ -28,7 +27,7 @@ export async function GET(
       );
     }
 
-    const bytes = await readFile(localAttachmentPath(attachment.storageKey));
+    const bytes = await readImageEvidence(attachment.storageKey);
 
     return new Response(new Uint8Array(bytes), {
       headers: {
@@ -39,9 +38,13 @@ export async function GET(
       },
     });
   } catch (error) {
-    if (error instanceof Error && error.message === "Invalid local storage key") {
+    if (
+      error instanceof Error &&
+      (error.message === "Invalid local storage key" ||
+        error.message === "Unsupported attachment storage key")
+    ) {
       return NextResponse.json(
-        { error: "Attachment file is not available locally" },
+        { error: "Attachment file is not available in configured storage" },
         { status: 404 },
       );
     }

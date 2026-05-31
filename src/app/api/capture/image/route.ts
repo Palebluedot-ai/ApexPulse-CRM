@@ -4,10 +4,7 @@ import {
   requireCurrentUser,
 } from "@/server/auth/current-user";
 import { createImageCapture } from "@/server/capture/image-capture";
-import {
-  buildLocalImageStoragePlan,
-  writeLocalAttachment,
-} from "@/server/capture/local-image-storage";
+import { saveImageEvidence } from "@/server/capture/image-storage-provider";
 import { createDb } from "@/server/db";
 
 export const runtime = "nodejs";
@@ -24,13 +21,13 @@ export async function POST(request: Request) {
       throw new Error("Image file is required");
     }
 
-    const storagePlan = buildLocalImageStoragePlan({
+    const bytes = Buffer.from(await imageFile.arrayBuffer());
+    const storagePlan = await saveImageEvidence({
       fileName: imageFile.name,
       mimeType: imageFile.type,
       fileSize: imageFile.size,
+      bytes,
     });
-    const bytes = Buffer.from(await imageFile.arrayBuffer());
-    await writeLocalAttachment(storagePlan.storageKey, bytes);
 
     const result = await createImageCapture(db, {
       storageKey: storagePlan.storageKey,

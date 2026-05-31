@@ -287,6 +287,26 @@ describe("review page model", () => {
     expect(item?.attachments[0]?.unavailableReason).toBeNull();
   });
 
+  it("exposes preview urls for Supabase stored image attachments", () => {
+    const [item] = buildReviewQueueViewItems([
+      {
+        event: pendingEvent,
+        attachments: [
+          {
+            ...attachment,
+            storageKey: "supabase-images/2026/05/29/demo.png",
+          },
+        ],
+      },
+    ]);
+
+    expect(item?.attachments[0]?.previewUrl).toBe(
+      `/api/attachments/${attachment.id}`,
+    );
+    expect(item?.attachments[0]?.canPreviewInline).toBe(true);
+    expect(item?.attachments[0]?.unavailableReason).toBeNull();
+  });
+
   it("marks non-local attachments as evidence records without inline preview", () => {
     const [item] = buildReviewQueueViewItems([
       {

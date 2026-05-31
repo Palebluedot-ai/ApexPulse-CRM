@@ -1,3 +1,4 @@
+import { isPreviewableImageStorageKey } from "@/lib/storage-keys";
 import type { CustomerListItem } from "@/server/customers/customer-dashboard";
 import {
   buildReviewAiFields,
@@ -113,13 +114,13 @@ export function buildReviewQueueViewItems(
       fileName: attachment.fileName,
       mimeType: attachment.mimeType,
       storageKey: attachment.storageKey,
-      previewUrl: attachment.storageKey.startsWith("local-images/")
+      previewUrl: isPreviewableImageStorageKey(attachment.storageKey)
         ? `/api/attachments/${attachment.id}`
         : null,
       canPreviewInline:
-        attachment.storageKey.startsWith("local-images/") &&
+        isPreviewableImageStorageKey(attachment.storageKey) &&
         attachment.mimeType.startsWith("image/"),
-      unavailableReason: attachment.storageKey.startsWith("local-images/")
+      unavailableReason: isPreviewableImageStorageKey(attachment.storageKey)
         ? null
         : "这份附件不是本地图片，暂时只能保留文件记录。",
     })),
