@@ -2,6 +2,8 @@
 
 PWA-first personal CRM for OTC relationship follow-up.
 
+Before contributing code, docs, database changes, deployment changes, or Git history changes, read `CONTRIBUTING.md`. It is forbidden to work in this repository without reading the collaboration rules first.
+
 This project starts as Chao's side project. V1 is not a HashKey internal compliance system. The current priority is proving one mobile-first working loop and moving the dogfood environment to a stable HTTPS staging URL before adding team permissions.
 
 ## Current Stage

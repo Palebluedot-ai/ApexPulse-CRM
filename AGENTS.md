@@ -30,6 +30,11 @@
 
 ## Team Collaboration Rules
 
+- Before modifying code, docs, database, deployment, or Git history, every human contributor and AI agent must read `CONTRIBUTING.md`.
+- It is forbidden to work in this repository without reading `CONTRIBUTING.md`.
+- It is forbidden to skip the collaboration rules because a task looks small.
+- It is forbidden to commit directly to `main` for new work. Use a branch and PR unless Chao explicitly says otherwise.
+- It is forbidden to merge, revert, reset, or force-push shared history without understanding the current branch state and Chao's intent.
 - This project is entering first-time two-person collaboration.
 - Before starting work, run `git status -sb` and `git pull --ff-only`.
 - Do not use `git reset --hard`, `git clean -fdx`, or `git push --force` unless Chao explicitly approves.
