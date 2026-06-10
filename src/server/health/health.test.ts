@@ -7,7 +7,7 @@ describe("health response", () => {
       buildHealthResponse(new Date("2026-05-31T10:00:00Z")),
     ).toEqual({
       ok: true,
-      app: "hashkey-otc-crm-v1",
+      app: "apexpulse-crm",
       checkedAt: "2026-05-31T10:00:00.000Z",
     });
   });

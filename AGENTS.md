@@ -1,4 +1,4 @@
-# HashKey OTC CRM V1 - Project Rules
+# ApexPulse CRM - Project Rules
 
 ## Product Direction
 

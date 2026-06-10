@@ -59,7 +59,7 @@ src/server/health/health.test.ts
 ```json
 {
   "ok": true,
-  "app": "hashkey-otc-crm-v1",
+  "app": "apexpulse-crm",
   "checkedAt": "ISO timestamp"
 }
 ```
@@ -209,7 +209,7 @@ https://你的域名/api/health
 ```json
 {
   "ok": true,
-  "app": "hashkey-otc-crm-v1"
+  "app": "apexpulse-crm"
 }
 ```
 

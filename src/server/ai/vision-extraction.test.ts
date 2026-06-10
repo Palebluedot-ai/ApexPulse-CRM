@@ -149,7 +149,7 @@ describe("vision extraction helpers", () => {
     const prompt = buildVisionExtractionPrompt();
 
     expect(prompt).toContain("companyName 只有明确属于对方");
-    expect(prompt).toContain("不能把 HashKey、群名、我方公司");
+    expect(prompt).toContain("不能把 ApexPulse、群名、我方公司");
     expect(prompt).toContain("nextFollowupAt 只有截图里有明确日期");
     expect(prompt).toContain("actionRequired");
     expect(prompt).toContain("phone, email, telegram, wechatAlias");

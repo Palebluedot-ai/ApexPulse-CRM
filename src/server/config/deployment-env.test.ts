@@ -5,7 +5,7 @@ describe("deployment env checklist", () => {
   it("keeps local development focused on database and local login", () => {
     const result = checkDeploymentEnv(
       {
-        DATABASE_URL: "postgres://postgres:postgres@localhost:5432/hashkey",
+        DATABASE_URL: "postgres://postgres:postgres@localhost:5432/apexpulse",
         LOCAL_AUTH_EMAIL: "chao.local@example.com",
         LOCAL_AUTH_PASSWORD: "local-dev-password",
         AUTH_SESSION_SECRET: "local-secret",
@@ -78,13 +78,13 @@ describe("deployment env checklist", () => {
     expect(
       parseDotEnvContent(`
 # local notes
-DATABASE_URL=postgres://localhost/hashkey
+DATABASE_URL=postgres://localhost/apexpulse
 AUTH_COOKIE_SECURE=false
 QUOTED_VALUE="hello world"
 EMPTY_VALUE=
       `),
     ).toEqual({
-      DATABASE_URL: "postgres://localhost/hashkey",
+      DATABASE_URL: "postgres://localhost/apexpulse",
       AUTH_COOKIE_SECURE: "false",
       QUOTED_VALUE: "hello world",
       EMPTY_VALUE: "",

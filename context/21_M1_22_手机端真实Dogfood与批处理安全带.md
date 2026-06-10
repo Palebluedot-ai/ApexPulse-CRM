@@ -283,7 +283,7 @@ M1.22 完成后，可以开始第二轮手机测试：
 在 Mac 上启动：
 
 ```bash
-cd /Users/chao/Projects/hashkey-otc-crm-v1
+cd /Users/chao/Projects/apexpulse-crm
 docker compose up -d postgres
 pnpm dev
 ```

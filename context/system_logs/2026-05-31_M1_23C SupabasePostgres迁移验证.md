@@ -128,7 +128,7 @@ pnpm db:check
 结果：
 
 ```text
-Database: hashkey_otc_crm_v1
+Database: apexpulse_crm
 Schema: public
 Prepared statements: true
 Missing tables: none

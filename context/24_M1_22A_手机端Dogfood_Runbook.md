@@ -47,7 +47,7 @@
 在 Mac 上打开终端，进入项目目录：
 
 ```bash
-cd /Users/chao/Projects/hashkey-otc-crm-v1
+cd /Users/chao/Projects/apexpulse-crm
 ```
 
 启动 Postgres：
@@ -102,7 +102,7 @@ http://10.x.x.x:3000
 密码配置位置：
 
 ```text
-/Users/chao/Projects/hashkey-otc-crm-v1/.env.local
+/Users/chao/Projects/apexpulse-crm/.env.local
 ```
 
 不要把 `.env.local` 提交到 Git。
