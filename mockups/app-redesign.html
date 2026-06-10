@@ -1,0 +1,707 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>全站重设计视觉稿 — HashKey OTC CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,640;9..144,720&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#faf4e8; --paper-deep:#f3ead8; --card:#fffdf7; --ink:#1f1c17; --ink-soft:#6b6357;
+  --line:#e4d9c3; --tea:#2f5d50; --tea-deep:#234739; --persimmon:#d4622a; --gold:#b98a2f;
+  --ok-bg:#e9f2ec; --red:#c2452d; --shadow:0 20px 60px rgba(57,47,32,.10);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  font-family:"Noto Sans SC",sans-serif;color:var(--ink);min-height:100vh;padding:40px 36px 96px;
+  background:
+    radial-gradient(1200px 500px at 85% -10%, rgba(212,98,42,.06), transparent 60%),
+    radial-gradient(900px 600px at -10% 30%, rgba(47,93,80,.07), transparent 55%),
+    var(--paper);
+}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.5;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)' opacity='0.025'/%3E%3C/svg%3E")}
+.wrap{max-width:1340px;margin:0 auto;position:relative}
+h1.master{font-family:"Noto Serif SC",serif;font-size:42px;letter-spacing:-.02em}
+h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);border-bottom:5px solid rgba(47,93,80,.18)}
+.master-sub{color:var(--ink-soft);margin-top:8px;font-size:14.5px}
+
+/* 页签 */
+.tabs{display:flex;gap:8px;flex-wrap:wrap;margin:28px 0 36px;position:sticky;top:12px;z-index:30}
+.tab{
+  border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 20px;
+  font:inherit;font-size:14px;font-weight:700;color:var(--ink-soft);cursor:pointer;
+  transition:all .2s;box-shadow:0 4px 14px rgba(57,47,32,.06);
+}
+.tab:hover{border-color:var(--tea);color:var(--tea)}
+.tab.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.view{display:none;animation:fade .35s both}
+.view.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+
+/* 布局:桌面框 + 手机框 */
+.stage{display:grid;grid-template-columns:minmax(0,1fr) 348px;gap:44px;align-items:start}
+@media(max-width:1080px){.stage{grid-template-columns:1fr}}
+.col-title{font-size:12px;font-weight:700;letter-spacing:.18em;color:var(--ink-soft);margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.col-title::after{content:"";flex:1;height:1px;background:var(--line)}
+
+.browser{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.browser .bar{display:flex;align-items:center;gap:6px;padding:11px 16px;border-bottom:1px solid var(--paper-deep);background:var(--paper)}
+.browser .bar i{width:10px;height:10px;border-radius:50%;background:var(--line)}
+.browser .bar i:first-child{background:#e8b4a4}
+.browser .url{margin-left:10px;font-size:12px;color:var(--ink-soft);font-family:"Fraunces",serif}
+.bview{padding:26px 28px 30px}
+
+/* 桌面顶导航 */
+.topnav{display:flex;align-items:center;gap:22px;margin-bottom:24px;font-size:14px}
+.topnav .logo{font-family:"Noto Serif SC",serif;font-weight:900;font-size:17px;margin-right:8px}
+.topnav a{color:var(--ink-soft);font-weight:500;cursor:pointer}
+.topnav a.cur{color:var(--ink);font-weight:700;border-bottom:2.5px solid var(--tea);padding-bottom:3px}
+.topnav .badge{background:var(--persimmon);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;margin-left:4px;font-weight:700}
+.topnav .cta{margin-left:auto;background:var(--tea);color:#fdfbf4;border-radius:999px;padding:9px 18px;font-weight:700;font-size:13.5px;box-shadow:0 6px 16px rgba(47,93,80,.28)}
+
+/* 手机 */
+.phone-col{position:sticky;top:80px}
+.phone{width:318px;margin:0 auto;background:#171511;border-radius:44px;padding:13px;box-shadow:0 40px 90px rgba(40,32,20,.35)}
+.screen{background:var(--paper);border-radius:33px;overflow:hidden;height:622px;display:flex;flex-direction:column;position:relative}
+.notch{height:26px;display:flex;justify-content:center}.notch i{width:104px;height:21px;background:#171511;border-radius:0 0 15px 15px}
+.ph-body{flex:1;overflow:hidden;padding:8px 16px 12px;display:flex;flex-direction:column}
+/* 底部 tab 栏 */
+.tabbar{
+  flex:none;display:flex;align-items:flex-end;justify-content:space-around;border-top:1px solid var(--line);
+  background:var(--card);padding:8px 6px 14px;position:relative;
+}
+.tabbar .ti{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--ink-soft);width:52px}
+.tabbar .ti b{font-size:17px;font-weight:400}
+.tabbar .ti.cur{color:var(--tea);font-weight:700}
+.tabbar .fab{
+  width:54px;height:54px;border-radius:50%;background:var(--tea);color:#fff;display:flex;align-items:center;justify-content:center;
+  font-size:23px;margin-top:-26px;box-shadow:0 10px 24px rgba(47,93,80,.4);border:4px solid var(--paper);
+}
+.tabbar .ti .bdg{position:absolute;transform:translate(13px,-2px);background:var(--persimmon);color:#fff;font-size:9px;border-radius:999px;padding:1px 5px;font-weight:700}
+
+/* 通用组件 */
+.h-serif{font-family:"Noto Serif SC",serif}
+.num{font-family:"Fraunces",serif;font-weight:720}
+.chip{display:inline-flex;align-items:center;gap:6px;border-radius:999px;padding:4px 12px;font-size:12px;font-weight:700}
+.chip.hot{background:rgba(212,98,42,.12);color:var(--persimmon)}
+.chip.warm{background:rgba(185,138,47,.13);color:var(--gold)}
+.chip.cold{background:var(--paper-deep);color:var(--ink-soft)}
+.chip.due{background:rgba(194,69,45,.1);color:var(--red)}
+.chip.ok{background:var(--ok-bg);color:var(--tea-deep)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px 20px}
+.btn{border:0;cursor:pointer;font:inherit;font-size:14px;font-weight:700;border-radius:999px;padding:11px 22px;transition:transform .15s}
+.btn:active{transform:scale(.96)}
+.btn-tea{background:var(--tea);color:#fdfbf4;box-shadow:0 6px 18px rgba(47,93,80,.3)}
+.btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
+.dot{width:9px;height:9px;border-radius:50%;flex:none}
+.dot.r{background:var(--red)}.dot.o{background:var(--gold)}.dot.g{background:#5d9b7c}.dot.gr{background:#cbc2af}
+.muted{color:var(--ink-soft)}
+.annos{margin-top:30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
+.anno{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 18px}
+.anno b{display:block;font-size:13.5px;margin-bottom:4px;color:var(--tea-deep)}
+.anno p{font-size:12.5px;line-height:1.65;color:var(--ink-soft)}
+
+/* ===== 首页 ===== */
+.today-grid{display:grid;grid-template-columns:1.25fr .9fr;gap:18px}
+.urgent-card{border-left:5px solid var(--red);padding-left:16px}
+.urgent-card h3{font-size:15px;display:flex;align-items:center;gap:8px}
+.task-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:14px}
+.task-row:last-child{border:0}
+.task-row input[type=checkbox]{width:19px;height:19px;accent-color:var(--tea)}
+.task-row .who{font-weight:700}
+.task-row .when{margin-left:auto;font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.stat-row{display:flex;gap:26px;margin-top:4px}
+.stat .n{font-size:36px;font-family:"Fraunces",serif;font-weight:720;color:var(--tea-deep);line-height:1}
+.stat .l{font-size:12px;color:var(--ink-soft);margin-top:4px}
+.go-review{
+  display:flex;align-items:center;gap:12px;background:linear-gradient(120deg,#fff8ea,#fdf2dd);
+  border:1px solid var(--line);border-radius:16px;padding:14px 18px;font-size:14px;font-weight:700;cursor:pointer;
+}
+.go-review .n{font-family:"Fraunces",serif;font-size:26px;color:var(--persimmon)}
+.go-review .arr{margin-left:auto;font-size:18px;color:var(--tea)}
+
+/* ===== 录入 ===== */
+.cap-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}
+.dropzone{
+  border:2px dashed rgba(47,93,80,.4);border-radius:18px;background:var(--ok-bg);
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;
+  padding:44px 20px;text-align:center;cursor:pointer;transition:background .2s;
+}
+.dropzone:hover{background:#dfece4}
+.dropzone .ico{font-size:34px}
+.dropzone b{font-size:16px}
+.dropzone span{font-size:12.5px;color:var(--ink-soft)}
+.recent-chips{display:flex;flex-direction:column;gap:9px;margin-top:14px}
+.rchip{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:9px 13px;font-size:13px}
+.rchip .st{margin-left:auto;font-size:12px;font-weight:700}
+.rchip .st.done{color:var(--tea)}
+.rchip .st.run{color:var(--gold)}
+.cap-note textarea{width:100%;height:120px;border:1px solid var(--line);border-radius:14px;background:var(--card);padding:13px;font:inherit;font-size:14px;outline:none;resize:none}
+.cap-note textarea:focus{border-color:var(--tea)}
+
+/* ===== 待确认(简) ===== */
+.dcard{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);overflow:hidden}
+.dcard-main{display:flex;gap:16px;padding:18px 20px 14px}
+.thumb{width:74px;height:74px;border-radius:14px;flex:none;border:1px solid var(--line);background:linear-gradient(160deg,#e8f0e9,#d8e4d6);position:relative;overflow:hidden}
+.thumb .fc{position:absolute;inset:9px;display:flex;flex-direction:column;gap:5px}
+.thumb .fc i{display:block;height:8px;border-radius:4px;background:#fff}
+.thumb .fc i:nth-child(2){width:85%;background:#bcd7c4}.thumb .fc i:nth-child(1){width:65%}.thumb .fc i:nth-child(3){width:50%}
+.dname{font-family:"Noto Serif SC",serif;font-size:19px;font-weight:700}
+.dsummary{margin-top:5px;font-size:13.5px;line-height:1.6}
+.dfields{margin-top:8px;display:flex;flex-wrap:wrap;gap:5px 14px;font-size:12.5px}
+.dfields b{font-weight:500;color:var(--ink-soft);margin-right:3px}
+.bind{margin-top:10px;display:inline-flex;gap:7px;font-size:12.5px;background:var(--ok-bg);border:1px dashed rgba(47,93,80,.35);color:var(--tea-deep);border-radius:9px;padding:5px 11px}
+.dactions{display:flex;gap:10px;padding:12px 20px 16px;border-top:1px solid var(--paper-deep);align-items:center}
+.kbd{margin-left:auto;font-size:11px;color:var(--ink-soft)}
+.kbd b{border:1px solid var(--line);background:var(--paper);border-radius:5px;padding:1px 6px;font-family:"Fraunces",serif;font-weight:500}
+
+/* ===== 客户列表 ===== */
+.seg{display:inline-flex;background:var(--paper-deep);border-radius:999px;padding:4px;gap:2px;font-size:13px}
+.seg span{padding:7px 16px;border-radius:999px;cursor:pointer;font-weight:500;color:var(--ink-soft)}
+.seg span.cur{background:var(--card);color:var(--ink);font-weight:700;box-shadow:0 2px 8px rgba(57,47,32,.1)}
+.search{flex:1;display:flex;align-items:center;gap:9px;border:1px solid var(--line);background:var(--card);border-radius:999px;padding:10px 16px;font-size:13.5px;color:var(--ink-soft)}
+.crow{
+  display:grid;grid-template-columns:auto 1.1fr 1fr 1.2fr auto;align-items:center;gap:14px;
+  background:var(--card);border:1px solid var(--line);border-radius:14px;padding:13px 18px;font-size:13.5px;
+  transition:transform .15s,box-shadow .15s;cursor:pointer;
+}
+.crow:hover{transform:translateY(-1px);box-shadow:var(--shadow)}
+.crow .nm{font-weight:700;font-size:15px}
+.crow .co{color:var(--ink-soft);font-size:12px}
+.crow .last{color:var(--ink-soft)}
+.crow .last.bad{color:var(--red);font-weight:700}
+.crow .nx b{font-weight:500;color:var(--ink-soft)}
+
+/* ===== 客户详情 ===== */
+.detail-head{display:flex;align-items:flex-start;gap:16px;flex-wrap:wrap}
+.detail-head h2{font-family:"Noto Serif SC",serif;font-size:30px}
+.alert-strip{
+  margin-top:14px;display:flex;align-items:center;gap:14px;background:rgba(194,69,45,.07);
+  border:1px solid rgba(194,69,45,.25);border-radius:16px;padding:14px 18px;
+}
+.alert-strip .h-serif{font-size:18px;font-weight:700;color:var(--red)}
+.alert-strip p{font-size:13px;color:var(--ink-soft)}
+.detail-grid{display:grid;grid-template-columns:1.15fr .85fr;gap:16px;margin-top:16px}
+.tl{margin-top:10px;display:flex;flex-direction:column}
+.tl-item{display:flex;gap:13px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:13px}
+.tl-item:last-child{border:0}
+.tl-item .d{font-family:"Fraunces",serif;color:var(--ink-soft);white-space:nowrap;font-size:12px;width:44px;flex:none;padding-top:2px}
+.tl-item .evi{width:34px;height:34px;border-radius:8px;background:linear-gradient(160deg,#e8f0e9,#d8e4d6);border:1px solid var(--line);flex:none}
+.mini-task{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.mini-task:last-child{border:0}
+.mini-task input{width:17px;height:17px;accent-color:var(--tea)}
+.brief{font-size:13px;line-height:1.75;color:var(--ink);background:linear-gradient(120deg,#fff8ea,#fdf2dd);border-radius:14px;padding:14px 16px;border:1px solid var(--line)}
+.brief b{color:var(--tea-deep)}
+
+/* ===== 任务 ===== */
+.quickadd{display:flex;gap:10px}
+.quickadd input{flex:1;border:1px solid var(--line);border-radius:999px;background:var(--card);padding:12px 20px;font:inherit;font-size:14px;outline:none}
+.quickadd input:focus{border-color:var(--tea)}
+.tgroup{margin-top:18px}
+.tgroup h4{font-size:13px;color:var(--ink-soft);letter-spacing:.1em;margin-bottom:8px;display:flex;gap:8px;align-items:center}
+.tgroup h4 .num{color:var(--persimmon);font-size:15px}
+.trow{display:flex;align-items:center;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:13px;padding:12px 16px;font-size:14px;margin-bottom:8px}
+.trow input{width:19px;height:19px;accent-color:var(--tea)}
+.trow .cust{font-size:11.5px;font-weight:700;background:var(--paper-deep);border-radius:999px;padding:3px 10px;color:var(--ink-soft)}
+.trow .due{margin-left:auto;font-size:12px;color:var(--ink-soft);white-space:nowrap}
+.trow .due.bad{color:var(--red);font-weight:700}
+.trow.done-t{opacity:.45}
+.trow.done-t span.txt{text-decoration:line-through}
+
+/* ===== 周报 ===== */
+.wk-stats{display:flex;gap:0;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:var(--card)}
+.wk-stat{flex:1;padding:20px;text-align:center;border-right:1px solid var(--paper-deep)}
+.wk-stat:last-child{border:0}
+.wk-stat .n{font-family:"Fraunces",serif;font-size:40px;font-weight:720;color:var(--tea-deep);line-height:1}
+.wk-stat .n.or{color:var(--persimmon)}
+.wk-stat .l{font-size:12px;color:var(--ink-soft);margin-top:6px}
+.wk-row{display:flex;align-items:center;gap:12px;padding:11px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
+.wk-row:last-child{border:0}
+.wk-row .delta{margin-left:auto;font-size:12px;font-weight:700}
+.wk-row .delta.up{color:var(--persimmon)}
+.wk-row .delta.fl{color:var(--ink-soft)}
+
+/* 手机内通用 */
+.ph-h{font-family:"Noto Serif SC",serif;font-size:20px;font-weight:700;padding:6px 2px 2px}
+.ph-sec{font-size:11px;font-weight:700;letter-spacing:.14em;color:var(--ink-soft);margin:12px 2px 7px}
+.ph-card-s{background:var(--card);border:1px solid var(--line);border-radius:15px;padding:13px 14px;font-size:12.5px}
+.ph-scroll{flex:1;overflow-y:auto;scrollbar-width:none}
+.ph-scroll::-webkit-scrollbar{display:none}
+.ph-bigbtn{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--tea);color:#fdfbf4;border-radius:16px;padding:16px;font-size:15px;font-weight:700;box-shadow:0 8px 20px rgba(47,93,80,.3)}
+.ph-bigbtn.alt{background:var(--card);color:var(--ink);border:1px solid var(--line);box-shadow:none}
+.ph-sticky-cta{flex:none;padding:10px 0 4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1 class="master">全站重设计 <em>·</em> 桌面 + 手机</h1>
+  <p class="master-sub">设计语言:纸感米色 × 墨绿主操作 × 柿色热度信号。核心原则:每页只回答一个问题。点上方页签切换。</p>
+
+  <nav class="tabs" id="tabs">
+    <button class="tab on" data-v="home">① 首页·今日</button>
+    <button class="tab" data-v="capture">② 录入</button>
+    <button class="tab" data-v="review">③ 待确认</button>
+    <button class="tab" data-v="customers">④ 客户列表</button>
+    <button class="tab" data-v="detail">⑤ 客户详情</button>
+    <button class="tab" data-v="tasks">⑥ 任务</button>
+    <button class="tab" data-v="report">⑦ 周报</button>
+  </nav>
+
+  <!-- ============================== ① 首页 ============================== -->
+  <section class="view on" id="v-home">
+    <div class="stage">
+      <div>
+        <p class="col-title">桌面 — 回答"我今天该干什么"</p>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.hashkey.dev / 今日</span></div>
+        <div class="bview">
+          <div class="topnav"><span class="logo">OTC·CRM</span><a class="cur">今日</a><a>待确认<span class="badge">3</span></a><a>客户</a><a>任务</a><a>周报</a><span class="cta">+ 录入</span></div>
+          <h2 class="h-serif" style="font-size:26px">周三，6 月 10 日</h2>
+          <p class="muted" style="font-size:13px;margin-top:4px">2 个客户逾期 · 3 条任务到期 · 3 条截图待确认</p>
+          <div class="today-grid" style="margin-top:18px">
+            <div class="card urgent-card">
+              <h3><span class="dot r"></span>需要先处理</h3>
+              <div class="task-row"><input type="checkbox"><span><span class="who">陈总</span> 已逾期 2 天 — 跟进 USDT 出金方案</span><span class="when">逾期</span></div>
+              <div class="task-row"><input type="checkbox"><span><span class="who">Amy Wong</span> 报价承诺今天到期 — BTC 大宗</span><span class="when">今天</span></div>
+              <div class="task-row"><input type="checkbox"><span><span class="who">刘总</span> 发开户材料清单</span><span class="when">周五</span></div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div class="go-review"><span class="n">3</span><span>条待确认<br><span class="muted" style="font-weight:400;font-size:12px">AI 已全部提取完毕</span></span><span class="arr">→</span></div>
+              <div class="card"><div class="stat-row">
+                <div class="stat"><div class="n">12</div><div class="l">本周跟进</div></div>
+                <div class="stat"><div class="n">3</div><div class="l">新客户</div></div>
+                <div class="stat"><div class="n" style="color:var(--persimmon)">2</div><div class="l">逾期</div></div>
+              </div></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="annos">
+          <div class="anno"><b>从"门户"改成"日程"</b><p>现在首页是 5 个入口链接。改成行动清单:逾期置顶 + 今日任务 + 待确认计数,打开就知道干什么。</p></div>
+          <div class="anno"><b>勾选即完成</b><p>任务直接在首页打勾完成,不用跳任务页。</p></div>
+        </div>
+      </div>
+      <aside class="phone-col">
+        <p class="col-title">手机</p>
+        <div class="phone"><div class="screen">
+          <div class="notch"><i></i></div>
+          <div class="ph-body">
+            <div class="ph-h">6 月 10 日 周三</div>
+            <div class="ph-scroll">
+              <p class="ph-sec">先处理</p>
+              <div class="ph-card-s" style="border-left:4px solid var(--red)">
+                <b>陈总</b> 逾期 2 天<br><span class="muted">跟进 USDT 出金方案</span>
+              </div>
+              <div class="ph-card-s" style="margin-top:8px"><b>Amy Wong</b> 今天到期<br><span class="muted">BTC 大宗报价</span></div>
+              <p class="ph-sec">待确认</p>
+              <div class="ph-card-s" style="display:flex;align-items:center;gap:10px">
+                <span class="num" style="font-size:24px;color:var(--persimmon)">3</span>
+                <span>条已提取完<br><span class="muted">点击进入轻审查</span></span><span style="margin-left:auto;color:var(--tea)">→</span>
+              </div>
+              <p class="ph-sec">本周</p>
+              <div class="ph-card-s" style="display:flex;gap:18px;justify-content:space-around;text-align:center">
+                <span><span class="num" style="font-size:20px;color:var(--tea-deep)">12</span><br><span class="muted" style="font-size:10.5px">跟进</span></span>
+                <span><span class="num" style="font-size:20px;color:var(--tea-deep)">3</span><br><span class="muted" style="font-size:10.5px">新客户</span></span>
+                <span><span class="num" style="font-size:20px;color:var(--persimmon)">2</span><br><span class="muted" style="font-size:10.5px">逾期</span></span>
+              </div>
+            </div>
+            <div class="tabbar">
+              <span class="ti cur"><b>☀</b>今日</span>
+              <span class="ti"><b>◎</b>客户</span>
+              <span class="fab">＋</span>
+              <span class="ti"><span class="bdg">3</span><b>☑</b>待确认</span>
+              <span class="ti"><b>≣</b>任务</span>
+            </div>
+          </div>
+        </div></div>
+        <p style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft)">底部 Tab 栏 + 中央 ＋ 即录入(选截图/写备注)<br>一拇指可达</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================== ② 录入 ============================== -->
+  <section class="view" id="v-capture">
+    <div class="stage">
+      <div>
+        <p class="col-title">桌面 — 拖进来就行</p>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.hashkey.dev / 录入</span></div>
+        <div class="bview">
+          <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a>待确认<span class="badge">3</span></a><a>客户</a><a>任务</a><a>周报</a><span class="cta" style="background:var(--ink)">录入中</span></div>
+          <div class="cap-grid">
+            <div>
+              <div class="dropzone"><span class="ico">⇪</span><b>拖入截图 / 粘贴 / 点击选择</b><span>支持多张连传,传完即开始 AI 提取</span></div>
+              <div class="recent-chips">
+                <div class="rchip">🖼 IMG_2841.png <span class="st done">✓ 已提取 · Florian</span></div>
+                <div class="rchip">🖼 IMG_2842.png <span class="st done">✓ 已提取 · 刘总</span></div>
+                <div class="rchip">🖼 IMG_2843.png <span class="st run">⏳ AI 提取中…</span></div>
+              </div>
+            </div>
+            <div class="cap-note">
+              <p style="font-size:13.5px;font-weight:700;margin-bottom:8px">或者写条备注</p>
+              <textarea placeholder="今天在活动上认识了…(提交后 AI 自动提取客户名 / 需求 / 下一步)"></textarea>
+              <div style="display:flex;gap:10px;margin-top:10px"><button class="btn btn-tea">提交备注</button><button class="btn btn-ghost">去待确认 (3)</button></div>
+            </div>
+          </div>
+        </div></div>
+        <div class="annos">
+          <div class="anno"><b>录入后不离场</b><p>每条录入实时显示提取状态,提取完直接看到 AI 认出来的是谁。攒一批再去待确认一次清掉。</p></div>
+          <div class="anno"><b>桌面支持粘贴</b><p>微信电脑版截图 Ctrl+V 直接进,比存文件再选快一倍。</p></div>
+        </div>
+      </div>
+      <aside class="phone-col">
+        <p class="col-title">手机</p>
+        <div class="phone"><div class="screen">
+          <div class="notch"><i></i></div>
+          <div class="ph-body">
+            <div class="ph-h">录入</div>
+            <div class="ph-scroll">
+              <div style="display:flex;flex-direction:column;gap:10px;margin-top:6px">
+                <div class="ph-bigbtn">🖼 从相册选截图（可多选）</div>
+                <div class="ph-bigbtn alt">✏️ 写条备注</div>
+              </div>
+              <p class="ph-sec">本轮已录 3 条</p>
+              <div class="ph-card-s" style="display:flex;gap:8px;align-items:center">🖼 <span>IMG_2841</span><span style="margin-left:auto;color:var(--tea);font-weight:700;font-size:11.5px">✓ Florian</span></div>
+              <div class="ph-card-s" style="display:flex;gap:8px;align-items:center;margin-top:7px">🖼 <span>IMG_2842</span><span style="margin-left:auto;color:var(--tea);font-weight:700;font-size:11.5px">✓ 刘总</span></div>
+              <div class="ph-card-s" style="display:flex;gap:8px;align-items:center;margin-top:7px">🖼 <span>IMG_2843</span><span style="margin-left:auto;color:var(--gold);font-weight:700;font-size:11.5px">⏳ 提取中</span></div>
+            </div>
+            <div class="ph-sticky-cta"><div class="ph-bigbtn" style="background:var(--ink)">去待确认 (3) →</div></div>
+            <div class="tabbar">
+              <span class="ti"><b>☀</b>今日</span><span class="ti"><b>◎</b>客户</span>
+              <span class="fab" style="background:var(--ink)">＋</span>
+              <span class="ti"><span class="bdg">3</span><b>☑</b>待确认</span><span class="ti"><b>≣</b>任务</span>
+            </div>
+          </div>
+        </div></div>
+        <p style="text-align:center;margin-top:14px;font-size:12.5px;color:var(--ink-soft)">相册多选连传 → 状态实时回流<br>底部常驻"去待确认"</p>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================== ③ 待确认 ============================== -->
+  <section class="view" id="v-review">
+    <div class="stage">
+      <div>
+        <p class="col-title">桌面 — 决策卡(已定稿,见 review-redesign.html 可交互版)</p>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.hashkey.dev / 待确认</span></div>
+        <div class="bview">
+          <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a class="cur">待确认<span class="badge">3</span></a><a>客户</a><a>任务</a><a>周报</a><span class="cta">+ 录入</span></div>
+          <div class="dcard">
+            <div class="dcard-main">
+              <div class="thumb"><div class="fc"><i></i><i></i><i></i></div></div>
+              <div style="flex:1">
+                <div style="display:flex;align-items:baseline;gap:10px;flex-wrap:wrap">
+                  <span class="dname">Florian</span><span class="chip hot">HOT · 高置信</span><span class="muted" style="font-size:12px">截图 · 16:31</span>
+                </div>
+                <p class="dsummary">天津服装出海老板,月固定 offramp ~10M USD,下周希望开户。</p>
+                <div class="dfields"><span><b>需求</b>offramp 10M USD/月</span><span><b>下一步</b>下周约开户</span><span><b>来源</b>HashKey 活动</span></div>
+                <div class="bind">⊕ 将新建客户 <b>Florian</b></div>
+              </div>
+            </div>
+            <div class="dactions">
+              <button class="btn btn-tea">✓ 确认入库</button><button class="btn btn-ghost">✎ 修改</button>
+              <button class="btn" style="background:none;color:var(--ink-soft)">跳过</button>
+              <span class="kbd"><b>Y</b> 确认 <b>E</b> 修改 <b>S</b> 跳过</span>
+            </div>
+          </div>
+        </div></div>
+        <div class="annos"><div class="anno"><b>已在上一版定稿</b><p>折叠决策卡 + 键盘流 + 提取中骨架屏。完整可交互版打开 mockups/review-redesign.html。</p></div></div>
+      </div>
+      <aside class="phone-col">
+        <p class="col-title">手机 · 聚焦模式</p>
+        <div class="phone"><div class="screen">
+          <div class="notch"><i></i></div>
+          <div class="ph-body">
+            <div class="ph-h">待确认 <span class="num" style="font-size:14px;color:var(--tea-deep)">3 / 7</span></div>
+            <div style="height:6px;border-radius:3px;background:var(--paper-deep);margin:6px 2px 10px"><i style="display:block;height:100%;width:43%;border-radius:3px;background:var(--tea)"></i></div>
+            <div class="ph-scroll">
+              <div class="ph-card-s" style="padding:16px">
+                <div style="height:100px;border-radius:12px;background:linear-gradient(150deg,#e8f0e9,#d4e2d2);border:1px solid var(--line)"></div>
+                <div style="margin-top:12px;display:flex;gap:8px;align-items:baseline"><b class="h-serif" style="font-size:17px">Florian</b><span class="chip hot" style="font-size:10px">HOT</span></div>
+                <p style="margin-top:5px;line-height:1.6">月 offramp ~10M USD,下周希望开户。</p>
+                <p class="muted" style="margin-top:7px;font-size:12px">需求 offramp 10M/月 · 下一步 下周约开户</p>
+                <div class="bind" style="margin-top:10px">⊕ 将新建客户 Florian</div>
+              </div>
+            </div>
+            <div class="ph-sticky-cta" style="display:flex;gap:9px">
+              <div class="ph-bigbtn" style="flex:1.4">✓ 确认</div>
+              <div class="ph-bigbtn alt" style="flex:.7">✎</div>
+              <div class="ph-bigbtn alt" style="flex:.7;color:var(--ink-soft)">跳过</div>
+            </div>
+            <div class="tabbar">
+              <span class="ti"><b>☀</b>今日</span><span class="ti"><b>◎</b>客户</span><span class="fab">＋</span>
+              <span class="ti cur"><span class="bdg">3</span><b>☑</b>待确认</span><span class="ti"><b>≣</b>任务</span>
+            </div>
+          </div>
+        </div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================== ④ 客户列表 ============================== -->
+  <section class="view" id="v-customers">
+    <div class="stage">
+      <div>
+        <p class="col-title">桌面 — 该跟进的排最上</p>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.hashkey.dev / 客户</span></div>
+        <div class="bview">
+          <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a>待确认<span class="badge">3</span></a><a class="cur">客户</a><a>任务</a><a>周报</a><span class="cta">+ 录入</span></div>
+          <div style="display:flex;gap:12px;align-items:center;margin-bottom:16px">
+            <div class="search">⌕ 搜客户名 / 公司 / 需求…</div>
+            <div class="seg"><span class="cur">全部 24</span><span>逾期 2</span><span>近期跟进 5</span><span>沉睡 8</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:9px">
+            <div class="crow">
+              <span class="dot r"></span>
+              <span><span class="nm">陈总</span><br><span class="co">矿机贸易</span></span>
+              <span class="last bad">逾期 2 天</span>
+              <span class="nx"><b>下一步</b> USDT 出金方案</span>
+              <span class="chip warm">WARM</span>
+            </div>
+            <div class="crow">
+              <span class="dot o"></span>
+              <span><span class="nm">Amy Wong</span><br><span class="co">家族办公室</span></span>
+              <span class="last">今天到期</span>
+              <span class="nx"><b>下一步</b> BTC 大宗报价</span>
+              <span class="chip hot">HOT</span>
+            </div>
+            <div class="crow">
+              <span class="dot g"></span>
+              <span><span class="nm">刘总</span><br><span class="co">BVI 主体</span></span>
+              <span class="last">3 天前沟通</span>
+              <span class="nx"><b>下一步</b> 发开户材料(周五)</span>
+              <span class="chip warm">WARM</span>
+            </div>
+            <div class="crow" style="opacity:.6">
+              <span class="dot gr"></span>
+              <span><span class="nm">王经理</span><br><span class="co">跨境电商</span></span>
+              <span class="last">23 天无动静</span>
+              <span class="nx"><b>下一步</b> —— 没有计划</span>
+              <span class="chip cold">沉睡</span>
+            </div>
+          </div>
+        </div></div>
+        <div class="annos">
+          <div class="anno"><b>卡片 → 行</b><p>现在是大卡片宫格,一屏 6 个。改成信息行,一屏 12+,且默认按"该跟进程度"排序:逾期 > 今天 > 计划中 > 沉睡。</p></div>
+          <div class="anno"><b>状态用色点不用文案</b><p>红=逾期 黄=临近 绿=健康 灰=沉睡,扫一眼定位问题客户。</p></div>
+        </div>
+      </div>
+      <aside class="phone-col">
+        <p class="col-title">手机</p>
+        <div class="phone"><div class="screen">
+          <div class="notch"><i></i></div>
+          <div class="ph-body">
+            <div class="ph-h">客户</div>
+            <div class="search" style="flex:none;margin:8px 0;font-size:12.5px;padding:9px 14px">⌕ 搜索</div>
+            <div class="seg" style="font-size:11px;align-self:flex-start"><span class="cur">全部</span><span>逾期 2</span><span>沉睡</span></div>
+            <div class="ph-scroll" style="margin-top:10px">
+              <div class="ph-card-s" style="display:flex;gap:9px;align-items:center"><span class="dot r"></span><span><b>陈总</b> · 矿机贸易<br><span class="muted" style="font-size:11px;color:var(--red)">逾期 2 天 · USDT 出金</span></span><span style="margin-left:auto" class="chip warm">W</span></div>
+              <div class="ph-card-s" style="display:flex;gap:9px;align-items:center;margin-top:7px"><span class="dot o"></span><span><b>Amy Wong</b> · 家办<br><span class="muted" style="font-size:11px">今天 · BTC 大宗报价</span></span><span style="margin-left:auto" class="chip hot">H</span></div>
+              <div class="ph-card-s" style="display:flex;gap:9px;align-items:center;margin-top:7px"><span class="dot g"></span><span><b>刘总</b> · BVI<br><span class="muted" style="font-size:11px">3 天前 · 发材料(周五)</span></span><span style="margin-left:auto" class="chip warm">W</span></div>
+              <div class="ph-card-s" style="display:flex;gap:9px;align-items:center;margin-top:7px;opacity:.6"><span class="dot gr"></span><span><b>王经理</b> · 跨境电商<br><span class="muted" style="font-size:11px">23 天无动静</span></span><span style="margin-left:auto" class="chip cold">沉</span></div>
+            </div>
+            <div class="tabbar">
+              <span class="ti"><b>☀</b>今日</span><span class="ti cur"><b>◎</b>客户</span><span class="fab">＋</span>
+              <span class="ti"><span class="bdg">3</span><b>☑</b>待确认</span><span class="ti"><b>≣</b>任务</span>
+            </div>
+          </div>
+        </div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================== ⑤ 客户详情 ============================== -->
+  <section class="view" id="v-detail">
+    <div class="stage">
+      <div>
+        <p class="col-title">桌面 — 先告诉我现在该干什么</p>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.hashkey.dev / 客户 / 陈总</span></div>
+        <div class="bview">
+          <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a>待确认<span class="badge">3</span></a><a class="cur">客户</a><a>任务</a><a>周报</a><span class="cta">+ 录入</span></div>
+          <div class="detail-head">
+            <h2>陈总</h2><span class="chip warm">WARM</span><span class="muted" style="font-size:13px;padding-top:12px">矿机贸易 · 王姐介绍 · 微信: chen_mining</span>
+          </div>
+          <div class="alert-strip">
+            <div><div class="h-serif">已经逾期 2 天</div><p>越过预期跟进时间——上次承诺给 USDT 出金合规方案。</p></div>
+            <button class="btn btn-tea" style="margin-left:auto;white-space:nowrap">✓ 今天处理</button>
+          </div>
+          <div class="detail-grid">
+            <div class="card">
+              <h3 style="font-size:14px;margin-bottom:4px">沟通时间线</h3>
+              <div class="tl">
+                <div class="tl-item"><span class="d">6/08</span><span class="evi"></span><span>聊 USDT 出金量级,月 500-800K,关心合规路径。<br><span class="muted" style="font-size:11.5px">截图证据 · AI 提取 · 已确认</span></span></div>
+                <div class="tl-item"><span class="d">6/05</span><span class="evi" style="background:var(--paper-deep)"></span><span>王姐拉群介绍,初步寒暄。<br><span class="muted" style="font-size:11.5px">文字备注</span></span></div>
+                <div class="tl-item"><span class="d">6/03</span><span class="evi"></span><span>名片:辰光矿业贸易 陈总。<br><span class="muted" style="font-size:11.5px">名片照片</span></span></div>
+              </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:14px">
+              <div class="card">
+                <h3 style="font-size:14px;margin-bottom:2px">待办 <span class="num" style="color:var(--persimmon)">2</span></h3>
+                <div class="mini-task"><input type="checkbox"><span>发 USDT 出金合规方案 <b style="color:var(--red);font-size:11.5px">逾期</b></span></div>
+                <div class="mini-task"><input type="checkbox"><span>约下次电话(本周)</span></div>
+              </div>
+              <div class="brief"><b>Morning Brief</b> · 陈总是王姐介绍的矿机贸易商,核心诉求是 USDT 大额出金的合规通道,月量 500-800K。当前卡在我方方案未给,已逾期,信任窗口在缩小。建议今天给出初版方案并约电话。</div>
+            </div>
+          </div>
+        </div></div>
+        <div class="annos">
+          <div class="anno"><b>警示条置顶</b><p>逾期/今天到期直接横幅,主按钮就在横幅里。健康客户显示"状态健康,记录新进展"。</p></div>
+          <div class="anno"><b>时间线带证据缩略图</b><p>每条沟通挂原始截图缩略,点开大图。证据链 = OTC 合规刚需。</p></div>
+        </div>
+      </div>
+      <aside class="phone-col">
+        <p class="col-title">手机</p>
+        <div class="phone"><div class="screen">
+          <div class="notch"><i></i></div>
+          <div class="ph-body">
+            <div class="ph-h">陈总 <span class="chip warm" style="font-size:10px">WARM</span></div>
+            <p class="muted" style="font-size:11.5px;padding:0 2px">矿机贸易 · 王姐介绍</p>
+            <div class="ph-scroll" style="margin-top:8px">
+              <div class="ph-card-s" style="border:1px solid rgba(194,69,45,.3);background:rgba(194,69,45,.05)">
+                <b style="color:var(--red)">已经逾期 2 天</b><br><span class="muted" style="font-size:11.5px">该给 USDT 出金合规方案了</span>
+              </div>
+              <p class="ph-sec">待办 2</p>
+              <div class="ph-card-s"><div class="mini-task" style="border:0;padding:2px 0"><input type="checkbox"><span style="font-size:12.5px">发出金合规方案 <b style="color:var(--red);font-size:10.5px">逾期</b></span></div>
+              <div class="mini-task" style="border:0;padding:2px 0"><input type="checkbox"><span style="font-size:12.5px">约下次电话</span></div></div>
+              <p class="ph-sec">时间线</p>
+              <div class="ph-card-s" style="display:flex;gap:9px"><span class="evi" style="width:30px;height:30px;border-radius:7px;background:linear-gradient(160deg,#e8f0e9,#d8e4d6);flex:none"></span><span style="font-size:12px">6/08 · 聊出金量级 500-800K/月</span></div>
+              <div class="ph-card-s" style="margin-top:7px;font-size:12px">6/05 · 王姐拉群介绍</div>
+            </div>
+            <div class="ph-sticky-cta"><div class="ph-bigbtn">✓ 今天处理</div></div>
+            <div class="tabbar">
+              <span class="ti"><b>☀</b>今日</span><span class="ti cur"><b>◎</b>客户</span><span class="fab">＋</span>
+              <span class="ti"><span class="bdg">3</span><b>☑</b>待确认</span><span class="ti"><b>≣</b>任务</span>
+            </div>
+          </div>
+        </div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================== ⑥ 任务 ============================== -->
+  <section class="view" id="v-tasks">
+    <div class="stage">
+      <div>
+        <p class="col-title">桌面 — 一行新建,按时间分组</p>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.hashkey.dev / 任务</span></div>
+        <div class="bview">
+          <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a>待确认<span class="badge">3</span></a><a>客户</a><a class="cur">任务</a><a>周报</a><span class="cta">+ 录入</span></div>
+          <div class="quickadd"><input placeholder='输入即建任务,如 "周五给刘总发材料清单" — AI 自动认客户和时间,回车确认'><button class="btn btn-tea">添加</button></div>
+          <div class="tgroup"><h4>逾期 / 今天 <span class="num">2</span></h4>
+            <div class="trow"><input type="checkbox"><span class="txt">发 USDT 出金合规方案</span><span class="cust">陈总</span><span class="due bad">逾期 2 天</span></div>
+            <div class="trow"><input type="checkbox"><span class="txt">BTC 大宗报价单</span><span class="cust">Amy Wong</span><span class="due bad">今天</span></div>
+          </div>
+          <div class="tgroup"><h4>本周</h4>
+            <div class="trow"><input type="checkbox"><span class="txt">发开户材料清单</span><span class="cust">刘总</span><span class="due">周五 6/13</span></div>
+            <div class="trow"><input type="checkbox"><span class="txt">约 Florian 开户沟通</span><span class="cust">Florian</span><span class="due">下周二 6/17</span></div>
+          </div>
+          <div class="tgroup"><h4>已完成 · 今天</h4>
+            <div class="trow done-t"><input type="checkbox" checked><span class="txt">回复王姐群消息</span><span class="cust">陈总</span><span class="due">14:20</span></div>
+          </div>
+        </div></div>
+        <div class="annos">
+          <div class="anno"><b>表单 → 单行输入</b><p>现在建任务要填 4 个字段的表单。改成一句话输入,AI 解析客户名和时间(复用提取管线),回车即建。</p></div>
+          <div class="anno"><b>按紧迫分组</b><p>逾期/今天 > 本周 > 以后,完成的折到底部,焦点永远在最该干的。</p></div>
+        </div>
+      </div>
+      <aside class="phone-col">
+        <p class="col-title">手机</p>
+        <div class="phone"><div class="screen">
+          <div class="notch"><i></i></div>
+          <div class="ph-body">
+            <div class="ph-h">任务</div>
+            <div class="ph-scroll" style="margin-top:6px">
+              <p class="ph-sec" style="color:var(--red)">逾期 / 今天 2</p>
+              <div class="ph-card-s" style="display:flex;gap:9px;align-items:center"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--tea)"><span style="font-size:12.5px">出金合规方案<br><span class="muted" style="font-size:10.5px">陈总 · 逾期 2 天</span></span></div>
+              <div class="ph-card-s" style="display:flex;gap:9px;align-items:center;margin-top:7px"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--tea)"><span style="font-size:12.5px">BTC 大宗报价单<br><span class="muted" style="font-size:10.5px">Amy Wong · 今天</span></span></div>
+              <p class="ph-sec">本周</p>
+              <div class="ph-card-s" style="display:flex;gap:9px;align-items:center"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--tea)"><span style="font-size:12.5px">发开户材料清单<br><span class="muted" style="font-size:10.5px">刘总 · 周五</span></span></div>
+            </div>
+            <div class="ph-sticky-cta"><div class="search" style="font-size:12px;padding:11px 14px">＋ 一句话建任务…</div></div>
+            <div class="tabbar">
+              <span class="ti"><b>☀</b>今日</span><span class="ti"><b>◎</b>客户</span><span class="fab">＋</span>
+              <span class="ti"><span class="bdg">3</span><b>☑</b>待确认</span><span class="ti cur"><b>≣</b>任务</span>
+            </div>
+          </div>
+        </div></div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ============================== ⑦ 周报 ============================== -->
+  <section class="view" id="v-report">
+    <div class="stage">
+      <div>
+        <p class="col-title">桌面 — 一眼看到本周节奏</p>
+        <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.hashkey.dev / 周报</span></div>
+        <div class="bview">
+          <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a>待确认<span class="badge">3</span></a><a>客户</a><a>任务</a><a class="cur">周报</a><span class="cta">+ 录入</span></div>
+          <h2 class="h-serif" style="font-size:24px;margin-bottom:14px">6/9 – 6/15 <span class="muted" style="font-size:13px;font-family:'Noto Sans SC'">第 24 周</span></h2>
+          <div class="wk-stats">
+            <div class="wk-stat"><div class="n">8</div><div class="l">触达客户</div></div>
+            <div class="wk-stat"><div class="n">12</div><div class="l">完成任务</div></div>
+            <div class="wk-stat"><div class="n">3</div><div class="l">新增客户</div></div>
+            <div class="wk-stat"><div class="n or">4</div><div class="l">遗留待办</div></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1.1fr .9fr;gap:16px;margin-top:16px">
+            <div class="card">
+              <h3 style="font-size:14px;margin-bottom:4px">本周触达</h3>
+              <div class="wk-row"><span class="dot g"></span><b>Florian</b><span class="muted">新客户 · 2 次沟通</span><span class="delta up">↑ HOT</span></div>
+              <div class="wk-row"><span class="dot g"></span><b>刘总</b><span class="muted">3 次沟通 · 进开户流程</span><span class="delta up">↑ WARM</span></div>
+              <div class="wk-row"><span class="dot o"></span><b>Amy Wong</b><span class="muted">1 次 · 等报价</span><span class="delta fl">→ HOT</span></div>
+              <div class="wk-row"><span class="dot r"></span><b>陈总</b><span class="muted">0 次 · 逾期中</span><span class="delta fl" style="color:var(--red)">⚠ 失速</span></div>
+            </div>
+            <div class="card">
+              <h3 style="font-size:14px;margin-bottom:4px">遗留待办 <span class="num" style="color:var(--persimmon)">4</span></h3>
+              <div class="mini-task"><input type="checkbox"><span>出金合规方案 — 陈总</span></div>
+              <div class="mini-task"><input type="checkbox"><span>BTC 报价 — Amy Wong</span></div>
+              <div class="mini-task"><input type="checkbox"><span>开户材料 — 刘总</span></div>
+              <button class="btn btn-ghost" style="margin-top:12px;font-size:13px">全部移入下周 →</button>
+            </div>
+          </div>
+        </div></div>
+        <div class="annos">
+          <div class="anno"><b>加"失速"信号</b><p>本周 0 次沟通且有未完成任务的客户标 ⚠,周报不只是回顾,直接产出下周名单。</p></div>
+          <div class="anno"><b>遗留一键滚动</b><p>没干完的勾掉或整体挪下周,不让待办在周与周之间静默蒸发。</p></div>
+        </div>
+      </div>
+      <aside class="phone-col">
+        <p class="col-title">手机</p>
+        <div class="phone"><div class="screen">
+          <div class="notch"><i></i></div>
+          <div class="ph-body">
+            <div class="ph-h">周报 <span class="muted" style="font-size:12px">W24</span></div>
+            <div class="ph-scroll" style="margin-top:6px">
+              <div class="ph-card-s" style="display:flex;justify-content:space-around;text-align:center">
+                <span><span class="num" style="font-size:22px;color:var(--tea-deep)">8</span><br><span class="muted" style="font-size:10px">触达</span></span>
+                <span><span class="num" style="font-size:22px;color:var(--tea-deep)">12</span><br><span class="muted" style="font-size:10px">完成</span></span>
+                <span><span class="num" style="font-size:22px;color:var(--persimmon)">4</span><br><span class="muted" style="font-size:10px">遗留</span></span>
+              </div>
+              <p class="ph-sec">本周触达</p>
+              <div class="ph-card-s" style="font-size:12px"><b>Florian</b> 新客户 · 2 次 <span style="float:right;color:var(--persimmon);font-weight:700">↑HOT</span></div>
+              <div class="ph-card-s" style="font-size:12px;margin-top:7px"><b>陈总</b> 0 次 · 逾期 <span style="float:right;color:var(--red);font-weight:700">⚠失速</span></div>
+              <p class="ph-sec">遗留 4</p>
+              <div class="ph-card-s" style="font-size:12px">出金方案 — 陈总<br>BTC 报价 — Amy Wong</div>
+            </div>
+            <div class="tabbar">
+              <span class="ti"><b>☀</b>今日</span><span class="ti"><b>◎</b>客户</span><span class="fab">＋</span>
+              <span class="ti"><span class="bdg">3</span><b>☑</b>待确认</span><span class="ti"><b>≣</b>任务</span>
+            </div>
+          </div>
+        </div></div>
+      </aside>
+    </div>
+  </section>
+</div>
+
+<script>
+document.getElementById('tabs').addEventListener('click', (e)=>{
+  const btn = e.target.closest('.tab'); if(!btn) return;
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('on'));
+  btn.classList.add('on');
+  document.getElementById('v-'+btn.dataset.v).classList.add('on');
+  window.scrollTo({top:0});
+});
+</script>
+</body>
+</html>
