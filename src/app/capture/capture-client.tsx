@@ -58,7 +58,8 @@ export function CaptureClient() {
 
   async function submitText(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
 
     try {
       const result = await postJson("/api/capture/text", {
@@ -68,7 +69,7 @@ export function CaptureClient() {
         status: "success",
         message: `已创建待确认事件：${String(result.id)}`,
       });
-      event.currentTarget.reset();
+      formElement.reset();
     } catch (error) {
       setTextState({
         status: "error",
@@ -79,7 +80,8 @@ export function CaptureClient() {
 
   async function submitImage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const imageFile = form.get("imageFile");
 
     if (!(imageFile instanceof File) || !imageFile.name) {
@@ -127,7 +129,7 @@ export function CaptureClient() {
         }),
       });
       setSelectedImagePreview(null);
-      event.currentTarget.reset();
+      formElement.reset();
     } catch (error) {
       setImageState({
         status: "error",

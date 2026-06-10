@@ -85,7 +85,8 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
 
   async function create(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const form = new FormData(event.currentTarget);
+    const formElement = event.currentTarget;
+    const form = new FormData(formElement);
     const description = String(form.get("description") ?? "").trim();
 
     if (!description) {
@@ -109,7 +110,7 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
         setTasks((current) => [task, ...current]);
       }
       setMessage({ tone: "success", text: "任务已创建。" });
-      event.currentTarget.reset();
+      formElement.reset();
     } catch (error) {
       setMessage({
         tone: "error",
