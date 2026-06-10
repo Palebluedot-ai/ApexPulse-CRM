@@ -192,6 +192,15 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
 .mini-task{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px dashed var(--line);font-size:13.5px}
 .mini-task:last-child{border:0}
 .mini-task input{width:17px;height:17px;accent-color:var(--tea)}
+.mini-task.done{opacity:.5}
+.mini-task.done span{text-decoration:line-through}
+.fold{font-size:12.5px;color:var(--ink-soft);cursor:pointer;padding:8px 0 2px;font-weight:700}
+.fold:hover{color:var(--tea)}
+/* 时间线 AI 分析展开 */
+.tl-ai{margin-top:8px;background:var(--paper);border:1px solid var(--line);border-radius:12px;padding:11px 13px;font-size:12.5px;line-height:1.7}
+.tl-ai .tag{display:inline-block;background:var(--ok-bg);color:var(--tea-deep);border-radius:999px;padding:2px 10px;font-size:11px;font-weight:700;margin-bottom:6px}
+.tl-ai .row b{color:var(--ink-soft);font-weight:500}
+.tl-ai .src{margin-top:7px;padding-top:7px;border-top:1px dashed var(--line);color:var(--tea);font-weight:700;font-size:12px;cursor:pointer}
 .brief{font-size:13px;line-height:1.75;color:var(--ink);background:linear-gradient(120deg,#fff8ea,#fdf2dd);border-radius:14px;padding:14px 16px;border:1px solid var(--line)}
 .brief b{color:var(--tea-deep)}
 
@@ -279,6 +288,7 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
         <div class="annos">
           <div class="anno"><b>从"门户"改成"日程"</b><p>现在首页是 5 个入口链接。改成行动清单:逾期置顶 + 今日任务 + 待确认计数,打开就知道干什么。</p></div>
           <div class="anno"><b>勾选即完成</b><p>任务直接在首页打勾完成,不用跳任务页。</p></div>
+          <div class="anno"><b>手机周报入口在这里</b><p>周报不占底部 Tab 位(每周看一次,不配常驻)。手机从今日页"本周"卡右上"看周报 →"进入。</p></div>
         </div>
       </div>
       <aside class="phone-col">
@@ -298,7 +308,7 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
                 <span class="num" style="font-size:24px;color:var(--persimmon)">3</span>
                 <span>条已提取完<br><span class="muted">点击进入轻审查</span></span><span style="margin-left:auto;color:var(--tea)">→</span>
               </div>
-              <p class="ph-sec">本周</p>
+              <p class="ph-sec" style="display:flex;align-items:center">本周<span style="margin-left:auto;color:var(--tea);letter-spacing:0;font-size:11px">看周报 →</span></p>
               <div class="ph-card-s" style="display:flex;gap:18px;justify-content:space-around;text-align:center">
                 <span><span class="num" style="font-size:20px;color:var(--tea-deep)">12</span><br><span class="muted" style="font-size:10.5px">跟进</span></span>
                 <span><span class="num" style="font-size:20px;color:var(--tea-deep)">3</span><br><span class="muted" style="font-size:10.5px">新客户</span></span>
@@ -385,6 +395,7 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
         <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.hashkey.dev / 待确认</span></div>
         <div class="bview">
           <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a class="cur">待确认<span class="badge">3</span></a><a>客户</a><a>任务</a><a>周报</a><span class="cta">+ 录入</span></div>
+          <p class="kbd" style="margin:-6px 0 12px"><b>Y</b> 确认 <b>E</b> 修改 <b>S</b> 跳过 — 提示只在页头出现一次，不重复挂在每张卡上</p>
           <div class="dcard">
             <div class="dcard-main">
               <div class="thumb"><div class="fc"><i></i><i></i><i></i></div></div>
@@ -400,7 +411,6 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
             <div class="dactions">
               <button class="btn btn-tea">✓ 确认入库</button><button class="btn btn-ghost">✎ 修改</button>
               <button class="btn" style="background:none;color:var(--ink-soft)">跳过</button>
-              <span class="kbd"><b>Y</b> 确认 <b>E</b> 修改 <b>S</b> 跳过</span>
             </div>
           </div>
         </div></div>
@@ -528,9 +538,18 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
             <div class="card">
               <h3 style="font-size:14px;margin-bottom:4px">沟通时间线</h3>
               <div class="tl">
-                <div class="tl-item"><span class="d">6/08</span><span class="evi"></span><span>聊 USDT 出金量级,月 500-800K,关心合规路径。<br><span class="muted" style="font-size:11.5px">截图证据 · AI 提取 · 已确认</span></span></div>
-                <div class="tl-item"><span class="d">6/05</span><span class="evi" style="background:var(--paper-deep)"></span><span>王姐拉群介绍,初步寒暄。<br><span class="muted" style="font-size:11.5px">文字备注</span></span></div>
-                <div class="tl-item"><span class="d">6/03</span><span class="evi"></span><span>名片:辰光矿业贸易 陈总。<br><span class="muted" style="font-size:11.5px">名片照片</span></span></div>
+                <div class="tl-item"><span class="d">6/08</span><span class="evi"></span>
+                  <span style="flex:1">聊 USDT 出金量级,月 500-800K,关心合规路径。<br><span class="muted" style="font-size:11.5px">截图证据 · AI 提取 · 已确认 · <b style="color:var(--tea);cursor:pointer">▾ 收起分析</b></span>
+                    <span class="tl-ai" style="display:block">
+                      <span class="tag">USDT 大额出金合规通道</span><br>
+                      陈总核心诉求是 USDT 大额出金的合规通道,月量 500-800K,对路径合规性敏感,多次追问监管口径。<br>
+                      <span class="row"><b>跟进建议:</b>给出初版合规方案,约电话过细节</span><br>
+                      <span class="row"><b>需要确认:</b>出金币种比例;资金来源证明材料</span>
+                      <span class="src">▸ 查看原始截图依据</span>
+                    </span>
+                  </span></div>
+                <div class="tl-item"><span class="d">6/05</span><span class="evi" style="background:var(--paper-deep)"></span><span>王姐拉群介绍,初步寒暄。<br><span class="muted" style="font-size:11.5px">文字备注 · <b style="color:var(--tea);cursor:pointer">▸ 展开 AI 分析</b></span></span></div>
+                <div class="tl-item"><span class="d">6/03</span><span class="evi"></span><span>名片:辰光矿业贸易 陈总。<br><span class="muted" style="font-size:11.5px">名片照片 · <b style="color:var(--tea);cursor:pointer">▸ 展开 AI 分析</b></span></span></div>
               </div>
             </div>
             <div style="display:flex;flex-direction:column;gap:14px">
@@ -538,6 +557,8 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
                 <h3 style="font-size:14px;margin-bottom:2px">待办 <span class="num" style="color:var(--persimmon)">2</span></h3>
                 <div class="mini-task"><input type="checkbox"><span>发 USDT 出金合规方案 <b style="color:var(--red);font-size:11.5px">逾期</b></span></div>
                 <div class="mini-task"><input type="checkbox"><span>约下次电话(本周)</span></div>
+                <div class="fold">▾ 已完成 1 条</div>
+                <div class="mini-task done"><input type="checkbox" checked><span>回复王姐群消息 <span class="muted" style="font-size:11px">6/09</span></span></div>
               </div>
               <div class="brief"><b>Morning Brief</b> · 陈总是王姐介绍的矿机贸易商,核心诉求是 USDT 大额出金的合规通道,月量 500-800K。当前卡在我方方案未给,已逾期,信任窗口在缩小。建议今天给出初版方案并约电话。</div>
             </div>
@@ -545,7 +566,8 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
         </div></div>
         <div class="annos">
           <div class="anno"><b>警示条置顶</b><p>逾期/今天到期直接横幅,主按钮就在横幅里。健康客户显示"状态健康,记录新进展"。</p></div>
-          <div class="anno"><b>时间线带证据缩略图</b><p>每条沟通挂原始截图缩略,点开大图。证据链 = OTC 合规刚需。</p></div>
+          <div class="anno"><b>时间线条目可展开 AI 分析</b><p>默认折叠一句话摘要;点开看完整分析:主题标签 + 业务分析 + 跟进建议 + 需要确认 + 原始截图依据。桌面手机同构。</p></div>
+          <div class="anno"><b>已完成待办进折叠区</b><p>勾掉的待办划线后收进"▸ 已完成"折叠区,随时可翻,不挤当前视野。</p></div>
         </div>
       </div>
       <aside class="phone-col">
@@ -561,10 +583,21 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
               </div>
               <p class="ph-sec">待办 2</p>
               <div class="ph-card-s"><div class="mini-task" style="border:0;padding:2px 0"><input type="checkbox"><span style="font-size:12.5px">发出金合规方案 <b style="color:var(--red);font-size:10.5px">逾期</b></span></div>
-              <div class="mini-task" style="border:0;padding:2px 0"><input type="checkbox"><span style="font-size:12.5px">约下次电话</span></div></div>
+              <div class="mini-task" style="border:0;padding:2px 0"><input type="checkbox"><span style="font-size:12.5px">约下次电话</span></div>
+              <div class="fold" style="font-size:11px;padding:5px 0 1px">▾ 已完成 1 条</div>
+              <div class="mini-task done" style="border:0;padding:2px 0"><input type="checkbox" checked><span style="font-size:12px">回复王姐群消息</span></div></div>
               <p class="ph-sec">时间线</p>
-              <div class="ph-card-s" style="display:flex;gap:9px"><span class="evi" style="width:30px;height:30px;border-radius:7px;background:linear-gradient(160deg,#e8f0e9,#d8e4d6);flex:none"></span><span style="font-size:12px">6/08 · 聊出金量级 500-800K/月</span></div>
-              <div class="ph-card-s" style="margin-top:7px;font-size:12px">6/05 · 王姐拉群介绍</div>
+              <div class="ph-card-s">
+                <div style="display:flex;gap:9px"><span class="evi" style="width:30px;height:30px;border-radius:7px;background:linear-gradient(160deg,#e8f0e9,#d8e4d6);flex:none"></span><span style="font-size:12px">6/08 · 聊出金量级 500-800K/月<br><span class="muted" style="font-size:10.5px;color:var(--tea);font-weight:700">▾ 收起分析</span></span></div>
+                <div class="tl-ai" style="font-size:11.5px;padding:9px 11px">
+                  <span class="tag" style="font-size:10px">USDT 出金合规通道</span><br>
+                  核心诉求是大额出金合规通道,对路径合规性敏感。<br>
+                  <span class="row"><b>跟进建议:</b>给初版方案,约电话</span><br>
+                  <span class="row"><b>需要确认:</b>币种比例;资金来源证明</span>
+                  <span class="src" style="font-size:11px">▸ 查看原始截图</span>
+                </div>
+              </div>
+              <div class="ph-card-s" style="margin-top:7px;font-size:12px">6/05 · 王姐拉群介绍<br><span class="muted" style="font-size:10.5px;color:var(--tea);font-weight:700">▸ 点开看 AI 分析</span></div>
             </div>
             <div class="ph-sticky-cta"><div class="ph-bigbtn">✓ 今天处理</div></div>
             <div class="tabbar">
@@ -594,13 +627,15 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
             <div class="trow"><input type="checkbox"><span class="txt">发开户材料清单</span><span class="cust">刘总</span><span class="due">周五 6/13</span></div>
             <div class="trow"><input type="checkbox"><span class="txt">约 Florian 开户沟通</span><span class="cust">Florian</span><span class="due">下周二 6/17</span></div>
           </div>
-          <div class="tgroup"><h4>已完成 · 今天</h4>
-            <div class="trow done-t"><input type="checkbox" checked><span class="txt">回复王姐群消息</span><span class="cust">陈总</span><span class="due">14:20</span></div>
+          <div class="tgroup"><h4>已完成 <span class="muted" style="letter-spacing:0;font-weight:400">· 保留 3 天后自动清空</span></h4>
+            <div class="trow done-t"><input type="checkbox" checked><span class="txt">回复王姐群消息</span><span class="cust">陈总</span><span class="due">今天 14:20</span></div>
+            <div class="trow done-t"><input type="checkbox" checked><span class="txt">确认 Florian 开户时间</span><span class="cust">Florian</span><span class="due">昨天 · 还剩 2 天</span></div>
           </div>
         </div></div>
         <div class="annos">
           <div class="anno"><b>表单 → 单行输入</b><p>现在建任务要填 4 个字段的表单。改成一句话输入,AI 解析客户名和时间(复用提取管线),回车即建。</p></div>
-          <div class="anno"><b>按紧迫分组</b><p>逾期/今天 > 本周 > 以后,完成的折到底部,焦点永远在最该干的。</p></div>
+          <div class="anno"><b>点勾立即完成</b><p>勾选瞬间划线沉到"已完成"组,不弹确认。点错再勾回来即可恢复。</p></div>
+          <div class="anno"><b>已完成保留 3 天</b><p>完成的任务保留 3 天可见(反悔/回查窗口),之后自动从列表清掉。数据库不删,客户详情时间线仍可追溯。</p></div>
         </div>
       </div>
       <aside class="phone-col">
@@ -615,6 +650,8 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
               <div class="ph-card-s" style="display:flex;gap:9px;align-items:center;margin-top:7px"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--tea)"><span style="font-size:12.5px">BTC 大宗报价单<br><span class="muted" style="font-size:10.5px">Amy Wong · 今天</span></span></div>
               <p class="ph-sec">本周</p>
               <div class="ph-card-s" style="display:flex;gap:9px;align-items:center"><input type="checkbox" style="width:18px;height:18px;accent-color:var(--tea)"><span style="font-size:12.5px">发开户材料清单<br><span class="muted" style="font-size:10.5px">刘总 · 周五</span></span></div>
+              <p class="ph-sec">已完成 <span style="letter-spacing:0;font-weight:400">· 保留 3 天</span></p>
+              <div class="ph-card-s" style="display:flex;gap:9px;align-items:center;opacity:.5"><input type="checkbox" checked style="width:18px;height:18px;accent-color:var(--tea)"><span style="font-size:12.5px;text-decoration:line-through">回复王姐群消息<br><span class="muted" style="font-size:10.5px">陈总 · 今天 14:20</span></span></div>
             </div>
             <div class="ph-sticky-cta"><div class="search" style="font-size:12px;padding:11px 14px">＋ 一句话建任务…</div></div>
             <div class="tabbar">
@@ -669,7 +706,7 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
         <div class="phone"><div class="screen">
           <div class="notch"><i></i></div>
           <div class="ph-body">
-            <div class="ph-h">周报 <span class="muted" style="font-size:12px">W24</span></div>
+            <div class="ph-h"><span style="font-size:15px;color:var(--ink-soft)">←</span> 周报 <span class="muted" style="font-size:12px">W24</span></div>
             <div class="ph-scroll" style="margin-top:6px">
               <div class="ph-card-s" style="display:flex;justify-content:space-around;text-align:center">
                 <span><span class="num" style="font-size:22px;color:var(--tea-deep)">8</span><br><span class="muted" style="font-size:10px">触达</span></span>

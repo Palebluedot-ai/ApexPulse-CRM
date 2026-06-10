@@ -237,7 +237,8 @@ body::before{
   <header class="masthead">
     <div>
       <h1>待确认 <em>·</em> 轻审查</h1>
-      <p class="sub">AI 已自动提取并预归类，你只需要：扫一眼 → 确认。改和跳过是例外，不是日常。</p>
+      <p class="sub">AI 已自动提取并预归类，你只需要：扫一眼 → 确认。改和跳过是例外，不是日常。
+        <span class="kbd-hint" style="margin-left:14px"><kbd>Y</kbd>确认<kbd>E</kbd>修改<kbd>S</kbd>跳过</span></p>
     </div>
     <div style="display:flex;align-items:center;gap:12px">
       <button class="filter-pill">⚲ 筛选</button>
@@ -277,7 +278,6 @@ body::before{
             <button class="btn btn-confirm" onclick="confirmCard(this)">✓ 确认入库</button>
             <button class="btn btn-ghost" onclick="toggleEdit(this)">✎ 修改</button>
             <button class="btn btn-skip" onclick="confirmCard(this,true)">跳过</button>
-            <span class="kbd-hint"><kbd>Y</kbd>确认<kbd>E</kbd>修改<kbd>S</kbd>跳过</span>
           </div>
           <div class="editor">
             <div class="grid">
@@ -314,7 +314,6 @@ body::before{
             <button class="btn btn-confirm" onclick="confirmCard(this)">✓ 确认入库</button>
             <button class="btn btn-ghost" onclick="toggleEdit(this)">✎ 修改</button>
             <button class="btn btn-skip" onclick="confirmCard(this,true)">跳过</button>
-            <span class="kbd-hint"><kbd>Y</kbd>确认<kbd>E</kbd>修改<kbd>S</kbd>跳过</span>
           </div>
           <div class="editor">
             <div class="grid">
