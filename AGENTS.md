@@ -56,15 +56,15 @@
 - Avoid corporate jargon.
 - Prefer concrete tradeoffs over vague reassurance.
 
-## Snapshot Status (updated on 2026-06-02)
+## Snapshot Status (updated on 2026-06-11)
 
-- 全面 review 完成：M1.23D 已落地，进入 M1.23E（真实云端部署 + C1 手机真实使用）。
-- 新建核心路径图：context/31_M1_23E_首次云端部署与C1验收路径.md（自包含，含 full picture、TDD 步骤、Chao 确认）。
-- 发现并纳入路径：vision-extract 不支持 supabase-images/（必须在 E 中 TDD 修复）。
-- Chao 确认：立即真实部署、vision 云端支持优先、C1 标准=checklist+“愿意继续每天用”、暂不加 PWA icons、聚焦部署与基础闭环。
-- Snapshot 文件：docs/snapshots/2026-06-02-230914.md（按 snapshot skill 结构，中文）。
-- system log：context/system_logs/2026-06-02_M1_23E_Review与路径图.md。
-- 00_文档总览.md 已更新指向 31_ 作为最新。
-- 下一步：按 31_ 执行 Step 0 基线 + Step 1 TDD 修 vision（先测试后代码），所有变更必须 pnpm check + build 通过。
-- 参考：docs/snapshots/2026-06-02-230914.md + context/31_ + context/00_文档总览.md。
-- 规则不变：任何产品边界变更必须停下问 Chao；TDD 铁律保留于业务规则。
+- 当前阶段：M1.23E 真实云端部署验证中，Vercel 项目已 import GitHub，生产主域名为 `https://apex-pulse-crm.vercel.app`。
+- staging 环境变量检查已通过：`pnpm env:check staging` 缺失项为 none，warning 为 none。
+- Supabase 数据库连接已通过：`pnpm db:check` 能连接到 `postgres/public`，`DATABASE_PREPARE=false` 已生效。
+- 当前核心阻塞：Supabase 业务表尚未创建，缺少 `users`、`parties`、`events`、`attachments`、`tasks`。
+- 代码健康：`pnpm check` 通过，32 个测试文件、156 个测试通过；`pnpm build` 在非沙盒环境通过。
+- 新 snapshot 文件：`docs/snapshots/2026-06-11-003610.md`。
+- 新 system log：`context/system_logs/2026-06-11_M1_23E_VercelSupabase环境验证.md`。
+- 下一步必须先由 Chao 确认是否允许执行 `pnpm db:migrate`；这是写入 Supabase 数据库结构的动作，但不是 drop table，也不是删除数据。
+- migration 后继续执行 `pnpm db:check`、`pnpm check`，再进入手机端 C1 闭环测试。
+- 规则不变：不要提交真实 key、真实数据库密码、真实截图；任何 drop table、删除数据、重做 migration 都必须暂停确认。
