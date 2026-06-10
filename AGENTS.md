@@ -34,6 +34,8 @@
 - It is forbidden to work in this repository without reading `CONTRIBUTING.md`.
 - It is forbidden to skip the collaboration rules because a task looks small.
 - It is forbidden to commit directly to `main` for new work. Use a branch and PR unless Chao explicitly says otherwise.
+- Commits inside a feature branch do not require review one by one; review is required when merging the branch into `main`.
+- Product branches should represent one verifiable user-value loop, not random file groups or long-running catch-all work.
 - It is forbidden to merge, revert, reset, or force-push shared history without understanding the current branch state and Chao's intent.
 - Chao as Administrator may use emergency bypass, but collaborators and AI agents must not treat that as permission to bypass PR review.
 - This project is entering first-time two-person collaboration.
