@@ -6,47 +6,65 @@ import {
   listCustomerListItems,
   sortCustomerListItems,
   type CustomerFollowupFilter,
+  type CustomerListItem,
   type CustomerSort,
 } from "@/server/customers/customer-dashboard";
 
 export const dynamic = "force-dynamic";
-
-const followupLabels = {
-  up_to_date: "已跟进",
-  due_soon: "即将跟进",
-  overdue: "已逾期",
-  unknown: "未分层",
-};
 
 const followupFilters: Array<{
   label: string;
   value: CustomerFollowupFilter;
 }> = [
   { label: "全部", value: "all" },
-  { label: "最近跟进", value: "up_to_date" },
-  { label: "即将跟进", value: "due_soon" },
-  { label: "已逾期", value: "overdue" },
-  { label: "未分层", value: "unknown" },
+  { label: "逾期", value: "overdue" },
+  { label: "临近", value: "due_soon" },
+  { label: "健康", value: "up_to_date" },
+  { label: "沉睡", value: "unknown" },
 ];
 
 const sortOptions: Array<{ label: string; value: CustomerSort }> = [
+  { label: "按该跟进程度", value: "attention" },
   { label: "按上次跟进时间", value: "last_contact_desc" },
   { label: "按下次跟进时间", value: "next_followup_asc" },
   { label: "按客户名", value: "name_asc" },
 ];
 
-function formatDate(date: Date | null): string {
-  if (!date) return "暂无记录";
-  return new Intl.DateTimeFormat("zh-HK", {
-    month: "short",
-    day: "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
+const dotClasses: Record<CustomerListItem["followupStatus"], string> = {
+  overdue: "bg-[var(--red-status)]",
+  due_soon: "bg-[var(--gold)]",
+  up_to_date: "bg-[#5d9b7c]",
+  unknown: "bg-[#cbc2af]",
+};
+
+function lastContactLabel(customer: CustomerListItem, now: Date): {
+  text: string;
+  alarming: boolean;
+} {
+  const dayMs = 86400000;
+
+  if (customer.followupStatus === "overdue" && customer.nextFollowupAt) {
+    const days = Math.max(
+      1,
+      Math.floor((now.getTime() - customer.nextFollowupAt.getTime()) / dayMs),
+    );
+    return { text: `逾期 ${days} 天`, alarming: true };
+  }
+
+  if (!customer.lastContactAt) {
+    return { text: "还没有确认沟通", alarming: false };
+  }
+
+  const days = Math.floor(
+    (now.getTime() - customer.lastContactAt.getTime()) / dayMs,
+  );
+  if (days <= 0) return { text: "今天沟通过", alarming: false };
+  if (days >= 21) return { text: `${days} 天无动静`, alarming: false };
+  return { text: `${days} 天前沟通`, alarming: false };
 }
 
 function searchParam(value: string | string[] | undefined): string {
-  return Array.isArray(value) ? value[0] ?? "" : value ?? "";
+  return Array.isArray(value) ? (value[0] ?? "") : (value ?? "");
 }
 
 function parseFollowupFilter(value: string): CustomerFollowupFilter {
@@ -58,7 +76,7 @@ function parseFollowupFilter(value: string): CustomerFollowupFilter {
 function parseSort(value: string): CustomerSort {
   return sortOptions.some((option) => option.value === value)
     ? (value as CustomerSort)
-    : "last_contact_desc";
+    : "attention";
 }
 
 function customerFilterHref(input: {
@@ -69,7 +87,7 @@ function customerFilterHref(input: {
   const params = new URLSearchParams();
   if (input.query) params.set("q", input.query);
   if (input.followupStatus !== "all") params.set("status", input.followupStatus);
-  if (input.sort !== "last_contact_desc") params.set("sort", input.sort);
+  if (input.sort !== "attention") params.set("sort", input.sort);
   const queryString = params.toString();
 
   return queryString ? `/customers?${queryString}` : "/customers";
@@ -95,180 +113,142 @@ export default async function CustomersPage({
       filterCustomerListItems(customers, { query, followupStatus }),
       sort,
     );
+    const now = new Date();
+
+    const filterCounts: Partial<Record<CustomerFollowupFilter, number>> = {
+      all: stats.total,
+      overdue: stats.overdue,
+      due_soon: stats.dueSoon,
+      unknown: stats.unknown,
+    };
 
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-8 sm:px-8 lg:px-10">
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-3 w-fit rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]">
-              M1 · 客户跟进驾驶舱
-            </p>
-            <h1 className="font-[var(--font-display)] text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
-              客户列表
-            </h1>
-          </div>
-          <Link
-            className="w-fit rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
-            href="/"
-          >
-            返回首页
-          </Link>
+      <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
+        <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+            客户
+          </h1>
+          <p className="text-xs text-[var(--ink-soft)]">
+            <span className="mr-3">
+              <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[var(--red-status)]" />
+              逾期
+            </span>
+            <span className="mr-3">
+              <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[var(--gold)]" />
+              临近
+            </span>
+            <span className="mr-3">
+              <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#5d9b7c]" />
+              健康
+            </span>
+            <span>
+              <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#cbc2af]" />
+              沉睡
+            </span>
+          </p>
         </header>
 
-        <section className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          <div className="rounded-[1.35rem] border border-[var(--line)] bg-white/58 p-4 shadow-[0_12px_40px_rgba(25,23,20,0.06)]">
-            <p className="text-4xl font-semibold tracking-[-0.04em]">
-              {stats.total}
-            </p>
-            <p className="mt-1 text-sm font-semibold text-[var(--muted)]">
-              客户 / 临时客户
-            </p>
-          </div>
-          <div className="rounded-[1.35rem] border border-[var(--line)] bg-white/58 p-4 shadow-[0_12px_40px_rgba(25,23,20,0.06)]">
-            <p className="text-4xl font-semibold tracking-[-0.04em]">
-              {stats.dueSoon}
-            </p>
-            <p className="mt-1 text-sm font-semibold text-[var(--muted)]">
-              即将跟进
-            </p>
-          </div>
-          <div className="rounded-[1.35rem] border border-[var(--line)] bg-white/58 p-4 shadow-[0_12px_40px_rgba(25,23,20,0.06)]">
-            <p className="text-4xl font-semibold tracking-[-0.04em]">
-              {stats.overdue}
-            </p>
-            <p className="mt-1 text-sm font-semibold text-[var(--muted)]">
-              已逾期
-            </p>
-          </div>
-          <div className="rounded-[1.35rem] border border-[var(--line)] bg-white/58 p-4 shadow-[0_12px_40px_rgba(25,23,20,0.06)]">
-            <p className="text-4xl font-semibold tracking-[-0.04em]">
-              {stats.unknown}
-            </p>
-            <p className="mt-1 text-sm font-semibold text-[var(--muted)]">
-              未分层
-            </p>
-          </div>
-        </section>
+        <form
+          action="/customers"
+          className="mb-3 flex flex-wrap items-center gap-2"
+        >
+          <input
+            className="min-h-11 min-w-0 flex-1 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)]"
+            defaultValue={query}
+            name="q"
+            placeholder="⌕ 搜客户名 / 公司 / 需求 / 标签"
+          />
+          <select
+            className="min-h-11 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-3 text-sm font-semibold outline-none focus:border-[var(--tea)]"
+            defaultValue={sort}
+            name="sort"
+          >
+            {sortOptions.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+          {followupStatus !== "all" ? (
+            <input name="status" type="hidden" value={followupStatus} />
+          ) : null}
+          <button
+            className="min-h-11 rounded-full bg-[var(--tea)] px-5 text-sm font-bold text-[#fdfbf4]"
+            type="submit"
+          >
+            搜索
+          </button>
+        </form>
 
-        <section className="mb-5 rounded-[1.5rem] border border-[var(--line)] bg-[rgba(255,250,240,0.78)] p-4 shadow-[0_18px_54px_rgba(25,23,20,0.08)]">
-          <form className="grid gap-3 lg:grid-cols-[1fr_16rem_auto]" action="/customers">
-            <input
-              className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 text-base outline-none focus:border-[var(--accent)]"
-              defaultValue={query}
-              name="q"
-              placeholder="搜索客户 / 公司 / 来源 / 标签 / 摘要"
-            />
-            <select
-              className="min-h-12 rounded-2xl border border-[var(--line)] bg-white/65 px-4 text-base font-semibold outline-none focus:border-[var(--accent)]"
-              defaultValue={sort}
-              name="sort"
-            >
-              {sortOptions.map((option) => (
-                <option key={option.value} value={option.value}>
-                  {option.label}
-                </option>
-              ))}
-            </select>
-            <button
-              className="min-h-12 rounded-2xl bg-[var(--foreground)] px-5 text-sm font-semibold text-[var(--panel)]"
-              type="submit"
-            >
-              搜索 / 排序
-            </button>
-          </form>
+        <div className="mb-5 inline-flex flex-wrap gap-1 rounded-full bg-[var(--paper-deep)] p-1 text-sm">
+          {followupFilters.map((filter) => {
+            const active = followupStatus === filter.value;
+            const count = filterCounts[filter.value];
+            return (
+              <Link
+                className={
+                  active
+                    ? "rounded-full bg-[var(--card)] px-4 py-1.5 font-bold shadow-[0_2px_8px_rgba(57,47,32,0.1)]"
+                    : "rounded-full px-4 py-1.5 font-medium text-[var(--ink-soft)]"
+                }
+                href={customerFilterHref({
+                  query,
+                  sort,
+                  followupStatus: filter.value,
+                })}
+                key={filter.value}
+              >
+                {filter.label}
+                {typeof count === "number" ? ` ${count}` : ""}
+              </Link>
+            );
+          })}
+        </div>
 
-          <div className="mt-4 flex flex-wrap gap-2">
-            {followupFilters.map((filter) => {
-              const active = followupStatus === filter.value;
-
-              return (
-                <Link
-                  className={
-                    active
-                      ? "rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]"
-                      : "rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--muted)]"
-                  }
-                  href={customerFilterHref({
-                    query,
-                    sort,
-                    followupStatus: filter.value,
-                  })}
-                  key={filter.value}
-                >
-                  {filter.label}
-                </Link>
-              );
-            })}
-          </div>
-        </section>
-
-        <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          {visibleCustomers.map((customer) => (
-            <Link
-              className="group min-h-56 rounded-[1.5rem] border border-[var(--line)] bg-[rgba(255,250,240,0.78)] p-5 shadow-[0_18px_54px_rgba(25,23,20,0.08)] transition hover:-translate-y-0.5 hover:shadow-[0_24px_70px_rgba(25,23,20,0.13)]"
-              href={`/customers/${customer.id}`}
-              key={customer.id}
-            >
-              <div className="flex h-full flex-col">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
-                    <h2 className="truncate text-2xl font-semibold">
-                      {customer.displayName}
-                    </h2>
-                    <p className="mt-2 line-clamp-1 text-sm text-[var(--muted)]">
-                      {customer.companyName ?? "未记录公司"} ·{" "}
-                      {customer.referralSourceTag ?? "未记录来源"}
-                    </p>
-                  </div>
-                  <span className="shrink-0 rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white">
-                    {followupLabels[customer.followupStatus]}
+        <div className="flex flex-col gap-2.5">
+          {visibleCustomers.map((customer) => {
+            const contact = lastContactLabel(customer, now);
+            const sleeping = customer.followupStatus === "unknown";
+            return (
+              <Link
+                className={`grid grid-cols-[auto_1fr_auto] items-center gap-3 rounded-2xl border border-[var(--line-soft)] bg-[var(--card)] px-4 py-3 text-sm transition hover:-translate-y-px hover:shadow-[0_14px_40px_rgba(57,47,32,0.1)] sm:grid-cols-[auto_1.2fr_1fr_1.4fr] ${sleeping ? "opacity-60" : ""}`}
+                href={`/customers/${customer.id}`}
+                key={customer.id}
+              >
+                <span
+                  className={`h-2.5 w-2.5 rounded-full ${dotClasses[customer.followupStatus]}`}
+                />
+                <span className="min-w-0">
+                  <span className="block truncate text-[15px] font-bold">
+                    {customer.displayName}
                   </span>
-                </div>
-
-                <p className="mt-4 line-clamp-3 text-base leading-7">
-                  {customer.lastContactSummary ?? "还没有确认过的沟通摘要。"}
-                </p>
-
-                <div className="mt-auto pt-5">
-                  <div className="grid grid-cols-2 gap-2 text-sm">
-                    <div className="rounded-2xl border border-[var(--line)] bg-white/55 p-3">
-                      <p className="font-semibold text-[var(--muted)]">
-                        最新沟通
-                      </p>
-                      <p className="mt-1 font-semibold">
-                        {formatDate(customer.lastContactAt)}
-                      </p>
-                    </div>
-                    <div className="rounded-2xl border border-[var(--line)] bg-white/55 p-3">
-                      <p className="font-semibold text-[var(--muted)]">
-                        下次跟进
-                      </p>
-                      <p className="mt-1 font-semibold">
-                        {formatDate(customer.nextFollowupAt)}
-                      </p>
-                    </div>
-                  </div>
-
-                  {customer.tags.length > 0 ? (
-                    <div className="mt-3 flex flex-wrap gap-2">
-                      {customer.tags.slice(0, 3).map((tag) => (
-                        <span
-                          className="rounded-full border border-[var(--line)] bg-white/55 px-2.5 py-1 text-xs font-semibold text-[var(--muted)]"
-                          key={tag}
-                        >
-                          {tag}
-                        </span>
-                      ))}
-                    </div>
-                  ) : null}
-                </div>
-              </div>
-            </Link>
-          ))}
-        </section>
+                  <span className="block truncate text-xs text-[var(--ink-soft)]">
+                    {customer.companyName ?? "未记录公司"}
+                    {customer.referralSourceTag
+                      ? ` · ${customer.referralSourceTag}`
+                      : ""}
+                  </span>
+                </span>
+                <span
+                  className={
+                    contact.alarming
+                      ? "whitespace-nowrap text-xs font-bold text-[var(--red-status)]"
+                      : "whitespace-nowrap text-xs text-[var(--ink-soft)]"
+                  }
+                >
+                  {contact.text}
+                </span>
+                <span className="col-span-3 truncate text-xs text-[var(--ink-soft)] sm:col-span-1">
+                  <span className="mr-1 font-semibold">下一步</span>
+                  {customer.lastContactSummary ?? "—— 没有计划"}
+                </span>
+              </Link>
+            );
+          })}
+        </div>
 
         {visibleCustomers.length === 0 ? (
-          <div className="mt-6 rounded-[1.5rem] border border-[var(--line)] bg-white/58 p-6 text-[var(--muted)]">
+          <div className="rounded-2xl border border-[var(--line-soft)] bg-[var(--card)] p-6 text-sm text-[var(--ink-soft)]">
             没有匹配的客户。可以清空搜索或切回“全部”。
           </div>
         ) : null}
