@@ -1,38 +1,55 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createDb } from "@/server/db";
-import { getCustomerFirstScreen } from "@/server/customers/customer-dashboard";
+import {
+  getCustomerFirstScreen,
+  listCustomerTimeline,
+} from "@/server/customers/customer-dashboard";
+import {
+  buildReviewAiFields,
+  buildReviewNaturalFields,
+} from "@/lib/review-form";
+import { classifyTaskUrgency } from "@/lib/task-grouping";
+import {
+  CustomerTimeline,
+  CustomerTodos,
+  type DoneTodoView,
+  type TimelineEntryView,
+  type TodoView,
+} from "./detail-client";
 
 export const dynamic = "force-dynamic";
 
-const followupLabels = {
-  up_to_date: "已跟进",
-  due_soon: "即将跟进",
-  overdue: "已逾期",
-  unknown: "未分层",
+const contentTypeLabels: Record<string, string> = {
+  image: "截图",
+  text: "文字备注",
+  card_photo: "名片照片",
 };
 
-const taskTypeLabels = {
-  commitment: "承诺",
-  reminder: "提醒",
-  followup: "跟进",
-};
-
-const urgencyStyles = {
-  overdue: "bg-[#b42318] text-white",
-  due_soon: "bg-[var(--accent)] text-white",
-  healthy: "bg-[#254f3c] text-white",
-  missing: "bg-[#8a5a18] text-white",
+const alertStyles = {
+  overdue:
+    "border-[rgba(194,69,45,0.3)] bg-[rgba(194,69,45,0.06)] text-[var(--red-status)]",
+  due_soon:
+    "border-[rgba(185,138,47,0.35)] bg-[rgba(185,138,47,0.08)] text-[var(--gold)]",
+  missing:
+    "border-[var(--line-soft)] bg-[var(--paper-deep)] text-[var(--ink-soft)]",
+  healthy: "border-[rgba(47,93,80,0.3)] bg-[var(--ok-bg)] text-[var(--tea-deep)]",
 };
 
 function formatDateTime(date: Date | null): string {
-  if (!date) return "暂无记录";
+  if (!date) return "未设置";
   return new Intl.DateTimeFormat("zh-HK", {
-    year: "numeric",
     month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
+  }).format(date);
+}
+
+function formatDay(date: Date): string {
+  return new Intl.DateTimeFormat("zh-HK", {
+    month: "numeric",
+    day: "numeric",
   }).format(date);
 }
 
@@ -45,273 +62,144 @@ export default async function CustomerDetailPage({
   const { client, db } = createDb();
 
   try {
-    const firstScreen = await getCustomerFirstScreen(db, id);
+    const [firstScreen, timeline] = await Promise.all([
+      getCustomerFirstScreen(db, id),
+      listCustomerTimeline(db, id),
+    ]);
     if (!firstScreen) notFound();
 
-    const {
-      actionPanel,
-      customer,
-      latestCommunication,
-      morningBrief,
-      openTasks,
-    } =
+    const { actionPanel, customer, morningBrief, openTasks, recentDoneTasks } =
       firstScreen;
+    const now = new Date();
+
+    const timelineViews: TimelineEntryView[] = timeline.map((entry) => {
+      const naturalFields = buildReviewNaturalFields(entry.extractedFields);
+      const aiFields = buildReviewAiFields(entry.extractedFields);
+      const happenedAt = entry.occurredAt ?? entry.capturedAt;
+      return {
+        eventId: entry.eventId,
+        dateLabel: formatDay(happenedAt),
+        summary: entry.summary,
+        metaLabel: `${contentTypeLabels[entry.contentType] ?? entry.contentType} · ${formatDateTime(happenedAt)}`,
+        rawText: entry.rawText,
+        thumbnailUrl:
+          entry.attachments.find((attachment) => attachment.previewUrl)
+            ?.previewUrl ?? null,
+        analysis: {
+          topic: naturalFields.needSummary || null,
+          advice: naturalFields.nextAction || null,
+          evidence: aiFields.evidenceNotes || null,
+        },
+      };
+    });
+
+    const todoViews: TodoView[] = openTasks.map((task) => ({
+      id: task.id,
+      description: task.description,
+      dueLabel: task.dueAt ? formatDateTime(task.dueAt) : null,
+      overdue: classifyTaskUrgency(task.dueAt, now) === "overdue",
+    }));
+    const doneTodoViews: DoneTodoView[] = recentDoneTasks.map((task) => ({
+      id: task.id,
+      description: task.description,
+      completedLabel: task.completedAt ? formatDay(task.completedAt) : "",
+    }));
+
+    const card =
+      "rounded-[1.4rem] border border-[var(--line-soft)] bg-[var(--card)] p-5 shadow-[0_14px_40px_rgba(57,47,32,0.08)]";
 
     return (
-      <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-8 sm:px-8 lg:px-10">
-        <nav className="mb-6 flex flex-wrap items-center justify-between gap-3">
-          <Link
-            className="text-sm font-semibold text-[var(--accent-strong)]"
-            href="/customers"
-          >
-            ← 返回客户列表
-          </Link>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              className="rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]"
-              href="/capture"
-            >
-              新增录入
-            </Link>
-            <Link
-              className="rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]"
-              href="/review"
-            >
-              待确认
-            </Link>
-            <Link
-              className="rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]"
-              href="/tasks"
-            >
-              任务
-            </Link>
-          </div>
-        </nav>
+      <main className="mx-auto w-full max-w-5xl px-5 py-7 sm:px-8">
+        <Link
+          className="text-sm font-semibold text-[var(--ink-soft)] hover:text-[var(--tea)]"
+          href="/customers"
+        >
+          ← 返回客户
+        </Link>
 
-        <section className="grid gap-5 lg:grid-cols-[0.86fr_1.14fr]">
-          <section className="rounded-[2rem] border border-[var(--line)] bg-[rgba(255,250,240,0.86)] p-6 shadow-[0_24px_80px_rgba(25,23,20,0.12)]">
-            <div className="flex flex-wrap items-start justify-between gap-3">
-              <div>
-                <p className="mb-4 w-fit rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]">
-                  {followupLabels[customer.followupStatus]}
-                </p>
-                <h1 className="font-[var(--font-display)] text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
-                  {customer.displayName}
-                </h1>
-                <p className="mt-3 text-lg text-[var(--muted)]">
-                  {customer.companyName ?? "未记录公司"}
-                </p>
-              </div>
-              <span
-                className={`rounded-full px-4 py-2 text-sm font-semibold ${urgencyStyles[actionPanel.urgency]}`}
-              >
-                {actionPanel.headline}
+        <header className="mt-3">
+          <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+            {customer.displayName}
+          </h1>
+          <p className="mt-1.5 text-sm text-[var(--ink-soft)]">
+            {customer.companyName ?? "未记录公司"}
+            {customer.referralSourceTag
+              ? ` · ${customer.referralSourceTag}`
+              : " · 未记录来源"}
+            {customer.statusLabel ? ` · ${customer.statusLabel}` : ""}
+          </p>
+        </header>
+
+        <div
+          className={`mt-4 flex flex-wrap items-center gap-3 rounded-2xl border px-5 py-3.5 ${alertStyles[actionPanel.urgency]}`}
+        >
+          <div className="min-w-0 flex-1">
+            <p className="font-[var(--font-serif-display)] text-[17px] font-bold">
+              {actionPanel.headline}
+            </p>
+            <p className="mt-0.5 text-xs text-[var(--ink-soft)]">
+              {actionPanel.nextTask
+                ? actionPanel.nextTask.description
+                : actionPanel.reason}
+              {actionPanel.nextFollowupAt
+                ? ` · 下次跟进 ${formatDateTime(actionPanel.nextFollowupAt)}`
+                : ""}
+            </p>
+          </div>
+          <Link
+            className="rounded-full bg-[var(--tea)] px-5 py-2.5 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)]"
+            href="/tasks"
+          >
+            {actionPanel.primaryActionLabel}
+          </Link>
+        </div>
+
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.15fr_0.85fr]">
+          <section className={card}>
+            <div className="flex items-baseline justify-between">
+              <h2 className="text-sm font-bold">沟通时间线</h2>
+              <span className="rounded-full border border-[var(--line-soft)] px-2.5 py-0.5 text-xs text-[var(--ink-soft)]">
+                {timelineViews.length} 条
               </span>
             </div>
+            <CustomerTimeline entries={timelineViews} />
+          </section>
 
-            <div className="mt-8 rounded-[1.5rem] bg-[var(--foreground)] p-5 text-[var(--panel)]">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#d6c5a7]">
-                下一步
-              </p>
-              <h2 className="mt-4 text-3xl font-semibold tracking-[-0.03em]">
-                {actionPanel.nextTask?.description ??
-                  "先补一条明确的跟进任务。"}
-              </h2>
-              <p className="mt-3 leading-7 text-[#d6c5a7]">
-                {actionPanel.reason}
-              </p>
-              <div className="mt-5 grid gap-3 sm:grid-cols-2">
-                <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#d6c5a7]">
-                    下次跟进
-                  </p>
-                  <p className="mt-2 text-lg font-semibold">
-                    {formatDateTime(actionPanel.nextFollowupAt)}
-                  </p>
-                </div>
-                <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#d6c5a7]">
-                    未完成任务
-                  </p>
-                  <p className="mt-2 text-lg font-semibold">
-                    {actionPanel.openTaskCount} 条
-                  </p>
-                </div>
-              </div>
-              <Link
-                className="mt-5 inline-flex rounded-full bg-[var(--panel)] px-5 py-3 text-sm font-semibold text-[var(--foreground)]"
-                href="/tasks"
-              >
-                {actionPanel.primaryActionLabel}
-              </Link>
-            </div>
+          <div className="flex flex-col gap-4">
+            <CustomerTodos doneTodos={doneTodoViews} openTodos={todoViews} />
 
-            <div className="mt-5 rounded-[1.5rem] border border-[var(--line)] bg-white/60 p-5">
-              <p className="text-sm font-semibold text-[var(--accent-strong)]">
-                Morning Brief
-              </p>
-              <ul className="mt-3 grid gap-2">
+            <section className="rounded-[1.4rem] border border-[var(--line-soft)] bg-gradient-to-r from-[#fff8ea] to-[#fdf2dd] p-5 text-[13px] leading-relaxed shadow-[0_14px_40px_rgba(57,47,32,0.08)]">
+              <p className="font-bold text-[var(--tea-deep)]">Morning Brief</p>
+              <ul className="mt-2 space-y-1.5">
                 {morningBrief.map((line) => (
-                  <li
-                    className="rounded-2xl border border-[var(--line)] bg-white/65 p-3 leading-7"
-                    key={line}
-                  >
-                    {line}
-                  </li>
+                  <li key={line}>{line}</li>
                 ))}
               </ul>
-            </div>
+            </section>
 
-            <dl className="mt-5 grid gap-3 text-sm sm:grid-cols-3">
-              <div className="rounded-2xl border border-[var(--line)] bg-white/55 p-4">
-                <dt className="font-semibold text-[var(--muted)]">来源</dt>
-                <dd className="mt-1 text-base">
-                  {customer.referralSourceTag ?? "未记录"}
-                </dd>
-              </div>
-              <div className="rounded-2xl border border-[var(--line)] bg-white/55 p-4">
-                <dt className="font-semibold text-[var(--muted)]">最新沟通</dt>
-                <dd className="mt-1 text-base">
-                  {formatDateTime(customer.lastContactAt)}
-                </dd>
-              </div>
-              <div className="rounded-2xl border border-[var(--line)] bg-white/55 p-4">
-                <dt className="font-semibold text-[var(--muted)]">状态标签</dt>
-                <dd className="mt-1 text-base">
-                  {customer.statusLabel ?? "未记录"}
-                </dd>
-              </div>
-            </dl>
-
-            {customer.profileSummary ? (
-              <p className="mt-5 rounded-2xl border border-[var(--line)] bg-white/55 p-4 leading-7 text-[var(--muted)]">
-                {customer.profileSummary}
-              </p>
-            ) : null}
-
-            {customer.tags.length > 0 ? (
-              <div className="mt-5 flex flex-wrap gap-2">
-                {customer.tags.map((tag) => (
-                  <span
-                    className="rounded-full border border-[var(--line)] bg-white/50 px-3 py-1 text-sm"
-                    key={tag}
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            ) : null}
-          </section>
-
-          <section className="grid gap-5">
-            <article className="rounded-[2rem] bg-[var(--foreground)] p-6 text-[var(--panel)] shadow-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#d6c5a7]">
-                最新沟通卡片
-              </p>
-
-              {latestCommunication ? (
-                <div className="mt-6 space-y-5">
-                  <div>
-                    <h2 className="font-[var(--font-display)] text-4xl font-semibold tracking-[-0.03em]">
-                      {latestCommunication.summary}
-                    </h2>
-                    <p className="mt-3 text-sm leading-6 text-[#d6c5a7]">
-                      {formatDateTime(
-                        latestCommunication.occurredAt ??
-                          latestCommunication.capturedAt,
-                      )}{" "}
-                      · {latestCommunication.contentType} ·{" "}
-                      {latestCommunication.sourceChannel}
-                    </p>
-                  </div>
-
-                  {latestCommunication.rawText ? (
-                    <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#d6c5a7]">
-                        原始备注
-                      </p>
-                      <p className="mt-2 leading-7">
-                        {latestCommunication.rawText}
-                      </p>
-                    </div>
-                  ) : null}
-
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.06] p-4">
-                    <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#d6c5a7]">
-                      原始证据
-                    </p>
-                    {latestCommunication.attachments.length > 0 ? (
-                      <ul className="mt-3 space-y-2">
-                        {latestCommunication.attachments.map((attachment) => (
-                          <li
-                            className="rounded-xl bg-white/[0.06] px-3 py-2 text-sm"
-                            key={attachment.id}
-                          >
-                            {attachment.fileName} · {attachment.mimeType}
-                          </li>
-                        ))}
-                      </ul>
-                    ) : (
-                      <p className="mt-2 text-sm text-[#d6c5a7]">
-                        这条沟通没有附件，但事件原文仍然保留。
-                      </p>
-                    )}
-                  </div>
-                </div>
-              ) : (
-                <div className="mt-6 rounded-2xl border border-white/10 bg-white/[0.06] p-5">
-                  <p className="text-lg font-semibold">还没有确认过的沟通。</p>
-                  <p className="mt-2 text-sm leading-6 text-[#d6c5a7]">
-                    后续从截图或文字备注进入 review 队列，确认后这里会显示第一张最新沟通卡片。
+            {customer.profileSummary || customer.tags.length > 0 ? (
+              <section className={card}>
+                {customer.profileSummary ? (
+                  <p className="text-[13px] leading-relaxed text-[var(--ink-soft)]">
+                    {customer.profileSummary}
                   </p>
-                </div>
-              )}
-            </article>
-
-            <article className="rounded-[2rem] border border-[var(--line)] bg-[rgba(255,250,240,0.86)] p-6 shadow-[0_24px_80px_rgba(25,23,20,0.1)]">
-              <div className="flex items-center justify-between gap-3">
-                <div>
-                  <p className="text-sm font-semibold text-[var(--accent-strong)]">
-                    Open Tasks
-                  </p>
-                  <h2 className="mt-1 text-2xl font-semibold">未完成任务</h2>
-                </div>
-                <Link
-                  className="rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]"
-                  href="/tasks"
-                >
-                  管理任务
-                </Link>
-              </div>
-              {openTasks.length > 0 ? (
-                <ul className="mt-5 grid gap-3">
-                  {openTasks.map((task) => (
-                    <li
-                      className="rounded-2xl border border-[var(--line)] bg-white/55 p-4"
-                      key={task.id}
-                    >
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="rounded-full bg-[var(--accent)] px-3 py-1 text-xs font-semibold text-white">
-                          {taskTypeLabels[task.taskType]}
-                        </span>
-                        <span className="text-sm font-semibold text-[var(--muted)]">
-                          {formatDateTime(task.dueAt)}
-                        </span>
-                      </div>
-                      <p className="mt-3 text-lg font-semibold">
-                        {task.description}
-                      </p>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p className="mt-5 rounded-2xl border border-[var(--line)] bg-white/55 p-4 text-[var(--muted)]">
-                  当前没有未完成任务。对于未分层客户，建议先补一条明确下一步。
-                </p>
-              )}
-            </article>
-          </section>
-        </section>
+                ) : null}
+                {customer.tags.length > 0 ? (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {customer.tags.map((tag) => (
+                      <span
+                        className="rounded-full border border-[var(--line-soft)] bg-[var(--paper)] px-2.5 py-0.5 text-xs text-[var(--ink-soft)]"
+                        key={tag}
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                  </div>
+                ) : null}
+              </section>
+            ) : null}
+          </div>
+        </div>
       </main>
     );
   } finally {

@@ -1,4 +1,5 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { isPreviewableImageStorageKey } from "@/lib/storage-keys";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import {
   attachments,
@@ -83,6 +84,12 @@ export interface CustomerActionPanel {
   nextTask: CustomerActionTask | null;
 }
 
+export interface CustomerDoneTask {
+  id: string;
+  description: string;
+  completedAt: Date | null;
+}
+
 export interface CustomerFirstScreen {
   customer: CustomerListItem & {
     handles: Party["handlesJson"];
@@ -92,6 +99,22 @@ export interface CustomerFirstScreen {
   actionPanel: CustomerActionPanel;
   morningBrief: string[];
   openTasks: CustomerActionTask[];
+  recentDoneTasks: CustomerDoneTask[];
+}
+
+export interface CustomerTimelineEntry {
+  eventId: string;
+  summary: string;
+  rawText: string | null;
+  contentType: Event["contentType"];
+  occurredAt: Date | null;
+  capturedAt: Date;
+  extractedFields: Record<string, unknown>;
+  attachments: Array<{
+    id: string;
+    fileName: string;
+    previewUrl: string | null;
+  }>;
 }
 
 export function buildCustomerListItem(party: Party): CustomerListItem {
@@ -364,6 +387,12 @@ export async function getCustomerFirstScreen(
     .from(tasks)
     .where(and(eq(tasks.partyId, customerId), eq(tasks.status, "open")))
     .orderBy(asc(tasks.dueAt), asc(tasks.createdAt));
+  const doneTasks = await db
+    .select()
+    .from(tasks)
+    .where(and(eq(tasks.partyId, customerId), eq(tasks.status, "done")))
+    .orderBy(desc(tasks.completedAt))
+    .limit(5);
   const customer = {
     ...buildCustomerListItem(party),
     handles: party.handlesJson,
@@ -390,5 +419,59 @@ export async function getCustomerFirstScreen(
       actionPanel,
     }),
     openTasks: openTasks.map(buildActionTask),
+    recentDoneTasks: doneTasks.map((task) => ({
+      id: task.id,
+      description: task.description,
+      completedAt: task.completedAt,
+    })),
   };
+}
+
+export async function listCustomerTimeline(
+  db: Db,
+  customerId: string,
+  limit = 20,
+): Promise<CustomerTimelineEntry[]> {
+  const eventRows = await db
+    .select()
+    .from(events)
+    .where(
+      and(eq(events.partyId, customerId), eq(events.reviewStatus, "confirmed")),
+    )
+    .orderBy(sql`coalesce(${events.occurredAt}, ${events.capturedAt}) desc`)
+    .limit(limit);
+
+  const attachmentRows =
+    eventRows.length > 0
+      ? await db
+          .select()
+          .from(attachments)
+          .where(
+            inArray(
+              attachments.eventId,
+              eventRows.map((event) => event.id),
+            ),
+          )
+      : [];
+
+  return eventRows.map((event) => ({
+    eventId: event.id,
+    summary: event.aiSummary ?? event.rawText ?? "暂无摘要",
+    rawText: event.rawText,
+    contentType: event.contentType,
+    occurredAt: event.occurredAt,
+    capturedAt: event.capturedAt,
+    extractedFields: event.extractedFieldsJson,
+    attachments: attachmentRows
+      .filter((attachment) => attachment.eventId === event.id)
+      .map((attachment) => ({
+        id: attachment.id,
+        fileName: attachment.fileName,
+        previewUrl:
+          isPreviewableImageStorageKey(attachment.storageKey) &&
+          attachment.mimeType.startsWith("image/")
+            ? `/api/attachments/${attachment.id}`
+            : null,
+      })),
+  }));
 }
