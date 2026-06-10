@@ -1,7 +1,20 @@
 export type TaskUrgency = "overdue" | "today" | "this_week" | "later" | "none";
 
-function startOfDay(date: Date): Date {
-  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+const CRM_TIME_ZONE = "Asia/Hong_Kong";
+const hongKongDateFormatter = new Intl.DateTimeFormat("en-CA", {
+  timeZone: CRM_TIME_ZONE,
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+function crmDayIndex(date: Date): number {
+  const parts = hongKongDateFormatter.formatToParts(date);
+  const year = Number(parts.find((part) => part.type === "year")?.value);
+  const month = Number(parts.find((part) => part.type === "month")?.value);
+  const day = Number(parts.find((part) => part.type === "day")?.value);
+
+  return Math.floor(Date.UTC(year, month - 1, day) / 86400000);
 }
 
 export function classifyTaskUrgency(
@@ -11,13 +24,11 @@ export function classifyTaskUrgency(
   if (!dueAt) return "none";
 
   const due = typeof dueAt === "string" ? new Date(dueAt) : dueAt;
-  const dayStart = startOfDay(now);
-  const nextDayStart = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
-  const weekEnd = new Date(dayStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const diffDays = crmDayIndex(due) - crmDayIndex(now);
 
-  if (due < dayStart) return "overdue";
-  if (due < nextDayStart) return "today";
-  if (due < weekEnd) return "this_week";
+  if (diffDays < 0) return "overdue";
+  if (diffDays === 0) return "today";
+  if (diffDays < 7) return "this_week";
   return "later";
 }
 
@@ -34,11 +45,7 @@ export function completedRetentionDaysLeft(
 
   const completed =
     typeof completedAt === "string" ? new Date(completedAt) : completedAt;
-  const completedDayStart = startOfDay(completed);
-  const nowDayStart = startOfDay(now);
-  const daysSince = Math.floor(
-    (nowDayStart.getTime() - completedDayStart.getTime()) / 86400000,
-  );
+  const daysSince = crmDayIndex(now) - crmDayIndex(completed);
 
   return Math.max(0, retentionDays - daysSince);
 }
