@@ -28,6 +28,20 @@
 - Use tests first for business rules: follow-up status refresh, task generation, review status transitions, and extraction normalization.
 - Configuration and generated framework boilerplate do not require mechanical TDD, but must still pass lint, typecheck, and tests before being called complete.
 
+## Team Collaboration Rules
+
+- This project is entering first-time two-person collaboration.
+- Before starting work, run `git status -sb` and `git pull --ff-only`.
+- Do not use `git reset --hard`, `git clean -fdx`, or `git push --force` unless Chao explicitly approves.
+- Do not submit `.env`, `.env.local`, `.env.*.local`, `data/`, real screenshots, API keys, Supabase keys, Vercel tokens, or database connection strings.
+- Do not change product boundaries without asking Chao.
+- Do not drop tables, reset databases, delete real data, remove migrations, or recreate migrations without asking Chao.
+- Avoid two people editing the same files at the same time.
+- If a task touches business rules, write tests first.
+- Before saying work is complete, run `pnpm check`; if the task touches deployment, Next.js routes, or server/client boundaries, also run `pnpm build`.
+- New product or collaboration docs must be self-contained.
+- The first team collaboration SOP is `context/32_首次团队协作规则.md`.
+
 ## Communication Rules
 
 - Explain key technical choices briefly in Chinese.
