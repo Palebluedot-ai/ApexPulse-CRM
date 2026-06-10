@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useState, type FormEvent, type ReactNode } from "react";
 import type {
   CustomerSelectOption,
   ReviewQueueViewItem,
@@ -69,6 +69,23 @@ const inputClass =
 const textareaClass =
   "min-h-20 w-full rounded-xl border border-[var(--line-soft)] bg-white p-3 outline-none focus:border-[var(--tea)]";
 
+function Field({
+  label,
+  children,
+}: {
+  label: string;
+  children: ReactNode;
+}) {
+  return (
+    <label className="block">
+      <span className="mb-1 block text-xs font-semibold text-[var(--ink-soft)]">
+        {label}
+      </span>
+      {children}
+    </label>
+  );
+}
+
 export interface DecisionCardProps {
   item: ReviewQueueViewItem;
   customers: CustomerSelectOption[];
@@ -92,7 +109,11 @@ export function DecisionCard({
   onSkip,
   onRetryExtract,
 }: DecisionCardProps) {
-  const [partyId, setPartyId] = useState("");
+  const [partyQuery, setPartyQuery] = useState("");
+  const matchedCustomer = customers.find(
+    (option) => option.label === partyQuery,
+  );
+  const partyId = matchedCustomer?.id ?? "";
 
   if (awaitingAutoExtraction(item)) {
     return (
@@ -218,109 +239,127 @@ export function DecisionCard({
           }
         >
           <p className="text-sm font-semibold">修改字段（确认前 AI 只是预填）</p>
-          <select
-            className={`mt-3 ${inputClass}`}
-            name="partyId"
-            onChange={(event) => setPartyId(event.target.value)}
-            value={partyId}
-          >
-            <option value="">新客户 / 暂不匹配现有客户</option>
-            {customers.map((customer) => (
-              <option key={customer.id} value={customer.id}>
-                {customer.label}
-              </option>
-            ))}
-          </select>
+          {/* 热度/置信不在这里改（卡片 chip 已显示），隐藏字段保留原值防止确认时丢失 */}
           <input
-            className={`mt-3 ${inputClass}`}
-            defaultValue={item.summary}
-            name="summary"
-            placeholder="这条沟通的可读摘要"
+            name="leadQuality"
+            type="hidden"
+            value={item.aiFields.leadQuality}
           />
-          <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <input
-              className={inputClass}
-              defaultValue={item.naturalFields.customerName}
-              name="customerName"
-              placeholder="客户名，例如 刘总"
-            />
-            <input
-              className={inputClass}
-              defaultValue={item.naturalFields.companyName}
-              name="companyName"
-              placeholder="公司，例如 Demo Capital"
-            />
-            <input
-              className={inputClass}
-              defaultValue={item.naturalFields.sourceTag}
-              name="sourceTag"
-              placeholder="来源，例如 Token2049"
-            />
-            <input
-              className={inputClass}
-              defaultValue={item.naturalFields.nextFollowupAt}
-              name="nextFollowupAt"
-              placeholder="下次跟进，例如 2026-06-17 09:00"
-            />
+          <input
+            name="confidence"
+            type="hidden"
+            value={item.aiFields.confidence}
+          />
+          <input name="partyId" type="hidden" value={partyId} />
+          <div className="mt-3">
+            <Field label="绑定客户（输入名字搜索；留空 = 新建客户）">
+              <input
+                className={inputClass}
+                list={`customers-${item.id}`}
+                onChange={(event) => setPartyQuery(event.target.value)}
+                placeholder="例如 刘总"
+                value={partyQuery}
+              />
+            </Field>
+            <datalist id={`customers-${item.id}`}>
+              {customers.map((customer) => (
+                <option key={customer.id} value={customer.label} />
+              ))}
+            </datalist>
           </div>
-          <textarea
-            className={`mt-3 ${textareaClass}`}
-            defaultValue={item.naturalFields.needSummary}
-            name="needSummary"
-            placeholder="需求"
-          />
-          <textarea
-            className={`mt-3 ${textareaClass}`}
-            defaultValue={item.naturalFields.nextAction}
-            name="nextAction"
-            placeholder="下一步"
-          />
+          <div className="mt-3">
+            <Field label="摘要">
+              <input
+                className={inputClass}
+                defaultValue={item.summary}
+                name="summary"
+                placeholder="这条沟通的可读摘要"
+              />
+            </Field>
+          </div>
           <div className="mt-3 grid gap-3 sm:grid-cols-2">
-            <input
-              className={inputClass}
-              defaultValue={item.aiFields.phone}
-              name="phone"
-              placeholder="电话"
-            />
-            <input
-              className={inputClass}
-              defaultValue={item.aiFields.email}
-              name="email"
-              placeholder="邮箱"
-            />
-            <input
-              className={inputClass}
-              defaultValue={item.aiFields.telegram}
-              name="telegram"
-              placeholder="Telegram"
-            />
-            <input
-              className={inputClass}
-              defaultValue={item.aiFields.wechatAlias}
-              name="wechatAlias"
-              placeholder="微信号 / 微信备注"
-            />
-            <select
-              className={inputClass}
-              defaultValue={item.aiFields.leadQuality}
-              name="leadQuality"
-            >
-              <option value="unknown">未判断</option>
-              <option value="hot">高意向</option>
-              <option value="warm">可跟进</option>
-              <option value="cold">低意向</option>
-              <option value="not_a_lead">非线索</option>
-            </select>
-            <select
-              className={inputClass}
-              defaultValue={item.aiFields.confidence}
-              name="confidence"
-            >
-              <option value="unknown">置信度未知</option>
-              <option value="high">高置信</option>
-              <option value="medium">中置信</option>
-              <option value="low">低置信</option>
-            </select>
+            <Field label="客户名">
+              <input
+                className={inputClass}
+                defaultValue={item.naturalFields.customerName}
+                name="customerName"
+                placeholder="例如 刘总"
+              />
+            </Field>
+            <Field label="公司">
+              <input
+                className={inputClass}
+                defaultValue={item.naturalFields.companyName}
+                name="companyName"
+                placeholder="例如 Demo Capital"
+              />
+            </Field>
+            <Field label="来源">
+              <input
+                className={inputClass}
+                defaultValue={item.naturalFields.sourceTag}
+                name="sourceTag"
+                placeholder="例如 Token2049"
+              />
+            </Field>
+            <Field label="下次跟进">
+              <input
+                className={inputClass}
+                defaultValue={item.naturalFields.nextFollowupAt}
+                name="nextFollowupAt"
+                placeholder="例如 2026-06-17 09:00"
+              />
+            </Field>
+          </div>
+          <div className="mt-3">
+            <Field label="需求">
+              <textarea
+                className={textareaClass}
+                defaultValue={item.naturalFields.needSummary}
+                name="needSummary"
+                placeholder="例如 想了解 OTC 费率和出入金流程"
+              />
+            </Field>
+          </div>
+          <div className="mt-3">
+            <Field label="下一步">
+              <textarea
+                className={textareaClass}
+                defaultValue={item.naturalFields.nextAction}
+                name="nextAction"
+                placeholder="例如 下周发报价并约一次电话"
+              />
+            </Field>
+          </div>
+          <div className="mt-3 grid gap-3 sm:grid-cols-2">
+            <Field label="电话">
+              <input
+                className={inputClass}
+                defaultValue={item.aiFields.phone}
+                name="phone"
+              />
+            </Field>
+            <Field label="邮箱">
+              <input
+                className={inputClass}
+                defaultValue={item.aiFields.email}
+                name="email"
+              />
+            </Field>
+            <Field label="Telegram">
+              <input
+                className={inputClass}
+                defaultValue={item.aiFields.telegram}
+                name="telegram"
+              />
+            </Field>
+            <Field label="微信号 / 微信备注">
+              <input
+                className={inputClass}
+                defaultValue={item.aiFields.wechatAlias}
+                name="wechatAlias"
+              />
+            </Field>
           </div>
           <label className="mt-3 flex items-center gap-2 text-sm font-semibold">
             <input
@@ -330,19 +369,15 @@ export function DecisionCard({
             />
             需要我方继续动作
           </label>
-          <textarea
-            className={`mt-3 ${textareaClass}`}
-            defaultValue={item.aiFields.evidenceNotes}
-            name="evidenceNotes"
-            placeholder="AI 判断依据"
-          />
-          <select className={`mt-3 ${inputClass}`} name="followupStatus">
-            <option value="">默认：已跟进</option>
-            <option value="up_to_date">已跟进</option>
-            <option value="due_soon">即将跟进</option>
-            <option value="overdue">已逾期</option>
-            <option value="unknown">未分层</option>
-          </select>
+          <div className="mt-3">
+            <Field label="AI 判断依据">
+              <textarea
+                className={textareaClass}
+                defaultValue={item.aiFields.evidenceNotes}
+                name="evidenceNotes"
+              />
+            </Field>
+          </div>
           {item.rawText ? (
             <p className="mt-3 rounded-xl border border-[var(--line-soft)] bg-white/70 p-3 text-sm leading-6 text-[var(--ink-soft)]">
               原文：{item.rawText}
