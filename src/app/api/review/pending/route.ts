@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { buildReviewQueueViewItems } from "@/server/review/review-page-model";
 import { listPendingReviewItems } from "@/server/review/review-queue";
 import { createDb } from "@/server/db";
 
@@ -15,7 +16,10 @@ export async function GET(request: Request) {
 
   try {
     const items = await listPendingReviewItems(db, limitFromUrl(request.url));
-    return NextResponse.json({ items });
+    return NextResponse.json({
+      items,
+      viewItems: buildReviewQueueViewItems(items),
+    });
   } finally {
     await client.end();
   }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useState, type FormEvent } from "react";
+import { useDeferredValue, useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import type {
   CustomerSelectOption,
@@ -134,8 +134,50 @@ function submitIntent(event: FormEvent<HTMLFormElement>): "confirm" | "edit" {
     : "edit";
 }
 
+function awaitingAutoExtraction(item: ReviewQueueViewItem): boolean {
+  if (item.extractedFields.aiExtractionSource) return false;
+  return (
+    Boolean(item.rawText?.trim()) ||
+    item.attachments.some((attachment) => attachment.canPreviewInline)
+  );
+}
+
 export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
   const [items, setItems] = useState(initialItems);
+
+  useEffect(() => {
+    if (!items.some(awaitingAutoExtraction)) return;
+
+    const timer = setInterval(() => {
+      void (async () => {
+        try {
+          const response = await fetch("/api/review/pending");
+          if (!response.ok) return;
+
+          const payload = (await response.json()) as {
+            viewItems?: ReviewQueueViewItem[];
+          };
+          const freshById = new Map(
+            (payload.viewItems ?? []).map((viewItem) => [viewItem.id, viewItem]),
+          );
+
+          setItems((current) =>
+            current.map((item) => {
+              const fresh = freshById.get(item.id);
+              return awaitingAutoExtraction(item) &&
+                fresh?.extractedFields.aiExtractionSource
+                ? fresh
+                : item;
+            }),
+          );
+        } catch {
+          // network hiccup: keep polling
+        }
+      })();
+    }, 4000);
+
+    return () => clearInterval(timer);
+  }, [items]);
   const [actionState, setActionState] = useState<ActionState>({});
   const [extractingIds, setExtractingIds] = useState<Set<string>>(new Set());
   const [query, setQuery] = useState("");
@@ -684,7 +726,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                               : "AI 提取字段"}
                           </button>
                           <span className="max-w-52 text-xs leading-5 text-[var(--muted)]">
-                            只回填字段，不会确认入库。
+                            AI 自动提取中，字段稍后自动出现；也可点按钮立即提取。
                           </span>
                         </div>
                       ) : null}
