@@ -1,11 +1,9 @@
-import { readFile } from "node:fs/promises";
 import { and, eq } from "drizzle-orm";
 import { NextResponse } from "next/server";
 import {
   isUnauthorizedError,
   requireCurrentUser,
 } from "@/server/auth/current-user";
-import { localAttachmentPath } from "@/server/capture/local-image-storage";
 import { createDb } from "@/server/db";
 import { attachments, events } from "@/server/db/schema";
 import {
@@ -15,6 +13,7 @@ import {
 } from "@/server/ai/vision-provider";
 import { buildReviewAiFields, buildReviewNaturalFields } from "@/lib/review-form";
 import { editReviewEvent } from "@/server/review/review-queue";
+import { readExtractableImageEvidence } from "@/server/review/vision-extract-evidence";
 import { buildVisionReviewPatch } from "@/server/review/vision-review";
 
 export const runtime = "nodejs";
@@ -53,22 +52,13 @@ export async function POST(request: Request) {
     let extractionSource: "vision_api" | "text_api";
 
     if (row.event.contentType === "image") {
-      const attachment = row.attachment;
-      const canExtract =
-        attachment?.storageKey.startsWith("local-images/") &&
-        attachment.mimeType.startsWith("image/");
-
-      if (!attachment || !canExtract) {
-        throw new Error("Local image attachment is required");
-      }
-
-      const imageBytes = await readFile(
-        localAttachmentPath(attachment.storageKey),
+      const { imageBytes, mimeType } = await readExtractableImageEvidence(
+        row.attachment,
       );
       extraction = await extractImageWithVisionProvider({
         config: buildVisionProviderConfig(),
         imageBytes,
-        mimeType: attachment.mimeType,
+        mimeType,
         note: row.event.rawText,
       });
       extractionSource = "vision_api";
@@ -116,9 +106,14 @@ export async function POST(request: Request) {
       const badRequestMessages = new Set([
         "Event id is required",
         "Pending review event not found",
-        "Local image attachment is required",
+        "Image attachment is required",
+        "Image attachment must have an image MIME type",
+        "Unsupported attachment storage key",
         "Text note is required",
         "Invalid local storage key",
+        "SUPABASE_URL is required",
+        "SUPABASE_SERVICE_ROLE_KEY is required",
+        "SUPABASE_STORAGE_BUCKET is required",
         "VISION_API_KEY is required",
         "VISION_API_BASE_URL is required",
         "VISION_API_MODEL is required",
