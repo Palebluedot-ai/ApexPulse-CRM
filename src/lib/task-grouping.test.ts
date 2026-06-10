@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { classifyTaskUrgency, groupTasksByUrgency } from "./task-grouping";
+import {
+  classifyTaskUrgency,
+  completedRetentionDaysLeft,
+  groupTasksByUrgency,
+} from "./task-grouping";
 
 const now = new Date("2026-06-10T06:00:00+08:00"); // 周三
 
@@ -59,5 +63,29 @@ describe("groupTasksByUrgency", () => {
     const shuffled = [tasks[1], tasks[0]];
     const groups = groupTasksByUrgency(shuffled, (task) => task.dueAt, now);
     expect(groups.urgent.map((task) => task.id)).toEqual(["a", "b"]);
+  });
+});
+
+describe("completedRetentionDaysLeft", () => {
+  it("keeps tasks completed today with 3 days left", () => {
+    expect(
+      completedRetentionDaysLeft("2026-06-10T01:00:00+08:00", now),
+    ).toBe(3);
+  });
+
+  it("keeps tasks completed two days ago with 1 day left", () => {
+    expect(
+      completedRetentionDaysLeft("2026-06-08T20:00:00+08:00", now),
+    ).toBe(1);
+  });
+
+  it("drops tasks completed three or more days ago", () => {
+    expect(
+      completedRetentionDaysLeft("2026-06-07T10:00:00+08:00", now),
+    ).toBe(0);
+  });
+
+  it("drops tasks without completion time", () => {
+    expect(completedRetentionDaysLeft(null, now)).toBe(0);
   });
 });
