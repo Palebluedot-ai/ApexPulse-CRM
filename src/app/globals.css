@@ -11,6 +11,22 @@
   --line: rgba(25, 23, 20, 0.14);
   --font-display: "Iowan Old Style", "Palatino", "Book Antiqua", serif;
   --font-sans: "Avenir Next", "Gill Sans", "Trebuchet MS", sans-serif;
+
+  /* R1 redesign tokens (context/32 §3) */
+  --paper: #faf4e8;
+  --paper-deep: #f3ead8;
+  --card: #fffdf7;
+  --ink: #1f1c17;
+  --ink-soft: #6b6357;
+  --line-soft: #e4d9c3;
+  --tea: #2f5d50;
+  --tea-deep: #234739;
+  --persimmon: #d4622a;
+  --gold: #b98a2f;
+  --red-status: #c2452d;
+  --ok-bg: #e9f2ec;
+  --font-serif-display: "Noto Serif SC", "Iowan Old Style", serif;
+  --font-numerals: "Fraunces", serif;
 }
 
 * {
@@ -46,4 +62,10 @@ textarea {
 button,
 select {
   font: inherit;
+}
+
+@keyframes shimmer {
+  0% { opacity: 0.45; }
+  50% { opacity: 1; }
+  100% { opacity: 0.45; }
 }
