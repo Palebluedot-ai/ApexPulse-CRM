@@ -1,4 +1,5 @@
 import {
+  buildTextExtractionRequest,
   buildVisionExtractionRequest,
   extractProviderText,
   parseVisionExtractionText,
@@ -64,6 +65,41 @@ export async function extractImageWithVisionProvider(
           imageBytes: input.imageBytes,
           mimeType: input.mimeType,
           note: input.note,
+        }),
+      ),
+    },
+  );
+
+  if (!response.ok) {
+    throw new Error(`Vision provider request failed: ${response.status}`);
+  }
+
+  const payload = (await response.json()) as unknown;
+  return parseVisionExtractionText(extractProviderText(payload));
+}
+
+interface ExtractTextInput {
+  config: VisionProviderConfig;
+  rawText: string;
+  fetchImpl?: typeof fetch;
+}
+
+export async function extractTextWithVisionProvider(
+  input: ExtractTextInput,
+): Promise<VisionExtractionResult> {
+  const fetchImpl = input.fetchImpl ?? fetch;
+  const response = await fetchImpl(
+    `${input.config.baseUrl}/chat/completions`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${input.config.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(
+        buildTextExtractionRequest({
+          model: input.config.model,
+          rawText: input.rawText,
         }),
       ),
     },

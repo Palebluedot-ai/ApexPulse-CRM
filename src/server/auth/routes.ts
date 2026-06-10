@@ -7,6 +7,7 @@ const publicExactPaths = new Set([
   "/login",
   "/api/auth/login",
   "/api/auth/logout",
+  "/api/health",
   "/manifest.webmanifest",
   "/favicon.ico",
 ]);

@@ -4,10 +4,10 @@ services:
     container_name: hashkey-otc-crm-v1-postgres
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: hashkey_otc_crm_v1
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d hashkey_otc_crm_v1"]
