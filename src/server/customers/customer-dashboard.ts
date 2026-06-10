@@ -41,6 +41,7 @@ export type CustomerFollowupFilter =
   | "unknown";
 
 export type CustomerSort =
+  | "attention"
   | "last_contact_desc"
   | "next_followup_asc"
   | "name_asc";
@@ -161,11 +162,34 @@ function dateValue(date: Date | null, nullFallback: number): number {
   return date ? date.getTime() : nullFallback;
 }
 
+const attentionRank: Record<CustomerListItem["followupStatus"], number> = {
+  overdue: 0,
+  due_soon: 1,
+  up_to_date: 2,
+  unknown: 3,
+};
+
 export function sortCustomerListItems(
   customers: CustomerListItem[],
   sort: CustomerSort,
 ): CustomerListItem[] {
   return [...customers].sort((a, b) => {
+    if (sort === "attention") {
+      const rankDiff =
+        attentionRank[a.followupStatus] - attentionRank[b.followupStatus];
+      if (rankDiff !== 0) return rankDiff;
+
+      const followupDiff =
+        dateValue(a.nextFollowupAt, Number.POSITIVE_INFINITY) -
+        dateValue(b.nextFollowupAt, Number.POSITIVE_INFINITY);
+      if (followupDiff !== 0) return followupDiff;
+
+      return (
+        dateValue(b.lastContactAt, Number.NEGATIVE_INFINITY) -
+        dateValue(a.lastContactAt, Number.NEGATIVE_INFINITY)
+      );
+    }
+
     if (sort === "name_asc") {
       return a.displayName.localeCompare(b.displayName, "zh-HK");
     }

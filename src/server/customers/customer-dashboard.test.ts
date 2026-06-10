@@ -278,4 +278,66 @@ describe("customer dashboard", () => {
       ),
     ).toEqual(["B 客户", "A 客户"]);
   });
+
+  it("sorts by attention: overdue > due_soon > up_to_date > unknown", () => {
+    const make = (
+      id: string,
+      displayName: string,
+      followupStatus: "overdue" | "due_soon" | "up_to_date" | "unknown",
+      nextFollowupAt: Date | null = null,
+    ) =>
+      buildCustomerListItem({
+        ...baseParty,
+        id,
+        displayName,
+        followupStatus,
+        nextFollowupAt,
+      });
+
+    const customers = [
+      make("44444444-4444-4444-4444-444444444444", "沉睡的", "unknown"),
+      make("55555555-5555-5555-5555-555555555555", "健康的", "up_to_date"),
+      make(
+        "66666666-6666-6666-6666-666666666666",
+        "逾期的",
+        "overdue",
+        new Date("2026-06-08T12:00:00+08:00"),
+      ),
+      make(
+        "77777777-7777-7777-7777-777777777777",
+        "临近的",
+        "due_soon",
+        new Date("2026-06-11T12:00:00+08:00"),
+      ),
+    ];
+
+    expect(
+      sortCustomerListItems(customers, "attention").map(
+        (customer) => customer.displayName,
+      ),
+    ).toEqual(["逾期的", "临近的", "健康的", "沉睡的"]);
+  });
+
+  it("breaks attention ties by earlier next followup first", () => {
+    const earlier = buildCustomerListItem({
+      ...baseParty,
+      id: "44444444-4444-4444-4444-444444444444",
+      displayName: "更早到期",
+      followupStatus: "overdue",
+      nextFollowupAt: new Date("2026-06-05T12:00:00+08:00"),
+    });
+    const later = buildCustomerListItem({
+      ...baseParty,
+      id: "55555555-5555-5555-5555-555555555555",
+      displayName: "晚点到期",
+      followupStatus: "overdue",
+      nextFollowupAt: new Date("2026-06-08T12:00:00+08:00"),
+    });
+
+    expect(
+      sortCustomerListItems([later, earlier], "attention").map(
+        (customer) => customer.displayName,
+      ),
+    ).toEqual(["更早到期", "晚点到期"]);
+  });
 });
