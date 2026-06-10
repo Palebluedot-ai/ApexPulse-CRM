@@ -92,7 +92,169 @@ git log --oneline -5
 
 然后把结果发给 Chao 或当前项目负责人。
 
-## 4. 标准开发流程
+## 4. 管理员绕过规则
+
+GitHub 当前分支保护允许 Administrator 绕过部分限制。
+
+这是一条应急通道，不是日常开发方式。
+
+本项目规则是：
+
+```text
+Chao 作为 Administrator 技术上可以绕过 PR。
+普通协作者不能绕过 PR。
+其他 AI agent 不能绕过 PR。
+日常开发默认不绕过 PR。
+```
+
+允许 Chao 绕过的典型场景：
+
+- 修正文档错别字或链接，且不影响代码。
+- 紧急修复明显阻断开发的小配置。
+- 需要先救回仓库状态，再补 PR 说明。
+
+不建议 Chao 绕过的场景：
+
+- 新功能。
+- 数据库 migration。
+- 登录、权限、客户数据、AI 提取、任务生成等业务规则。
+- 部署配置、GitHub Actions、Vercel、Supabase、Cloudflare 配置。
+- 任何涉及 secret 或真实数据的改动。
+
+如果 Chao 使用管理员权限绕过 PR，事后必须补一句说明：
+
+```text
+这次由 Administrator 直接合入，原因是：<具体原因>。
+验证结果是：<命令和结果>。
+```
+
+禁止普通协作者或 AI agent 说“因为 Chao 可以绕过，所以我也可以绕过”。
+
+## 5. Git 基础术语
+
+这些词必须按本节理解，避免协作时各说各话。
+
+`repository / repo`：
+
+```text
+整个 Git 项目仓库。
+```
+
+本项目远端 repo 是：
+
+```text
+https://github.com/Palebluedot-ai/apexpulse-crm
+```
+
+`working tree / worktree`：
+
+```text
+你电脑上当前看到和正在编辑的项目文件夹。
+```
+
+在本项目里，当前 working tree 通常是你的本机项目文件夹，例如：
+
+```text
+/Users/chao/Projects/apexpulse-crm
+```
+
+注意：
+
+```text
+本机文件夹名可以和 GitHub repo 名不同。
+这不会影响 GitHub repo。
+```
+
+Git 里还有一个高级命令叫 `git worktree`，可以让同一个 repo 同时开多个本地文件夹并行开发。
+
+本项目第一阶段不要求使用 `git worktree`。
+
+如果没有明确说“创建额外 worktree”，这里的 `working tree` 只表示当前项目文件夹。
+
+`branch`：
+
+```text
+一条独立开发线。
+```
+
+`main` 是稳定主线。
+
+新功能应该开自己的 branch，例如：
+
+```text
+codex/review-card-polish
+codex/mobile-capture-upload
+```
+
+`checkout / switch`：
+
+```text
+切换到另一个 branch，或者创建并切换到新 branch。
+```
+
+旧写法：
+
+```bash
+git checkout main
+git checkout -b codex/short-task-name
+```
+
+新写法：
+
+```bash
+git switch main
+git switch -c codex/short-task-name
+```
+
+本项目更推荐 `git switch`，因为它语义更清楚。
+
+`commit`：
+
+```text
+把当前改动保存成一个 Git 版本点。
+```
+
+一个 commit 应该只做一件事。
+
+`push`：
+
+```text
+把本地 commit 上传到 GitHub。
+```
+
+`pull`：
+
+```text
+从 GitHub 拉取别人已经上传的最新改动。
+```
+
+`merge`：
+
+```text
+把一个 branch 的改动合并到另一个 branch。
+```
+
+本项目默认通过 GitHub PR merge 到 `main`。
+
+`rebase`：
+
+```text
+把自己的 commit 重新放到最新 main 后面。
+```
+
+`rebase` 可以让历史更干净，但如果你不确定，不要自己乱用。
+
+遇到 rebase 冲突时先停下来。
+
+`PR / Pull Request`：
+
+```text
+把一个 branch 申请合并进 main 的审阅单。
+```
+
+PR 是本项目默认合并方式。
+
+## 6. 标准开发流程
 
 每次开始工作前，先确认本地干净，并拉最新代码：
 
@@ -108,9 +270,9 @@ git pull --ff-only
 新任务必须从最新 `main` 开分支：
 
 ```bash
-git checkout main
+git switch main
 git pull --ff-only
-git checkout -b codex/short-task-name
+git switch -c codex/short-task-name
 ```
 
 分支命名用简短英文：
@@ -144,7 +306,7 @@ git push -u origin codex/short-task-name
 
 然后在 GitHub 创建 PR。
 
-## 5. PR 合并规则
+## 7. PR 合并规则
 
 每个 PR 必须说明：
 
@@ -190,7 +352,7 @@ Squash and merge
 
 禁止为了好看历史而 force push `main`。
 
-## 6. 如何一个一个看 commit
+## 8. 如何一个一个看 commit
 
 看最近提交：
 
@@ -230,7 +392,7 @@ git log --oneline --reverse <old-sha>..<new-sha>
 https://github.com/Palebluedot-ai/apexpulse-crm/pull/16
 ```
 
-## 7. 如果发现已合并的代码有问题
+## 9. 如果发现已合并的代码有问题
 
 禁止使用：
 
@@ -250,7 +412,7 @@ revert 示例：
 ```bash
 git checkout main
 git pull --ff-only
-git checkout -b codex/revert-bad-change
+git switch -c codex/revert-bad-change
 git revert <commit-sha>
 pnpm check
 git push -u origin codex/revert-bad-change
@@ -258,7 +420,7 @@ git push -u origin codex/revert-bad-change
 
 然后创建 PR。
 
-## 8. 禁止提交的内容
+## 10. 禁止提交的内容
 
 禁止提交：
 
@@ -285,7 +447,7 @@ git push -u origin codex/revert-bad-change
 
 `.env.example` 只能写变量名和示例占位值，不能写真值。
 
-## 9. 数据库和 migration 规则
+## 11. 数据库和 migration 规则
 
 禁止未经 Chao 确认就做：
 
@@ -307,7 +469,7 @@ git push -u origin codex/revert-bad-change
 - 如何回滚。
 - 是否涉及真实客户数据。
 
-## 10. 产品边界规则
+## 12. 产品边界规则
 
 当前产品方向是：
 
@@ -336,7 +498,7 @@ PWA-first personal CRM for Chao's OTC sales follow-up workflow.
 
 可以做技术准备，但不能偷偷改变产品主线。
 
-## 11. 测试规则
+## 13. 测试规则
 
 业务规则必须先写测试。
 
@@ -363,7 +525,7 @@ pnpm check
 pnpm build
 ```
 
-## 12. 给 AI agent 的硬规则
+## 14. 给 AI agent 的硬规则
 
 AI agent 禁止做以下事情：
 
@@ -383,7 +545,7 @@ AI agent 每次交付时必须说明：
 - 还有什么风险。
 - 是否需要 Chao 决策。
 
-## 13. 管理员建议
+## 15. 管理员建议
 
 Chao 作为管理员，建议在 GitHub 设置：
 
@@ -402,4 +564,3 @@ PR 合并前必须贴出 pnpm check 结果。
 ```
 
 等项目稳定后，再把这些检查接入 GitHub Actions。
-
