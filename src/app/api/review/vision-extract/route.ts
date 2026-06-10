@@ -11,6 +11,7 @@ import { attachments, events } from "@/server/db/schema";
 import {
   buildVisionProviderConfig,
   extractImageWithVisionProvider,
+  extractTextWithVisionProvider,
 } from "@/server/ai/vision-provider";
 import { buildReviewAiFields, buildReviewNaturalFields } from "@/lib/review-form";
 import { editReviewEvent } from "@/server/review/review-queue";
@@ -48,27 +49,49 @@ export async function POST(request: Request) {
 
     if (!row?.event) throw new Error("Pending review event not found");
 
-    const attachment = row.attachment;
-    const canExtract =
-      attachment?.storageKey.startsWith("local-images/") &&
-      attachment.mimeType.startsWith("image/");
+    let extraction;
+    let extractionSource: "vision_api" | "text_api";
 
-    if (!attachment || !canExtract) {
-      throw new Error("Local image attachment is required");
+    if (row.event.contentType === "image") {
+      const attachment = row.attachment;
+      const canExtract =
+        attachment?.storageKey.startsWith("local-images/") &&
+        attachment.mimeType.startsWith("image/");
+
+      if (!attachment || !canExtract) {
+        throw new Error("Local image attachment is required");
+      }
+
+      const imageBytes = await readFile(
+        localAttachmentPath(attachment.storageKey),
+      );
+      extraction = await extractImageWithVisionProvider({
+        config: buildVisionProviderConfig(),
+        imageBytes,
+        mimeType: attachment.mimeType,
+        note: row.event.rawText,
+      });
+      extractionSource = "vision_api";
+    } else {
+      const rawText = row.event.rawText?.trim();
+
+      if (!rawText) {
+        throw new Error("Text note is required");
+      }
+
+      extraction = await extractTextWithVisionProvider({
+        config: buildVisionProviderConfig(),
+        rawText,
+      });
+      extractionSource = "text_api";
     }
 
-    const imageBytes = await readFile(localAttachmentPath(attachment.storageKey));
-    const extraction = await extractImageWithVisionProvider({
-      config: buildVisionProviderConfig(),
-      imageBytes,
-      mimeType: attachment.mimeType,
-      note: row.event.rawText,
-    });
     const patch = buildVisionReviewPatch({
       currentSummary: row.event.aiSummary,
       rawText: row.event.rawText,
       existingFields: row.event.extractedFieldsJson,
       extraction,
+      extractionSource,
     });
     const event = await editReviewEvent(db, {
       eventId,
@@ -94,6 +117,7 @@ export async function POST(request: Request) {
         "Event id is required",
         "Pending review event not found",
         "Local image attachment is required",
+        "Text note is required",
         "Invalid local storage key",
         "VISION_API_KEY is required",
         "VISION_API_BASE_URL is required",

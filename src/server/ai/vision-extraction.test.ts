@@ -188,3 +188,43 @@ describe("vision extraction helpers", () => {
     ).toBe("{\"summary\":\"客户问出入金。\"}");
   });
 });
+
+describe("text extraction helpers", () => {
+  it("builds a text-only chat completion request with the note inline", async () => {
+    const { buildTextExtractionRequest } = await import("./vision-extraction");
+    const request = buildTextExtractionRequest({
+      model: "test-model",
+      rawText: "和刘总聊了开户，下周二发资料",
+    });
+
+    expect(request.model).toBe("test-model");
+    expect(request.messages).toHaveLength(1);
+    expect(request.messages[0].role).toBe("user");
+    expect(request.messages[0].content).toContain("和刘总聊了开户");
+    expect(request.messages[0].content).toContain("备注原文");
+    expect(request.response_format).toEqual({ type: "json_object" });
+  });
+
+  it("keeps the same field schema in the text prompt", async () => {
+    const { buildTextExtractionPrompt } = await import("./vision-extraction");
+    const prompt = buildTextExtractionPrompt();
+
+    expect(prompt).toContain("summary, counterpartyName, customerName");
+    expect(prompt).toContain("leadQuality 只能是 hot, warm, cold");
+    expect(prompt).toContain("不要把我方自我介绍");
+    expect(prompt).toContain("备注");
+  });
+
+  it("tags extraction source when building fields", () => {
+    const extraction = parseVisionExtractionText(
+      JSON.stringify({ summary: "客户要报价。", customerName: "刘总" }),
+    );
+
+    expect(buildVisionExtractionFields(extraction).aiExtractionSource).toBe(
+      "vision_api",
+    );
+    expect(
+      buildVisionExtractionFields(extraction, "text_api").aiExtractionSource,
+    ).toBe("text_api");
+  });
+});

@@ -669,7 +669,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                     <div className="mt-3 flex flex-wrap gap-2">
                       {item.attachments.some(
                         (attachment) => attachment.canPreviewInline,
-                      ) ? (
+                      ) || Boolean(item.rawText?.trim()) ? (
                         <div className="flex flex-col gap-1">
                           <button
                             className="rounded-full border border-[var(--accent)] bg-white px-4 py-2 text-sm font-semibold text-[var(--accent-strong)] disabled:opacity-60"

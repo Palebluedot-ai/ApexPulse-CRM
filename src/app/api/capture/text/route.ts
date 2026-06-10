@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import {
   isUnauthorizedError,
   requireCurrentUser,
 } from "@/server/auth/current-user";
+import { runCaptureAutoExtraction } from "@/server/capture/auto-extract";
 import { createDb } from "@/server/db";
 import { createTextCapture } from "@/server/capture/text-capture";
 
@@ -34,6 +35,8 @@ export async function POST(request: Request) {
       occurredAt: parseOptionalDate(body.occurredAt),
       createdByUserId: currentUser.id,
     });
+
+    after(() => runCaptureAutoExtraction(event.id));
 
     return NextResponse.json(
       {

@@ -5,6 +5,7 @@ export interface VisionReviewPatchInput {
   rawText?: string | null;
   existingFields: Record<string, unknown>;
   extraction: VisionExtractionResult;
+  extractionSource?: "vision_api" | "text_api";
 }
 
 export interface VisionReviewPatch {
@@ -32,7 +33,10 @@ export function buildVisionReviewPatch(
     ),
     extractedFields: {
       ...input.existingFields,
-      ...buildVisionExtractionFields(input.extraction),
+      ...buildVisionExtractionFields(
+        input.extraction,
+        input.extractionSource ?? "vision_api",
+      ),
     },
   };
 }

@@ -128,9 +128,10 @@ export function parseVisionExtractionText(text: string): VisionExtractionResult 
 
 export function buildVisionExtractionFields(
   result: VisionExtractionResult,
+  source: "vision_api" | "text_api" = "vision_api",
 ): Record<string, unknown> {
   const fields: Record<string, unknown> = {
-    aiExtractionSource: "vision_api",
+    aiExtractionSource: source,
   };
 
   for (const [key, value] of Object.entries(result.naturalFields)) {
@@ -245,6 +246,44 @@ export function buildVisionExtractionRequest(input: {
             },
           },
         ],
+      },
+    ],
+    response_format: { type: "json_object" },
+  };
+}
+
+export function buildTextExtractionPrompt(): string {
+  return [
+    "你是 OTC CRM 的中文销售跟进备注信息提取助手。",
+    "用户会给你一段销售随手记的文字备注，从中提取结构化字段。",
+    "只输出 JSON object，不要 markdown，不要解释。",
+    "不要编造备注里没有的信息；没有就输出空字符串。",
+    "字段必须是：summary, counterpartyName, customerName, companyName, sourceTag, needSummary, nextAction, nextFollowupAt, phone, email, telegram, wechatAlias, leadQuality, confidence, actionRequired, evidenceNotes。",
+    "counterpartyName/customerName 写备注里提到的客户或对方称呼；只有昵称就写昵称。",
+    "不要把我方自我介绍、HashKey OTC、James、杨超当成对方客户名。",
+    "companyName 只有明确属于对方时才填；不能把 HashKey、我方公司误当成对方公司。",
+    "summary 用一句中文说明这条备注对销售跟进有什么价值，最多 80 字。",
+    "needSummary 只写对方明确表达的需求、兴趣或问题。",
+    "nextAction 写我方下一步该做什么；没有就空字符串。",
+    "nextFollowupAt 只有备注里有明确日期或日期时间才填；下周、周一、改天、之后聊这类相对时间不要硬推具体日期。",
+    "phone, email, telegram, wechatAlias 只提取备注中明确出现的联系方式。",
+    "leadQuality 只能是 hot, warm, cold, not_a_lead, unknown；只有明确开户、交易、报价、会议、资料交换才 warm 或 hot。",
+    "confidence 只能是 high, medium, low；不要输出数字。",
+    "actionRequired 表示是否需要我方继续动作，必须是 boolean。",
+    "evidenceNotes 简短说明依据，不要逐字抄完整备注。",
+  ].join("\n");
+}
+
+export function buildTextExtractionRequest(input: {
+  model: string;
+  rawText: string;
+}) {
+  return {
+    model: input.model,
+    messages: [
+      {
+        role: "user",
+        content: `${buildTextExtractionPrompt()}\n\n备注原文：\n${input.rawText}`,
       },
     ],
     response_format: { type: "json_object" },

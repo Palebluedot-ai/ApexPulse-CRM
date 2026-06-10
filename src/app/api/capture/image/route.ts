@@ -1,8 +1,9 @@
-import { NextResponse } from "next/server";
+import { after, NextResponse } from "next/server";
 import {
   isUnauthorizedError,
   requireCurrentUser,
 } from "@/server/auth/current-user";
+import { runCaptureAutoExtraction } from "@/server/capture/auto-extract";
 import { createImageCapture } from "@/server/capture/image-capture";
 import { saveImageEvidence } from "@/server/capture/image-storage-provider";
 import { createDb } from "@/server/db";
@@ -40,6 +41,8 @@ export async function POST(request: Request) {
           : undefined,
       createdByUserId: currentUser.id,
     });
+
+    after(() => runCaptureAutoExtraction(result.event.id));
 
     return NextResponse.json(
       {
