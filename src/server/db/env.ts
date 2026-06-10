@@ -1,5 +1,5 @@
 export const localDatabaseUrl =
-  "postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1";
+  "postgres://postgres:postgres@localhost:5432/apexpulse_crm";
 
 export function getDatabaseUrl(
   env: Record<string, string | undefined> = process.env,

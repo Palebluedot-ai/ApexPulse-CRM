@@ -227,7 +227,7 @@ git log --oneline --reverse <old-sha>..<new-sha>
 可以在 GitHub 打开：
 
 ```text
-https://github.com/Palebluedot-ai/hashkey-otc-crm-v1/pull/16
+https://github.com/Palebluedot-ai/apexpulse-crm/pull/16
 ```
 
 ## 7. 如果发现已合并的代码有问题

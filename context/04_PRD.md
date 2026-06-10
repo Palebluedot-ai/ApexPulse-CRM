@@ -14,7 +14,7 @@
 
 ## 2. 产品概述
 
-HashKey OTC CRM V1 是一个 `PWA-first` 的个人销售 CRM。
+ApexPulse CRM 是一个 `PWA-first` 的个人销售 CRM。
 
 第一版围绕一个最小闭环构建：
 

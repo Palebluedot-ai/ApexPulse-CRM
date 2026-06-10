@@ -102,7 +102,7 @@ Postgres 连接字符串。
 local 示例：
 
 ```text
-postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1
+postgres://postgres:postgres@localhost:5432/apexpulse_crm
 ```
 
 staging / production：

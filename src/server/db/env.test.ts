@@ -16,7 +16,7 @@ describe("database environment", () => {
 
   it("uses the local development database url as an explicit fallback", () => {
     expect(getDatabaseUrl({})).toBe(
-      "postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1",
+      "postgres://postgres:postgres@localhost:5432/apexpulse_crm",
     );
   });
 

@@ -1,10 +1,10 @@
-# HashKey OTC CRM V1 — Design Doc
+# ApexPulse CRM — Design Doc
 
 > 状态: DRAFT v2
 > 创建: 2026-05-24
 > 最后更新: 2026-05-24
 > 作者: Chao
-> 前作: jsui1998-cpu/hashkey-otc-crm (V0)
+> 前作: jsui1998-cpu/apexpulse-crm (V0)
 
 ---
 
@@ -28,7 +28,7 @@ V0 只作为逻辑参考，不作为必须延续的架构。
 ### 1.1 当前定位
 
 - 项目性质：`side project`
-- 当前主要业务场景：HashKey OTC 销售工作流
+- 当前主要业务场景：OTC team 销售工作流
 - 当前唯一真实用户：`Chao`
 - 未来目标用户：Chao 的下级销售同事
 

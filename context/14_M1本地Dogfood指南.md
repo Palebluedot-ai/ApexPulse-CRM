@@ -47,14 +47,14 @@
 在项目目录运行：
 
 ```bash
-cd /Users/chao/Projects/hashkey-otc-crm-v1
+cd /Users/chao/Projects/apexpulse-crm
 docker compose up -d postgres
 ```
 
 如果容器已经在运行，命令会显示类似：
 
 ```text
-Container hashkey-otc-crm-v1-postgres Running
+Container apexpulse-crm-postgres Running
 ```
 
 这不是错误。

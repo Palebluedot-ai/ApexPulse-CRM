@@ -60,12 +60,12 @@ describe("buildDecisionKeyFields", () => {
     const item = makeItem();
     item.naturalFields.needSummary = "offramp 10M USD/月";
     item.naturalFields.nextAction = "下周约开户";
-    item.naturalFields.sourceTag = "HashKey 活动";
+    item.naturalFields.sourceTag = "ApexPulse 活动";
     item.naturalFields.nextFollowupAt = "2026-06-17";
     expect(buildDecisionKeyFields(item)).toEqual([
       { label: "需求", value: "offramp 10M USD/月" },
       { label: "下一步", value: "下周约开户" },
-      { label: "来源", value: "HashKey 活动" },
+      { label: "来源", value: "ApexPulse 活动" },
     ]);
   });
 

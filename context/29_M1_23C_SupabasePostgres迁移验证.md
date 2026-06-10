@@ -97,7 +97,7 @@ pnpm db:check
 local：
 
 ```text
-postgres://postgres:postgres@localhost:5432/hashkey_otc_crm_v1
+postgres://postgres:postgres@localhost:5432/apexpulse_crm
 ```
 
 staging / production：
@@ -177,7 +177,7 @@ pnpm db:check
 当前本地验证结果：
 
 ```text
-Database: hashkey_otc_crm_v1
+Database: apexpulse_crm
 Schema: public
 Prepared statements: true
 Missing tables: none

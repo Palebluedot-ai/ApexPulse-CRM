@@ -1,16 +1,16 @@
 services:
   postgres:
     image: postgres:17-alpine
-    container_name: hashkey-otc-crm-v1-postgres
+    container_name: apexpulse-crm-postgres
     restart: unless-stopped
     ports:
       - "127.0.0.1:5432:5432"
     environment:
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
-      POSTGRES_DB: hashkey_otc_crm_v1
+      POSTGRES_DB: apexpulse_crm
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d hashkey_otc_crm_v1"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d apexpulse_crm"]
       interval: 5s
       timeout: 5s
       retries: 12

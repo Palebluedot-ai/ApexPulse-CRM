@@ -94,7 +94,7 @@ pnpm db:check
 编辑 `.env.local`（这个文件不进 Git，请自己填写）：
 
 ```text
-DATABASE_URL=postgres://postgres:换成强密码@localhost:5432/hashkey_otc_crm_v1
+DATABASE_URL=postgres://postgres:换成强密码@localhost:5432/apexpulse_crm
 STORAGE_PROVIDER=local
 APP_BASE_URL=https://crm.你的域名
 
@@ -141,7 +141,7 @@ pnpm start        # 前台启动，监听 127.0.0.1:3000
 
 ## 7. Step 4：用 launchd 守护应用（开机自启 + 崩溃重启）
 
-创建 `~/Library/LaunchAgents/com.hashkey-otc-crm.app.plist`：
+创建 `~/Library/LaunchAgents/com.apexpulse.crm.app.plist`：
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -150,7 +150,7 @@ pnpm start        # 前台启动，监听 127.0.0.1:3000
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.hashkey-otc-crm.app</string>
+  <string>com.apexpulse.crm.app</string>
 
   <key>ProgramArguments</key>
   <array>
@@ -179,8 +179,8 @@ pnpm start        # 前台启动，监听 127.0.0.1:3000
 
 ```bash
 mkdir -p /换成/项目/绝对路径/logs
-launchctl load ~/Library/LaunchAgents/com.hashkey-otc-crm.app.plist
-launchctl list | grep hashkey-otc-crm
+launchctl load ~/Library/LaunchAgents/com.apexpulse.crm.app.plist
+launchctl list | grep apexpulse-crm
 ```
 
 应用现在常驻、开机自启、崩溃自动重启。查看日志：
@@ -249,7 +249,7 @@ bash scripts/selfhost/backup.sh
 ls -1 ~/otc-crm-backups
 ```
 
-创建 `~/Library/LaunchAgents/com.hashkey-otc-crm.backup.plist`，每天凌晨 3:30 跑：
+创建 `~/Library/LaunchAgents/com.apexpulse.crm.backup.plist`，每天凌晨 3:30 跑：
 
 ```xml
 <?xml version="1.0" encoding="UTF-8"?>
@@ -258,7 +258,7 @@ ls -1 ~/otc-crm-backups
 <plist version="1.0">
 <dict>
   <key>Label</key>
-  <string>com.hashkey-otc-crm.backup</string>
+  <string>com.apexpulse.crm.backup</string>
 
   <key>ProgramArguments</key>
   <array>
@@ -284,7 +284,7 @@ ls -1 ~/otc-crm-backups
 加载：
 
 ```bash
-launchctl load ~/Library/LaunchAgents/com.hashkey-otc-crm.backup.plist
+launchctl load ~/Library/LaunchAgents/com.apexpulse.crm.backup.plist
 ```
 
 强烈建议：再把 `~/otc-crm-backups/` 定期 `rsync` 到一块外接盘或另一台机器，避免 Mac mini 单点故障导致数据和备份一起丢。
@@ -301,20 +301,20 @@ rsync -a ~/otc-crm-backups/ /Volumes/外接盘/otc-crm-backups/
 
 ```bash
 # 1. 停应用，避免写入冲突
-launchctl unload ~/Library/LaunchAgents/com.hashkey-otc-crm.app.plist
+launchctl unload ~/Library/LaunchAgents/com.apexpulse.crm.app.plist
 
 # 2. 选定一份备份
 ls -1 ~/otc-crm-backups
 
 # 3. 恢复数据库（会写入现有库，冲突时先和负责人确认是否重建库）
-gunzip -c ~/otc-crm-backups/<时间戳>/db_hashkey_otc_crm_v1_<时间戳>.sql.gz \
-  | docker exec -i hashkey-otc-crm-v1-postgres psql -U postgres -d hashkey_otc_crm_v1
+gunzip -c ~/otc-crm-backups/<时间戳>/db_apexpulse_crm_<时间戳>.sql.gz \
+  | docker exec -i apexpulse-crm-postgres psql -U postgres -d apexpulse_crm
 
 # 4. 恢复附件
 tar -xzf ~/otc-crm-backups/<时间戳>/attachments_<时间戳>.tar.gz -C data/
 
 # 5. 重新启动应用
-launchctl load ~/Library/LaunchAgents/com.hashkey-otc-crm.app.plist
+launchctl load ~/Library/LaunchAgents/com.apexpulse.crm.app.plist
 ```
 
 不要随手 `drop database` 或删卷。需要重建库时停下来和负责人确认。
@@ -356,7 +356,7 @@ launchctl load ~/Library/LaunchAgents/com.hashkey-otc-crm.app.plist
 应用打不开 / launchd 没起来：
 
 ```bash
-launchctl list | grep hashkey-otc-crm
+launchctl list | grep apexpulse-crm
 tail -n 50 /换成/项目/绝对路径/logs/app.err.log
 ```
 
@@ -378,6 +378,6 @@ docker compose ps
 docker compose logs postgres | tail -n 30
 ```
 
-确认容器 `hashkey-otc-crm-v1-postgres` 在跑、健康检查通过。
+确认容器 `apexpulse-crm-postgres` 在跑、健康检查通过。
 
 端口 3000 被占用：先确认占用进程是不是本项目旧实例，确认后再处理，不要盲目 kill。
