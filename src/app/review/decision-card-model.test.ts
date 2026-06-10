@@ -5,7 +5,6 @@ import {
   buildBindPrediction,
   buildCardTitle,
   buildDecisionKeyFields,
-  buildHeatBadge,
 } from "./decision-card-model";
 
 function makeItem(
@@ -43,37 +42,6 @@ function makeItem(
     ...overrides,
   };
 }
-
-describe("buildHeatBadge", () => {
-  it("maps hot + high confidence to HOT · 高置信", () => {
-    const item = makeItem();
-    item.aiFields.leadQuality = "hot";
-    item.aiFields.confidence = "high";
-    expect(buildHeatBadge(item)).toEqual({
-      label: "HOT · 高置信",
-      tone: "hot",
-    });
-  });
-
-  it("maps warm without confidence to WARM only", () => {
-    const item = makeItem();
-    item.aiFields.leadQuality = "warm";
-    expect(buildHeatBadge(item)).toEqual({ label: "WARM", tone: "warm" });
-  });
-
-  it("maps unknown lead quality to 待判断 cold tone", () => {
-    expect(buildHeatBadge(makeItem())).toEqual({
-      label: "待判断",
-      tone: "cold",
-    });
-  });
-
-  it("maps not_a_lead to 非线索", () => {
-    const item = makeItem();
-    item.aiFields.leadQuality = "not_a_lead";
-    expect(buildHeatBadge(item)).toEqual({ label: "非线索", tone: "cold" });
-  });
-});
 
 describe("buildCardTitle", () => {
   it("prefers extracted customer name", () => {

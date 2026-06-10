@@ -10,7 +10,6 @@ import {
   buildBindPrediction,
   buildCardTitle,
   buildDecisionKeyFields,
-  buildHeatBadge,
 } from "./decision-card-model";
 
 const contentTypeLabels: Record<string, string> = {
@@ -18,12 +17,6 @@ const contentTypeLabels: Record<string, string> = {
   text: "文字",
   card_photo: "名片照片",
 };
-
-const heatToneClasses = {
-  hot: "bg-[rgba(212,98,42,0.12)] text-[var(--persimmon)]",
-  warm: "bg-[rgba(185,138,47,0.13)] text-[var(--gold)]",
-  cold: "bg-[var(--paper-deep)] text-[var(--ink-soft)]",
-} as const;
 
 function formatDate(value: string): string {
   return new Intl.DateTimeFormat("zh-HK", {
@@ -157,7 +150,6 @@ export function DecisionCard({
     );
   }
 
-  const heat = buildHeatBadge(item);
   const keyFields = buildDecisionKeyFields(item);
 
   return (
@@ -169,11 +161,6 @@ export function DecisionCard({
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
               <span className="font-[var(--font-serif-display)] text-xl font-bold">
                 {buildCardTitle(item)}
-              </span>
-              <span
-                className={`rounded-full px-3 py-1 text-xs font-bold ${heatToneClasses[heat.tone]}`}
-              >
-                {heat.label}
               </span>
               <span className="text-xs text-[var(--ink-soft)]">
                 {contentTypeLabels[item.contentType] ?? item.contentType} ·{" "}
@@ -194,14 +181,9 @@ export function DecisionCard({
                 ))}
               </div>
             ) : null}
-            <button
-              className="mt-2.5 inline-flex items-center gap-2 rounded-lg border border-dashed border-[rgba(47,93,80,0.35)] bg-[var(--ok-bg)] px-3 py-1.5 text-xs font-semibold text-[var(--tea-deep)]"
-              onClick={onToggleExpanded}
-              type="button"
-            >
+            <p className="mt-2 text-xs font-semibold text-[var(--tea-deep)]">
               {buildBindPrediction(item, partyId, customers)}
-              <span className="opacity-70">改 ▾</span>
-            </button>
+            </p>
           </div>
         </div>
 

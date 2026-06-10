@@ -3,40 +3,6 @@ import type {
   ReviewQueueViewItem,
 } from "@/server/review/review-page-model";
 
-export interface HeatBadge {
-  label: string;
-  tone: "hot" | "warm" | "cold";
-}
-
-const leadQualityBadges: Record<
-  ReviewQueueViewItem["aiFields"]["leadQuality"],
-  { label: string; tone: HeatBadge["tone"] }
-> = {
-  hot: { label: "HOT", tone: "hot" },
-  warm: { label: "WARM", tone: "warm" },
-  cold: { label: "COLD", tone: "cold" },
-  not_a_lead: { label: "非线索", tone: "cold" },
-  unknown: { label: "待判断", tone: "cold" },
-};
-
-const confidenceSuffixes: Record<
-  ReviewQueueViewItem["aiFields"]["confidence"],
-  string
-> = {
-  high: " · 高置信",
-  medium: " · 中置信",
-  low: " · 低置信",
-  unknown: "",
-};
-
-export function buildHeatBadge(item: ReviewQueueViewItem): HeatBadge {
-  const badge = leadQualityBadges[item.aiFields.leadQuality];
-  return {
-    label: `${badge.label}${confidenceSuffixes[item.aiFields.confidence]}`,
-    tone: badge.tone,
-  };
-}
-
 export function buildCardTitle(item: ReviewQueueViewItem): string {
   return item.naturalFields.customerName.trim() || "未识别客户";
 }
