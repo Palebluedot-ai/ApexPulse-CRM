@@ -254,7 +254,109 @@ git switch -c codex/short-task-name
 
 PR 是本项目默认合并方式。
 
-## 6. 标准开发流程
+## 6. Branch 和 review 边界
+
+一个 feature branch 内部不需要每个 commit 都 review。
+
+本项目真正需要 review 的边界是：
+
+```text
+从 feature branch merge 到 main。
+```
+
+允许在同一个 feature branch 内部做：
+
+- 多次 commit。
+- 多次 push。
+- 修测试。
+- 改文案。
+- 按 review 意见继续补 commit。
+- 用 AI agent 连续推进同一个明确任务。
+
+不允许把 feature branch 当成长期垃圾桶。
+
+如果一个 branch 已经混入多个无关目标，必须拆开。
+
+判断一个 branch 是否合理，用这个标准：
+
+```text
+这个 branch 合并后，main 是否获得一个可以解释、可以验证、可以回滚的完整变化？
+```
+
+如果答案是 yes，这个 branch 大概率合理。
+
+如果答案是 no，说明 branch 太碎、太乱，或者范围太大。
+
+## 7. 产品功能如何拆 branch
+
+产品功能 branch 不是按“我改了哪个文件”来拆。
+
+产品功能 branch 应该按“一个可验收的用户价值闭环”来拆。
+
+推荐拆法：
+
+```text
+一条 branch = 一个明确目标 + 一个可验证结果。
+```
+
+好的 branch 例子：
+
+```text
+codex/capture-image-upload
+codex/review-customer-binding
+codex/customer-latest-card
+codex/tasks-urgency-groups
+codex/weekly-report-summary
+codex/login-session-hardening
+```
+
+这些 branch 都有清楚边界：
+
+- `capture-image-upload`：只解决图片上传和保存。
+- `review-customer-binding`：只解决待确认记录绑定客户。
+- `customer-latest-card`：只解决客户详情第一屏最新沟通卡片。
+- `tasks-urgency-groups`：只解决任务分组和展示。
+- `weekly-report-summary`：只解决周报统计和摘要。
+- `login-session-hardening`：只解决登录 session 更稳。
+
+不好的 branch 例子：
+
+```text
+codex/fix-everything
+codex/m1-work
+codex/ui-and-backend-and-auth
+codex/random-polish
+codex/chao-feedback
+```
+
+这些名字的问题是：
+
+- 看不出完成标准。
+- review 时不知道重点。
+- 出问题时不好 revert。
+- 容易把多个产品目标混在一起。
+
+如果一个功能很大，先拆成多个连续 branch。
+
+例如“真实手机端端到端使用”不要一个 branch 做完，可以拆成：
+
+```text
+codex/mobile-upload-stability
+codex/vision-result-review-fields
+codex/customer-detail-mobile-first-screen
+codex/task-complete-mobile-flow
+codex/weekly-report-mobile-readability
+```
+
+每个 branch 都应该能单独回答：
+
+```text
+这次用户能多做什么？
+怎么验证它真的能做？
+如果出问题，能不能单独 revert？
+```
+
+## 8. 标准开发流程
 
 每次开始工作前，先确认本地干净，并拉最新代码：
 
@@ -306,7 +408,7 @@ git push -u origin codex/short-task-name
 
 然后在 GitHub 创建 PR。
 
-## 7. PR 合并规则
+## 9. PR 合并规则
 
 每个 PR 必须说明：
 
@@ -352,7 +454,7 @@ Squash and merge
 
 禁止为了好看历史而 force push `main`。
 
-## 8. 如何一个一个看 commit
+## 10. 如何一个一个看 commit
 
 看最近提交：
 
@@ -392,7 +494,7 @@ git log --oneline --reverse <old-sha>..<new-sha>
 https://github.com/Palebluedot-ai/apexpulse-crm/pull/16
 ```
 
-## 9. 如果发现已合并的代码有问题
+## 11. 如果发现已合并的代码有问题
 
 禁止使用：
 
@@ -420,7 +522,7 @@ git push -u origin codex/revert-bad-change
 
 然后创建 PR。
 
-## 10. 禁止提交的内容
+## 12. 禁止提交的内容
 
 禁止提交：
 
@@ -447,7 +549,7 @@ git push -u origin codex/revert-bad-change
 
 `.env.example` 只能写变量名和示例占位值，不能写真值。
 
-## 11. 数据库和 migration 规则
+## 13. 数据库和 migration 规则
 
 禁止未经 Chao 确认就做：
 
@@ -469,7 +571,7 @@ git push -u origin codex/revert-bad-change
 - 如何回滚。
 - 是否涉及真实客户数据。
 
-## 12. 产品边界规则
+## 14. 产品边界规则
 
 当前产品方向是：
 
@@ -498,7 +600,7 @@ PWA-first personal CRM for Chao's OTC sales follow-up workflow.
 
 可以做技术准备，但不能偷偷改变产品主线。
 
-## 13. 测试规则
+## 15. 测试规则
 
 业务规则必须先写测试。
 
@@ -525,7 +627,7 @@ pnpm check
 pnpm build
 ```
 
-## 14. 给 AI agent 的硬规则
+## 16. 给 AI agent 的硬规则
 
 AI agent 禁止做以下事情：
 
@@ -545,7 +647,7 @@ AI agent 每次交付时必须说明：
 - 还有什么风险。
 - 是否需要 Chao 决策。
 
-## 15. 管理员建议
+## 17. 管理员建议
 
 Chao 作为管理员，建议在 GitHub 设置：
 
