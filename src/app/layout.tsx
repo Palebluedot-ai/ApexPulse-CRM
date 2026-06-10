@@ -37,7 +37,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body>
+      <body className="pb-24 lg:pb-0">
         <AppNav />
         {children}
       </body>

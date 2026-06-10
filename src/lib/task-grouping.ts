@@ -1,0 +1,57 @@
+export type TaskUrgency = "overdue" | "today" | "this_week" | "later" | "none";
+
+function startOfDay(date: Date): Date {
+  return new Date(date.getFullYear(), date.getMonth(), date.getDate());
+}
+
+export function classifyTaskUrgency(
+  dueAt: Date | string | null,
+  now: Date,
+): TaskUrgency {
+  if (!dueAt) return "none";
+
+  const due = typeof dueAt === "string" ? new Date(dueAt) : dueAt;
+  const dayStart = startOfDay(now);
+  const nextDayStart = new Date(dayStart.getTime() + 24 * 60 * 60 * 1000);
+  const weekEnd = new Date(dayStart.getTime() + 7 * 24 * 60 * 60 * 1000);
+
+  if (due < dayStart) return "overdue";
+  if (due < nextDayStart) return "today";
+  if (due < weekEnd) return "this_week";
+  return "later";
+}
+
+export interface TaskUrgencyGroups<T> {
+  urgent: T[]; // 逾期 + 今天
+  thisWeek: T[];
+  later: T[]; // 以后 + 无截止时间
+}
+
+export function groupTasksByUrgency<T>(
+  tasks: T[],
+  getDueAt: (task: T) => Date | string | null,
+  now: Date,
+): TaskUrgencyGroups<T> {
+  const groups: TaskUrgencyGroups<T> = { urgent: [], thisWeek: [], later: [] };
+
+  for (const task of tasks) {
+    const urgency = classifyTaskUrgency(getDueAt(task), now);
+    if (urgency === "overdue" || urgency === "today") groups.urgent.push(task);
+    else if (urgency === "this_week") groups.thisWeek.push(task);
+    else groups.later.push(task);
+  }
+
+  const byDueAsc = (a: T, b: T) => {
+    const dueA = getDueAt(a);
+    const dueB = getDueAt(b);
+    if (!dueA) return 1;
+    if (!dueB) return -1;
+    return new Date(dueA).getTime() - new Date(dueB).getTime();
+  };
+
+  groups.urgent.sort(byDueAsc);
+  groups.thisWeek.sort(byDueAsc);
+  groups.later.sort(byDueAsc);
+
+  return groups;
+}
