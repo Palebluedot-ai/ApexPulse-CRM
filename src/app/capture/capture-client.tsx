@@ -166,18 +166,15 @@ export function CaptureClient() {
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-8 sm:px-8 lg:px-10">
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <p className="mb-3 w-fit rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]">
-            M1.1 · 录入入口
-          </p>
-          <h1 className="font-[var(--font-display)] text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
-            新增录入
+          <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+            录入
           </h1>
-          <p className="mt-3 max-w-2xl text-[var(--muted)]">
-            第一版先把原始内容送进待确认队列。截图和名片会保存到本机，识别结果仍然需要你在 Review 里确认。
+          <p className="mt-2 max-w-2xl text-sm text-[var(--ink-soft)]">
+            截图和文字备注提交后 AI 自动提取，去待确认页轻审查入库。
           </p>
         </div>
         <Link
-          className="w-fit rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
+          className="w-fit rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-5 py-3 text-sm font-bold text-[var(--tea-deep)]"
           href="/review"
         >
           去待确认
@@ -200,7 +197,7 @@ export function CaptureClient() {
             required
           />
           <button
-            className="mt-4 rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
+            className="mt-4 rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)]"
             type="submit"
           >
             保存为待确认
@@ -264,7 +261,7 @@ export function CaptureClient() {
             />
           </div>
           <button
-            className="mt-4 rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
+            className="mt-4 rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)]"
             type="submit"
           >
             保存图片证据
@@ -288,7 +285,7 @@ export function CaptureClient() {
                 继续上传下一张
               </button>
               <Link
-                className="inline-flex rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]"
+                className="inline-flex rounded-full bg-[var(--tea)] px-4 py-2 text-sm font-bold text-[#fdfbf4]"
                 href="/review"
               >
                 去待确认处理
