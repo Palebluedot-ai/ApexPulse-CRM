@@ -103,7 +103,7 @@ export default async function WeeklyReportPage() {
         ) : null}
 
         <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
-          <section className={card}>
+          <section className={`${card} min-w-0`}>
             <h2 className="text-sm font-bold">本周触达</h2>
             {report.touchedCustomers.length > 0 ? (
               <div className="mt-1 flex flex-col">
@@ -133,8 +133,8 @@ export default async function WeeklyReportPage() {
             )}
           </section>
 
-          <div className="flex flex-col gap-4">
-            <section className={card}>
+          <div className="flex min-w-0 flex-col gap-4">
+            <section className={`${card} min-w-0`}>
               <h2 className="text-sm font-bold">
                 遗留待办{" "}
                 <span className="font-[var(--font-numerals)] text-[var(--persimmon)]">
@@ -169,7 +169,7 @@ export default async function WeeklyReportPage() {
               </Link>
             </section>
 
-            <section className={card}>
+            <section className={`${card} min-w-0`}>
               <h2 className="text-sm font-bold">
                 本周已完成{" "}
                 <span className="font-[var(--font-numerals)] text-[var(--tea-deep)]">

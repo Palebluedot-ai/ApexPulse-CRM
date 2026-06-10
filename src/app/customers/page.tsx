@@ -241,7 +241,7 @@ export default async function CustomersPage({
                 >
                   {contact.text}
                 </span>
-                <span className="col-span-3 truncate text-xs text-[var(--ink-soft)] sm:col-span-1">
+                <span className="col-span-3 min-w-0 truncate text-xs text-[var(--ink-soft)] sm:col-span-1">
                   <span className="mr-1 font-semibold">下一步</span>
                   {customer.lastContactSummary ?? "—— 没有计划"}
                 </span>
