@@ -54,21 +54,21 @@ export default async function WeeklyReportPage() {
     return (
       <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
         <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
-          周报{" "}
-          <span className="font-[var(--font-numerals)] text-lg font-medium text-[var(--ink-soft)]">
+          周报
+          <span className="mt-1 block font-[var(--font-numerals)] text-base font-medium text-[var(--ink-soft)] sm:ml-3 sm:mt-0 sm:inline sm:text-lg">
             {formatDay(report.weekRange.start)} – {formatDay(weekEnd)} · 第{" "}
             {weekNumber(weekEnd)} 周
           </span>
         </h1>
 
-        <div className="mt-5 flex overflow-hidden rounded-[1.4rem] border border-[var(--line-soft)] bg-[var(--card)] shadow-[0_14px_40px_rgba(57,47,32,0.08)]">
+        <div className="mt-5 grid grid-cols-2 gap-3 sm:grid-cols-4">
           {stats.map((stat) => (
             <div
-              className="flex-1 border-r border-[var(--paper-deep)] px-2 py-5 text-center last:border-0"
+              className="rounded-2xl border border-[var(--line-soft)] bg-[var(--card)] px-2 py-4 text-center shadow-[0_8px_24px_rgba(57,47,32,0.06)]"
               key={stat.label}
             >
               <p
-                className={`font-[var(--font-numerals)] text-3xl font-bold sm:text-4xl ${stat.warn ? "text-[var(--persimmon)]" : "text-[var(--tea-deep)]"}`}
+                className={`font-[var(--font-numerals)] text-3xl font-bold ${stat.warn ? "text-[var(--persimmon)]" : "text-[var(--tea-deep)]"}`}
               >
                 {stat.value}
               </p>

@@ -57,11 +57,12 @@ export function CustomerTodos({
       </h2>
       {remaining.length > 0 ? (
         remaining.map((todo) => (
-          <label
+          <div
             className="flex items-center gap-2.5 border-b border-dashed border-[var(--line-soft)] py-2.5 text-sm last:border-0"
             key={todo.id}
           >
             <input
+              aria-label="完成待办"
               checked={false}
               className="h-[18px] w-[18px] flex-none accent-[var(--tea)]"
               onChange={() => void complete(todo.id)}
@@ -77,7 +78,7 @@ export function CustomerTodos({
                 </span>
               ) : null}
             </span>
-          </label>
+          </div>
         ))
       ) : (
         <p className="py-2.5 text-sm text-[var(--ink-soft)]">

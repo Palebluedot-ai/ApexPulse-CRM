@@ -390,13 +390,13 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
       {showFilters ? (
         <div className="mb-5 grid gap-3 rounded-2xl border border-[var(--line-soft)] bg-[var(--card)] p-4 lg:grid-cols-[1fr_11rem_11rem]">
           <input
-            className="min-h-11 rounded-xl border border-[var(--line-soft)] bg-white px-4 outline-none focus:border-[var(--tea)]"
+            className="min-h-11 min-w-0 rounded-xl border border-[var(--line-soft)] bg-white px-4 outline-none focus:border-[var(--tea)]"
             onChange={(event) => setQuery(event.target.value)}
             placeholder="搜索摘要、原始备注、附件名"
             value={query}
           />
           <select
-            className="min-h-11 rounded-xl border border-[var(--line-soft)] bg-white px-3 font-semibold outline-none focus:border-[var(--tea)]"
+            className="min-h-11 min-w-0 max-w-full rounded-xl border border-[var(--line-soft)] bg-white px-3 font-semibold outline-none focus:border-[var(--tea)]"
             onChange={(event) =>
               setContentType(event.target.value as ReviewContentTypeFilter)
             }
@@ -408,7 +408,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
             <option value="card_photo">只看名片照片</option>
           </select>
           <select
-            className="min-h-11 rounded-xl border border-[var(--line-soft)] bg-white px-3 font-semibold outline-none focus:border-[var(--tea)]"
+            className="min-h-11 min-w-0 max-w-full rounded-xl border border-[var(--line-soft)] bg-white px-3 font-semibold outline-none focus:border-[var(--tea)]"
             onChange={(event) =>
               setRecordScope(event.target.value as ReviewRecordScopeFilter)
             }

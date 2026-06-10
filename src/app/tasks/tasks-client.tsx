@@ -189,10 +189,11 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
         : false;
 
     return (
-      <label
+      <div
         className={`flex items-center gap-3 rounded-2xl border border-[var(--line-soft)] bg-[var(--card)] px-4 py-3 text-sm ${done ? "opacity-50" : ""}`}
       >
         <input
+          aria-label={done ? "恢复任务" : "完成任务"}
           checked={done}
           className="h-5 w-5 flex-none accent-[var(--tea)]"
           onChange={() => void toggle(task)}
@@ -215,7 +216,7 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
         >
           {dueLabel}
         </span>
-      </label>
+      </div>
     );
   }
 
@@ -230,13 +231,13 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
         onSubmit={create}
       >
         <input
-          className="min-h-11 min-w-0 flex-[2] basis-52 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)]"
+          className="min-h-11 min-w-0 basis-full rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)] sm:flex-[2] sm:basis-52"
           name="description"
           placeholder="任务内容，例如 周五给刘总发材料清单"
           required
         />
         <input
-          className="min-h-11 min-w-0 flex-1 basis-32 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)]"
+          className="min-h-11 min-w-0 flex-1 basis-[40%] rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)] sm:basis-32"
           list="task-customers"
           name="partyLabel"
           placeholder="客户（可留空）"
@@ -247,12 +248,12 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
           ))}
         </datalist>
         <input
-          className="min-h-11 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)]"
+          className="min-h-11 min-w-0 flex-1 basis-[40%] rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-3 text-sm outline-none focus:border-[var(--tea)] sm:basis-auto sm:flex-none"
           name="dueAt"
           type="datetime-local"
         />
         <button
-          className="min-h-11 rounded-full bg-[var(--tea)] px-6 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)]"
+          className="min-h-11 flex-none rounded-full bg-[var(--tea)] px-6 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)]"
           type="submit"
         >
           添加

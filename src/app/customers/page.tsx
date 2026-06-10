@@ -17,10 +17,10 @@ const followupFilters: Array<{
   value: CustomerFollowupFilter;
 }> = [
   { label: "全部", value: "all" },
-  { label: "逾期", value: "overdue" },
-  { label: "临近", value: "due_soon" },
-  { label: "健康", value: "up_to_date" },
-  { label: "沉睡", value: "unknown" },
+  { label: "该跟进", value: "overdue" },
+  { label: "快到期", value: "due_soon" },
+  { label: "正常", value: "up_to_date" },
+  { label: "没计划", value: "unknown" },
 ];
 
 const sortOptions: Array<{ label: string; value: CustomerSort }> = [
@@ -131,19 +131,19 @@ export default async function CustomersPage({
           <p className="text-xs text-[var(--ink-soft)]">
             <span className="mr-3">
               <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[var(--red-status)]" />
-              逾期
+              该跟进
             </span>
             <span className="mr-3">
               <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[var(--gold)]" />
-              临近
+              快到期
             </span>
             <span className="mr-3">
               <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#5d9b7c]" />
-              健康
+              正常
             </span>
             <span>
               <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#cbc2af]" />
-              沉睡
+              没计划
             </span>
           </p>
         </header>
@@ -153,13 +153,13 @@ export default async function CustomersPage({
           className="mb-3 flex flex-wrap items-center gap-2"
         >
           <input
-            className="min-h-11 min-w-0 flex-1 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)]"
+            className="min-h-11 min-w-0 basis-full rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)] sm:flex-1 sm:basis-auto"
             defaultValue={query}
             name="q"
             placeholder="⌕ 搜客户名 / 公司 / 需求 / 标签"
           />
           <select
-            className="min-h-11 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-3 text-sm font-semibold outline-none focus:border-[var(--tea)]"
+            className="min-h-11 min-w-0 max-w-full flex-1 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-3 text-sm font-semibold outline-none focus:border-[var(--tea)] sm:flex-none"
             defaultValue={sort}
             name="sort"
           >
@@ -180,7 +180,10 @@ export default async function CustomersPage({
           </button>
         </form>
 
-        <div className="mb-5 inline-flex flex-wrap gap-1 rounded-full bg-[var(--paper-deep)] p-1 text-sm">
+        <div
+          className="mb-5 flex gap-1 overflow-x-auto rounded-full bg-[var(--paper-deep)] p-1 text-sm"
+          style={{ scrollbarWidth: "none" }}
+        >
           {followupFilters.map((filter) => {
             const active = followupStatus === filter.value;
             const count = filterCounts[filter.value];
@@ -188,8 +191,8 @@ export default async function CustomersPage({
               <Link
                 className={
                   active
-                    ? "rounded-full bg-[var(--card)] px-4 py-1.5 font-bold shadow-[0_2px_8px_rgba(57,47,32,0.1)]"
-                    : "rounded-full px-4 py-1.5 font-medium text-[var(--ink-soft)]"
+                    ? "whitespace-nowrap rounded-full bg-[var(--card)] px-4 py-1.5 font-bold shadow-[0_2px_8px_rgba(57,47,32,0.1)]"
+                    : "whitespace-nowrap rounded-full px-4 py-1.5 font-medium text-[var(--ink-soft)]"
                 }
                 href={customerFilterHref({
                   query,

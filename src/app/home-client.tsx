@@ -68,8 +68,9 @@ export function HomeClient({
     const done = doneIds.has(task.id);
     const dueLabel = formatDue(task.dueAt, now);
     return (
-      <label className="flex items-center gap-3 border-b border-dashed border-[var(--line-soft)] py-2.5 text-sm last:border-0">
+      <div className="flex items-center gap-3 border-b border-dashed border-[var(--line-soft)] py-2.5 text-sm last:border-0">
         <input
+          aria-label="完成任务"
           checked={done}
           className="h-5 w-5 flex-none accent-[var(--tea)]"
           onChange={() => void complete(task.id)}
@@ -88,7 +89,7 @@ export function HomeClient({
         >
           {dueLabel}
         </span>
-      </label>
+      </div>
     );
   }
 
