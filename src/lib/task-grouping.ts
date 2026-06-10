@@ -21,6 +21,28 @@ export function classifyTaskUrgency(
   return "later";
 }
 
+/**
+ * 已完成任务在列表里保留 3 天（按完成当天起算的自然日）。
+ * 返回剩余可见天数；0 = 不再显示。数据库不删，仅列表过滤。
+ */
+export function completedRetentionDaysLeft(
+  completedAt: Date | string | null,
+  now: Date,
+  retentionDays = 3,
+): number {
+  if (!completedAt) return 0;
+
+  const completed =
+    typeof completedAt === "string" ? new Date(completedAt) : completedAt;
+  const completedDayStart = startOfDay(completed);
+  const nowDayStart = startOfDay(now);
+  const daysSince = Math.floor(
+    (nowDayStart.getTime() - completedDayStart.getTime()) / 86400000,
+  );
+
+  return Math.max(0, retentionDays - daysSince);
+}
+
 export interface TaskUrgencyGroups<T> {
   urgent: T[]; // 逾期 + 今天
   thisWeek: T[];
