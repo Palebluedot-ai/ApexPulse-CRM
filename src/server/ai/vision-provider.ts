@@ -71,7 +71,10 @@ export async function extractImageWithVisionProvider(
   );
 
   if (!response.ok) {
-    throw new Error(`Vision provider request failed: ${response.status}`);
+    const body = await response.text().catch(() => "");
+    throw new Error(
+      `Vision provider request failed: ${response.status} ${body.slice(0, 300)}`,
+    );
   }
 
   const payload = (await response.json()) as unknown;
@@ -106,7 +109,10 @@ export async function extractTextWithVisionProvider(
   );
 
   if (!response.ok) {
-    throw new Error(`Vision provider request failed: ${response.status}`);
+    const body = await response.text().catch(() => "");
+    throw new Error(
+      `Vision provider request failed: ${response.status} ${body.slice(0, 300)}`,
+    );
   }
 
   const payload = (await response.json()) as unknown;

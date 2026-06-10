@@ -667,9 +667,11 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
                       空字段不会强行写入；未展示的底层字段会保留，避免丢信息。
                     </p>
                     <div className="mt-3 flex flex-wrap gap-2">
-                      {item.attachments.some(
+                      {!item.extractedFields.aiExtractionSource &&
+                      (item.attachments.some(
                         (attachment) => attachment.canPreviewInline,
-                      ) || Boolean(item.rawText?.trim()) ? (
+                      ) ||
+                        Boolean(item.rawText?.trim())) ? (
                         <div className="flex flex-col gap-1">
                           <button
                             className="rounded-full border border-[var(--accent)] bg-white px-4 py-2 text-sm font-semibold text-[var(--accent-strong)] disabled:opacity-60"
