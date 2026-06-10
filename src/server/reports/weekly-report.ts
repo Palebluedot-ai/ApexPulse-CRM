@@ -74,6 +74,41 @@ export interface WeeklyReport {
   openTodos: WeeklyReportTaskRow[];
 }
 
+export interface StalledCustomer {
+  partyId: string;
+  partyName: string;
+  openTaskCount: number;
+  nextTaskDescription: string;
+}
+
+/** 失速信号：本周 0 次确认沟通且有未完成任务的客户。 */
+export function buildStalledCustomers(report: WeeklyReport): StalledCustomer[] {
+  const touchedPartyIds = new Set(
+    report.touchedCustomers
+      .map((customer) => customer.partyId)
+      .filter(Boolean),
+  );
+
+  const byParty = new Map<string, StalledCustomer>();
+  for (const task of report.openTodos) {
+    if (!task.partyId || touchedPartyIds.has(task.partyId)) continue;
+
+    const existing = byParty.get(task.partyId);
+    if (existing) {
+      existing.openTaskCount += 1;
+    } else {
+      byParty.set(task.partyId, {
+        partyId: task.partyId,
+        partyName: task.partyName ?? "未命名客户",
+        openTaskCount: 1,
+        nextTaskDescription: task.description,
+      });
+    }
+  }
+
+  return Array.from(byParty.values());
+}
+
 function inRange(date: Date, range: WeekRange): boolean {
   return date >= range.start && date < range.end;
 }

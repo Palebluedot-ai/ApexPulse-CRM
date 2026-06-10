@@ -1,30 +1,32 @@
 import Link from "next/link";
 import { createDb } from "@/server/db";
-import { getWeeklyReport, type WeeklyReportTaskRow } from "@/server/reports/weekly-report";
+import {
+  buildStalledCustomers,
+  getWeeklyReport,
+} from "@/server/reports/weekly-report";
 
 export const dynamic = "force-dynamic";
 
+function formatDay(date: Date): string {
+  return new Intl.DateTimeFormat("zh-HK", {
+    month: "numeric",
+    day: "numeric",
+  }).format(date);
+}
+
 function formatDateTime(date: Date | null): string {
   if (!date) return "未设置时间";
-
   return new Intl.DateTimeFormat("zh-HK", {
-    month: "long",
+    month: "short",
     day: "numeric",
     hour: "2-digit",
     minute: "2-digit",
   }).format(date);
 }
 
-function formatDate(date: Date): string {
-  return new Intl.DateTimeFormat("zh-HK", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  }).format(date);
-}
-
-function taskOwner(task: WeeklyReportTaskRow): string {
-  return task.partyName ?? "未绑定客户";
+function weekNumber(date: Date): number {
+  const start = new Date(date.getFullYear(), 0, 1);
+  return Math.ceil(((date.getTime() - start.getTime()) / 86400000 + 1) / 7);
 }
 
 export default async function WeeklyReportPage() {
@@ -32,171 +34,171 @@ export default async function WeeklyReportPage() {
 
   try {
     const report = await getWeeklyReport(db);
-    const cards = [
-      { label: "本周新增客户", value: report.summary.newCustomerCount },
-      { label: "本周确认沟通", value: report.summary.confirmedEventCount },
-      { label: "本周完成任务", value: report.summary.completedTaskCount },
-      { label: "当前待办", value: report.summary.openTodoCount },
+    const stalled = buildStalledCustomers(report);
+    const weekEnd = new Date(report.weekRange.end.getTime() - 1);
+
+    const stats = [
+      { label: "触达客户", value: report.summary.touchedCustomerCount },
+      { label: "完成任务", value: report.summary.completedTaskCount },
+      { label: "新增客户", value: report.summary.newCustomerCount },
+      {
+        label: "遗留待办",
+        value: report.summary.openTodoCount,
+        warn: true,
+      },
     ];
 
-    return (
-      <main className="mx-auto flex min-h-screen w-full max-w-7xl flex-col px-5 py-8 sm:px-8 lg:px-10">
-        <header className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-3 w-fit rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]">
-              M1.15 · Weekly Report
-            </p>
-            <h1 className="font-[var(--font-display)] text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
-              本周复盘
-            </h1>
-            <p className="mt-3 text-[var(--muted)]">
-              {formatDate(report.weekRange.start)} 至{" "}
-              {formatDate(new Date(report.weekRange.end.getTime() - 1))}
-            </p>
-          </div>
-          <div className="flex flex-wrap gap-2">
-            <Link
-              className="rounded-full border border-[var(--line)] bg-white/55 px-5 py-3 text-sm font-semibold text-[var(--accent-strong)]"
-              href="/tasks"
-            >
-              去任务页
-            </Link>
-            <Link
-              className="rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
-              href="/capture"
-            >
-              新增录入
-            </Link>
-          </div>
-        </header>
+    const card =
+      "rounded-[1.4rem] border border-[var(--line-soft)] bg-[var(--card)] p-5 shadow-[0_14px_40px_rgba(57,47,32,0.08)]";
 
-        <section className="mb-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
-          {cards.map((card) => (
+    return (
+      <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
+        <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+          周报{" "}
+          <span className="font-[var(--font-numerals)] text-lg font-medium text-[var(--ink-soft)]">
+            {formatDay(report.weekRange.start)} – {formatDay(weekEnd)} · 第{" "}
+            {weekNumber(weekEnd)} 周
+          </span>
+        </h1>
+
+        <div className="mt-5 flex overflow-hidden rounded-[1.4rem] border border-[var(--line-soft)] bg-[var(--card)] shadow-[0_14px_40px_rgba(57,47,32,0.08)]">
+          {stats.map((stat) => (
             <div
-              className="rounded-[1.35rem] border border-[var(--line)] bg-white/58 p-4 shadow-[0_12px_40px_rgba(25,23,20,0.06)]"
-              key={card.label}
+              className="flex-1 border-r border-[var(--paper-deep)] px-2 py-5 text-center last:border-0"
+              key={stat.label}
             >
-              <p className="text-4xl font-semibold tracking-[-0.04em]">
-                {card.value}
+              <p
+                className={`font-[var(--font-numerals)] text-3xl font-bold sm:text-4xl ${stat.warn ? "text-[var(--persimmon)]" : "text-[var(--tea-deep)]"}`}
+              >
+                {stat.value}
               </p>
-              <p className="mt-1 text-sm font-semibold text-[var(--muted)]">
-                {card.label}
+              <p className="mt-1.5 text-xs text-[var(--ink-soft)]">
+                {stat.label}
               </p>
             </div>
           ))}
-        </section>
+        </div>
 
-        <section className="grid gap-5 lg:grid-cols-[1.05fr_0.95fr]">
-          <article className="rounded-[2rem] border border-[var(--line)] bg-[rgba(255,250,240,0.82)] p-6 shadow-[0_24px_80px_rgba(25,23,20,0.1)]">
-            <div className="flex items-center justify-between gap-3">
-              <div>
-                <p className="text-sm font-semibold text-[var(--accent-strong)]">
-                  本周跟进客户
-                </p>
-                <h2 className="mt-1 text-3xl font-semibold">
-                  {report.summary.touchedCustomerCount} 个客户有确认沟通
-                </h2>
-              </div>
-              <Link
-                className="rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]"
-                href="/customers"
-              >
-                客户列表
-              </Link>
+        {stalled.length > 0 ? (
+          <div className="mt-4 rounded-2xl border border-[rgba(194,69,45,0.3)] bg-[rgba(194,69,45,0.05)] px-5 py-4">
+            <p className="text-sm font-bold text-[var(--red-status)]">
+              ⚠ 失速信号 · 本周 0 次沟通且有欠账
+            </p>
+            <div className="mt-2 flex flex-col gap-1.5">
+              {stalled.map((customer) => (
+                <Link
+                  className="flex flex-wrap items-baseline gap-2 text-sm hover:text-[var(--tea)]"
+                  href={`/customers/${customer.partyId}`}
+                  key={customer.partyId}
+                >
+                  <b>{customer.partyName}</b>
+                  <span className="text-xs text-[var(--ink-soft)]">
+                    {customer.nextTaskDescription} · 欠 {customer.openTaskCount}{" "}
+                    件事 →
+                  </span>
+                </Link>
+              ))}
             </div>
+          </div>
+        ) : null}
 
-            <div className="mt-5 grid gap-3">
-              {report.touchedCustomers.length > 0 ? (
-                report.touchedCustomers.map((customer) => (
+        <div className="mt-4 grid gap-4 lg:grid-cols-[1.1fr_0.9fr]">
+          <section className={card}>
+            <h2 className="text-sm font-bold">本周触达</h2>
+            {report.touchedCustomers.length > 0 ? (
+              <div className="mt-1 flex flex-col">
+                {report.touchedCustomers.map((customer) => (
                   <div
-                    className="rounded-2xl border border-[var(--line)] bg-white/60 p-4"
-                    key={`${customer.partyId ?? customer.latestEventId}`}
+                    className="border-b border-dashed border-[var(--line-soft)] py-2.5 text-sm last:border-0"
+                    key={customer.partyId ?? customer.latestEventId}
                   >
-                    <div className="flex flex-wrap items-center justify-between gap-2">
-                      <div>
-                        <p className="text-xl font-semibold">
-                          {customer.partyName}
-                        </p>
-                        <p className="mt-1 text-sm text-[var(--muted)]">
-                          {customer.companyName ?? "未记录公司"} · 本周{" "}
-                          {customer.weeklyEventCount} 次确认沟通
-                        </p>
-                      </div>
-                      <span className="rounded-full border border-[var(--line)] bg-white/70 px-3 py-1 text-xs font-semibold text-[var(--muted)]">
+                    <p>
+                      <b>{customer.partyName}</b>
+                      <span className="ml-2 text-xs text-[var(--ink-soft)]">
+                        {customer.companyName ?? "未记录公司"} ·{" "}
+                        {customer.weeklyEventCount} 次沟通 ·{" "}
                         {formatDateTime(customer.latestContactAt)}
                       </span>
-                    </div>
-                    <p className="mt-3 leading-7">{customer.latestSummary}</p>
+                    </p>
+                    <p className="mt-0.5 truncate text-xs text-[var(--ink-soft)]">
+                      {customer.latestSummary}
+                    </p>
                   </div>
-                ))
+                ))}
+              </div>
+            ) : (
+              <p className="mt-3 text-sm text-[var(--ink-soft)]">
+                本周还没有确认沟通。先从录入和待确认开始。
+              </p>
+            )}
+          </section>
+
+          <div className="flex flex-col gap-4">
+            <section className={card}>
+              <h2 className="text-sm font-bold">
+                遗留待办{" "}
+                <span className="font-[var(--font-numerals)] text-[var(--persimmon)]">
+                  {report.openTodos.length}
+                </span>
+              </h2>
+              {report.openTodos.length > 0 ? (
+                <div className="mt-1 flex flex-col">
+                  {report.openTodos.map((task) => (
+                    <p
+                      className="border-b border-dashed border-[var(--line-soft)] py-2 text-sm last:border-0"
+                      key={task.id}
+                    >
+                      {task.description}
+                      <span className="ml-2 text-xs text-[var(--ink-soft)]">
+                        {task.partyName ?? "未绑定客户"} ·{" "}
+                        {formatDateTime(task.dueAt)}
+                      </span>
+                    </p>
+                  ))}
+                </div>
               ) : (
-                <p className="rounded-2xl border border-[var(--line)] bg-white/60 p-4 text-[var(--muted)]">
-                  本周还没有 confirmed 沟通。先从录入和待确认开始。
+                <p className="mt-3 text-sm text-[var(--ink-soft)]">
+                  本周没有遗留待办 ✓
                 </p>
               )}
-            </div>
-          </article>
+              <Link
+                className="mt-3 inline-block text-xs font-bold text-[var(--tea)]"
+                href="/tasks"
+              >
+                去任务页处理 →
+              </Link>
+            </section>
 
-          <div className="grid gap-5">
-            <article className="rounded-[2rem] bg-[var(--foreground)] p-6 text-[var(--panel)] shadow-2xl">
-              <p className="text-sm font-semibold uppercase tracking-[0.18em] text-[#d6c5a7]">
-                本周 To-do
-              </p>
-              <h2 className="mt-3 text-3xl font-semibold">
-                还剩 {report.openTodos.length} 件事
+            <section className={card}>
+              <h2 className="text-sm font-bold">
+                本周已完成{" "}
+                <span className="font-[var(--font-numerals)] text-[var(--tea-deep)]">
+                  {report.completedTasks.length}
+                </span>
               </h2>
-              <div className="mt-5 grid gap-3">
-                {report.openTodos.length > 0 ? (
-                  report.openTodos.map((task) => (
-                    <div
-                      className="rounded-2xl border border-white/10 bg-white/[0.06] p-4"
+              {report.completedTasks.length > 0 ? (
+                <div className="mt-1 flex flex-col">
+                  {report.completedTasks.map((task) => (
+                    <p
+                      className="border-b border-dashed border-[var(--line-soft)] py-2 text-sm text-[var(--ink-soft)] last:border-0"
                       key={task.id}
                     >
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[#d6c5a7]">
-                        {taskOwner(task)} · {formatDateTime(task.dueAt)}
-                      </p>
-                      <p className="mt-2 text-lg font-semibold leading-7">
-                        {task.description}
-                      </p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-[#d6c5a7]">
-                    本周没有需要处理的 open task。
-                  </p>
-                )}
-              </div>
-            </article>
-
-            <article className="rounded-[2rem] border border-[var(--line)] bg-[rgba(255,250,240,0.82)] p-6 shadow-[0_24px_80px_rgba(25,23,20,0.1)]">
-              <p className="text-sm font-semibold text-[var(--accent-strong)]">
-                本周已完成
-              </p>
-              <h2 className="mt-1 text-3xl font-semibold">
-                {report.completedTasks.length} 个任务已完成
-              </h2>
-              <div className="mt-5 grid gap-3">
-                {report.completedTasks.length > 0 ? (
-                  report.completedTasks.map((task) => (
-                    <div
-                      className="rounded-2xl border border-[var(--line)] bg-white/60 p-4"
-                      key={task.id}
-                    >
-                      <p className="text-xs font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
-                        {taskOwner(task)} · {formatDateTime(task.completedAt)}
-                      </p>
-                      <p className="mt-2 leading-7">{task.description}</p>
-                    </div>
-                  ))
-                ) : (
-                  <p className="rounded-2xl border border-[var(--line)] bg-white/60 p-4 text-[var(--muted)]">
-                    本周还没有完成任务。
-                  </p>
-                )}
-              </div>
-            </article>
+                      <span className="line-through">{task.description}</span>
+                      <span className="ml-2 text-xs">
+                        {task.partyName ?? "未绑定客户"} ·{" "}
+                        {formatDateTime(task.completedAt)}
+                      </span>
+                    </p>
+                  ))}
+                </div>
+              ) : (
+                <p className="mt-3 text-sm text-[var(--ink-soft)]">
+                  本周还没有完成任务。
+                </p>
+              )}
+            </section>
           </div>
-        </section>
+        </div>
       </main>
     );
   } finally {

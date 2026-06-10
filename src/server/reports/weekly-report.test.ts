@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  buildStalledCustomers,
   buildWeeklyReport,
   getHongKongWeekRange,
   type WeeklyReportEventRow,
@@ -157,5 +158,41 @@ describe("weekly report", () => {
       "no-due-date",
     ]);
     expect(report.summary.openTodoCount).toBe(2);
+  });
+
+  it("flags stalled customers: open todos but zero confirmed events this week", () => {
+    const report = buildWeeklyReport({
+      referenceDate: thisWeekReference,
+      parties: [
+        party({ id: "party-1", createdAt: new Date("2026-05-01T09:00:00+08:00") }),
+        party({
+          id: "party-2",
+          displayName: "陈总",
+          companyName: "矿机贸易",
+          createdAt: new Date("2026-05-01T09:00:00+08:00"),
+        }),
+      ],
+      events: [event({ partyId: "party-1" })],
+      tasks: [
+        task({ id: "touched-task", partyId: "party-1" }),
+        task({
+          id: "stalled-task",
+          partyId: "party-2",
+          partyName: "陈总",
+          description: "发出金合规方案",
+        }),
+        task({ id: "unbound-task", partyId: null, partyName: null }),
+      ],
+    });
+
+    const stalled = buildStalledCustomers(report);
+    expect(stalled).toEqual([
+      {
+        partyId: "party-2",
+        partyName: "陈总",
+        openTaskCount: 1,
+        nextTaskDescription: "发出金合规方案",
+      },
+    ]);
   });
 });
