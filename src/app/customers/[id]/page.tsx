@@ -118,7 +118,7 @@ export default async function CustomerDetailPage({
         </Link>
 
         <header className="mt-3">
-          <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+          <h1 className="font-(family-name:--font-serif-display) text-3xl font-bold sm:text-4xl">
             {customer.displayName}
           </h1>
           <p className="mt-1.5 text-sm text-[var(--ink-soft)]">
@@ -134,7 +134,7 @@ export default async function CustomerDetailPage({
           className={`mt-4 flex flex-wrap items-center gap-3 rounded-2xl border px-5 py-3.5 ${alertStyles[actionPanel.urgency]}`}
         >
           <div className="min-w-0 flex-1">
-            <p className="font-[var(--font-serif-display)] text-[17px] font-bold">
+            <p className="font-(family-name:--font-serif-display) text-[17px] font-bold">
               {actionPanel.headline}
             </p>
             <p className="mt-0.5 text-xs text-[var(--ink-soft)]">

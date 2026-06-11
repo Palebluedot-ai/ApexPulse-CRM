@@ -51,7 +51,7 @@ function Thumbnail({ item }: { item: ReviewQueueViewItem }) {
   }
 
   return (
-    <div className="flex h-[74px] w-[74px] flex-none items-center justify-center rounded-2xl border border-[var(--line-soft)] bg-[var(--paper-deep)] font-[var(--font-serif-display)] text-2xl text-[var(--ink-soft)]">
+    <div className="flex h-[74px] w-[74px] flex-none items-center justify-center rounded-2xl border border-[var(--line-soft)] bg-[var(--paper-deep)] font-(family-name:--font-serif-display) text-2xl text-[var(--ink-soft)]">
       文
     </div>
   );
@@ -114,7 +114,7 @@ export function DecisionCard({
         <div className="flex gap-4">
           <Thumbnail item={item} />
           <div className="flex-1">
-            <p className="font-[var(--font-serif-display)] text-lg font-semibold text-[var(--ink-soft)]">
+            <p className="font-(family-name:--font-serif-display) text-lg font-semibold text-[var(--ink-soft)]">
               {contentTypeLabels[item.contentType] ?? item.contentType} ·{" "}
               {formatDate(item.capturedAt)}
             </p>
@@ -159,7 +159,7 @@ export function DecisionCard({
           <Thumbnail item={item} />
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-              <span className="font-[var(--font-serif-display)] text-xl font-bold">
+              <span className="font-(family-name:--font-serif-display) text-xl font-bold">
                 {buildCardTitle(item)}
               </span>
               <span className="text-xs text-[var(--ink-soft)]">

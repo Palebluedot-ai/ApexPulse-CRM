@@ -18,7 +18,7 @@ export default async function MobileDogfoodPage() {
           <p className="mb-3 w-fit rounded-full border border-[var(--line)] bg-white/55 px-4 py-2 text-sm font-semibold text-[var(--accent-strong)]">
             C1 · 手机端上线冲刺
           </p>
-          <h1 className="font-[var(--font-display)] text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
+          <h1 className="font-(family-name:--font-display) text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
             手机 Dogfood
           </h1>
           <p className="mt-3 max-w-2xl text-[var(--muted)]">

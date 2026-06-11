@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ApexPulse CRM — 设计稿 v2（修复后预览）</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Noto+Sans+SC:wght@400;500;700&family=Noto+Serif+SC:wght@600;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #faf4e8;
+    --paper-deep: #f3ead8;
+    --card: #fffdf7;
+    --ink: #1f1c17;
+    --ink-soft: #6b6357;
+    --line-soft: #e4d9c3;
+    --tea: #38705f;
+    --tea-deep: #2b5547;
+    --persimmon: #dd7240;
+    --gold: #b98a2f;
+    --red-status: #c2452d;
+    --ok-bg: #e9f2ec;
+    --font-serif-display: "Noto Serif SC", serif;
+    --font-numerals: "Fraunces", serif;
+    --font-sans: "Noto Sans SC", "Avenir Next", sans-serif;
+    /* 半径层级：容器 > 行内条目 > 控件；chips 全圆 */
+    --r-card: 1.4rem;
+    --r-row: 10px;
+    --r-ctl: 8px;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: var(--font-sans);
+    background: linear-gradient(160deg, #e8ede4 0%, var(--paper) 28%, #f6efdf 100%);
+    color: var(--ink);
+    padding: 40px 24px 120px;
+  }
+  .annot {
+    max-width: 1080px; margin: 0 auto 14px;
+    font-size: 13px; line-height: 1.7; color: var(--ink-soft);
+    background: #fdf9ee; border: 1px dashed var(--gold);
+    border-radius: var(--r-row); padding: 10px 16px;
+  }
+  .annot b { color: var(--persimmon); }
+  .section-label {
+    max-width: 1080px; margin: 56px auto 16px;
+    font-family: var(--font-serif-display);
+    font-size: 22px; font-weight: 700;
+  }
+  .section-label small { font-family: var(--font-sans); font-weight: 400; font-size: 13px; color: var(--ink-soft); margin-left: 10px; }
+
+  /* ---------- 字体样张 ---------- */
+  .specimen {
+    max-width: 1080px; margin: 0 auto;
+    background: var(--card); border: 1px solid var(--line-soft);
+    border-radius: var(--r-card); padding: 36px 40px;
+    display: grid; grid-template-columns: 1.2fr 1fr; gap: 32px;
+  }
+  .specimen h1 {
+    font-family: var(--font-serif-display);
+    font-size: 44px; font-weight: 900; letter-spacing: 0.01em; line-height: 1.25;
+  }
+  .specimen .body-demo { margin-top: 14px; font-size: 15px; line-height: 1.9; color: var(--ink-soft); }
+  .specimen .nums {
+    font-family: var(--font-numerals); font-weight: 700;
+    font-size: 64px; color: var(--tea-deep); line-height: 1;
+  }
+  .specimen .nums em { font-style: normal; color: var(--persimmon); }
+  .specimen .numcap { font-size: 12px; color: var(--ink-soft); margin-top: 8px; }
+  .spec-old { opacity: 0.55; border-top: 1px dashed var(--line-soft); margin-top: 18px; padding-top: 14px; }
+  .spec-old h2 { font-family: "Avenir Next", "PingFang SC", sans-serif; font-size: 28px; font-weight: 700; }
+  .spec-old p { font-size: 12px; color: var(--ink-soft); margin-top: 4px; }
+
+  /* ---------- 桌面框架 ---------- */
+  .desktop {
+    max-width: 1080px; margin: 0 auto;
+    background: linear-gradient(160deg, #e9eee5 0%, var(--paper) 30%, #f6efdf 100%);
+    border: 1px solid var(--line-soft); border-radius: 18px;
+    overflow: hidden; box-shadow: 0 30px 80px rgba(57,47,32,0.16);
+  }
+  .topnav {
+    display: flex; align-items: center; gap: 26px;
+    padding: 14px 32px;
+    background: rgba(250,244,232,0.82); backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--line-soft);
+    position: sticky; top: 0;
+  }
+  .wordmark {
+    font-family: var(--font-serif-display); font-weight: 900; font-size: 17px;
+    letter-spacing: 0.02em;
+  }
+  .wordmark span { color: var(--persimmon); }
+  .topnav a { text-decoration: none; color: var(--ink-soft); font-size: 14px; font-weight: 500; padding: 6px 2px; }
+  .topnav a.active {
+    color: var(--ink); font-weight: 700;
+    box-shadow: inset 0 -2px 0 var(--tea);
+  }
+  .topnav .badge {
+    display: inline-block; min-width: 17px; text-align: center;
+    background: var(--persimmon); color: #fff; border-radius: 99px;
+    font-size: 11px; font-weight: 700; padding: 1px 5px; margin-left: 4px;
+    font-family: var(--font-numerals);
+  }
+  .topnav .cta {
+    margin-left: auto;
+    background: var(--tea); color: #fdfbf4; font-weight: 700;
+    padding: 9px 18px; border-radius: 99px; font-size: 14px;
+    box-shadow: 0 6px 16px rgba(47,93,80,0.28);
+  }
+  .topnav .quit { font-size: 13px; }
+  .canvas { padding: 36px 40px 48px; }
+  .canvas h1 {
+    font-family: var(--font-serif-display); font-weight: 900;
+    font-size: 38px; letter-spacing: 0.01em;
+  }
+  .canvas .sub { margin-top: 8px; font-size: 14px; color: var(--ink-soft); }
+
+  .grid2 { display: grid; grid-template-columns: 1.25fr 0.9fr; gap: 18px; margin-top: 26px; }
+  .card {
+    background: var(--card); border: 1px solid var(--line-soft);
+    border-radius: var(--r-card); padding: 22px 24px;
+  }
+  .card.clickable { box-shadow: 0 14px 40px rgba(57,47,32,0.08); }
+  .card h2 { font-size: 15px; font-weight: 700; }
+  .card h2.urgent { color: var(--red-status); }
+
+  /* 空态：行动出口 */
+  .empty {
+    margin-top: 16px; padding: 28px 20px;
+    border: 1px dashed var(--line-soft); border-radius: var(--r-row);
+    text-align: center; color: var(--ink-soft); font-size: 14px;
+  }
+  .empty .ok { font-size: 15px; color: var(--tea-deep); font-weight: 700; }
+  .empty a {
+    display: inline-block; margin-top: 12px;
+    color: var(--tea); font-weight: 700; font-size: 14px; text-decoration: none;
+    border: 1.5px solid var(--tea); border-radius: 99px; padding: 8px 18px;
+  }
+
+  .pend {
+    display: flex; align-items: center; gap: 16px;
+    background: linear-gradient(to right, #fff8ea, #fdf2dd);
+    border: 1px solid var(--line-soft); border-radius: var(--r-card);
+    padding: 20px 24px; box-shadow: 0 14px 40px rgba(57,47,32,0.08);
+    text-decoration: none; color: var(--ink); font-weight: 700; font-size: 14px;
+  }
+  .pend .n { font-family: var(--font-numerals); font-size: 34px; font-weight: 700; color: var(--persimmon); }
+  .pend small { display: block; font-weight: 400; font-size: 12px; color: var(--ink-soft); }
+  .pend .arrow { margin-left: auto; color: var(--tea); font-size: 18px; }
+
+  .week .statrow { display: flex; justify-content: space-around; text-align: center; margin-top: 14px; }
+  .week .n { font-family: var(--font-numerals); font-size: 34px; font-weight: 700; color: var(--tea-deep); }
+  .week .n.warn { color: var(--persimmon); }
+  .week .cap { font-size: 12px; color: var(--ink-soft); margin-top: 3px; }
+  .week .head { display: flex; justify-content: space-between; align-items: baseline; }
+  .week .head a { color: var(--tea); font-size: 12px; font-weight: 700; text-decoration: none; }
+
+  /* ---------- 客户列表 ---------- */
+  .filters { display: flex; gap: 4px; background: var(--paper-deep); border-radius: 99px; padding: 4px; width: fit-content; margin-top: 18px; }
+  .filters span { padding: 7px 16px; border-radius: 99px; font-size: 13px; color: var(--ink-soft); font-weight: 500; }
+  .filters span.on { background: var(--card); color: var(--ink); font-weight: 700; box-shadow: 0 2px 8px rgba(57,47,32,0.1); }
+  .filters .cnt { font-family: var(--font-numerals); margin-left: 3px; }
+  .rows { display: flex; flex-direction: column; gap: 8px; margin-top: 14px; }
+  .row {
+    display: grid; grid-template-columns: auto 1.2fr 0.7fr 1.4fr; align-items: center; gap: 14px;
+    background: var(--card); border: 1px solid var(--line-soft);
+    border-radius: var(--r-row); padding: 13px 18px; font-size: 14px;
+    box-shadow: 0 4px 14px rgba(57,47,32,0.05);
+  }
+  .dot { width: 10px; height: 10px; border-radius: 99px; }
+  .dot.red { background: var(--red-status); } .dot.gold { background: var(--gold); }
+  .dot.green { background: #5d9b7c; } .dot.gray { background: #cbc2af; }
+  .row .name { font-weight: 700; font-size: 15px; }
+  .row .co { font-size: 12px; color: var(--ink-soft); }
+  .row .when { font-size: 12px; color: var(--ink-soft); white-space: nowrap; }
+  .row .when.bad { color: var(--red-status); font-weight: 700; }
+  .row .next { font-size: 12px; color: var(--ink-soft); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+  .row .next b { color: var(--ink); margin-right: 4px; }
+
+  /* ---------- login ---------- */
+  .login-wrap { display: grid; grid-template-columns: 1fr 0.85fr; gap: 40px; padding: 56px 64px; align-items: center; }
+  .login-wrap h1 {
+    font-family: var(--font-serif-display); font-weight: 900;
+    font-size: 42px; line-height: 1.3; text-wrap: balance;
+  }
+  .login-wrap .lsub { margin-top: 14px; color: var(--ink-soft); font-size: 15px; line-height: 1.8; max-width: 26em; }
+  .login-card {
+    background: var(--card); border: 1px solid var(--line-soft);
+    border-radius: var(--r-card); padding: 28px;
+    box-shadow: 0 24px 70px rgba(57,47,32,0.12);
+  }
+  .login-card label { display: block; font-size: 12px; font-weight: 700; color: var(--ink-soft); margin-bottom: 6px; }
+  .login-card input {
+    width: 100%; min-height: 46px; font-size: 15px; font-family: var(--font-sans);
+    border: 1px solid var(--line-soft); border-radius: var(--r-ctl);
+    background: var(--paper); padding: 0 14px; margin-bottom: 16px; color: var(--ink);
+  }
+  .login-card button {
+    width: 100%; min-height: 48px; border: 0; border-radius: 99px;
+    background: var(--tea); color: #fdfbf4; font-size: 15px; font-weight: 700;
+    font-family: var(--font-sans); box-shadow: 0 6px 16px rgba(47,93,80,0.28);
+  }
+
+  /* ---------- 手机框架 ---------- */
+  .phones { max-width: 1080px; margin: 0 auto; display: flex; gap: 28px; flex-wrap: wrap; }
+  .phone {
+    width: 320px; height: 640px; flex: none;
+    background: linear-gradient(160deg, #e9eee5 0%, var(--paper) 30%, #f6efdf 100%);
+    border: 1px solid var(--line-soft); border-radius: 36px;
+    overflow: hidden; position: relative;
+    box-shadow: 0 30px 80px rgba(57,47,32,0.18);
+  }
+  .phone .pc { padding: 26px 18px 90px; height: 100%; overflow: hidden; }
+  .phone h1 { font-family: var(--font-serif-display); font-weight: 900; font-size: 27px; }
+  .phone .sub { font-size: 12px; color: var(--ink-soft); margin-top: 5px; }
+  .phone .backbar { font-size: 13px; font-weight: 700; color: var(--tea); margin-bottom: 10px; }
+
+  .tabbar {
+    position: absolute; bottom: 0; left: 0; right: 0;
+    display: flex; align-items: flex-end; justify-content: space-around;
+    padding: 8px 6px 16px;
+    background: rgba(250,244,232,0.94); backdrop-filter: blur(8px);
+    border-top: 1px solid var(--line-soft);
+  }
+  .tab { text-align: center; font-size: 10px; color: var(--ink-soft); width: 52px; }
+  .tab.on { color: var(--tea-deep); font-weight: 700; }
+  .tab .ic { font-size: 17px; display: block; margin-bottom: 2px; }
+  .fab {
+    width: 52px; height: 52px; border-radius: 99px; flex: none;
+    background: var(--tea); color: #fdfbf4; font-size: 24px;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 20px rgba(47,93,80,0.4); margin-bottom: 4px;
+    position: relative; top: -14px;
+  }
+  .tab .ic .bdg {
+    position: absolute; margin-left: 8px; margin-top: -4px;
+    background: var(--persimmon); color: #fff; font-size: 9px; font-weight: 700;
+    font-family: var(--font-numerals);
+    border-radius: 99px; padding: 0 4px; min-width: 14px;
+  }
+
+  .mcard {
+    background: var(--card); border: 1px solid var(--line-soft);
+    border-radius: 18px; padding: 16px; margin-top: 14px;
+  }
+  .mcard h2 { font-size: 14px; font-weight: 700; }
+  .mcard h2.urgent { color: var(--red-status); }
+  .task { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px dashed var(--line-soft); font-size: 13px; }
+  .task:last-child { border-bottom: 0; }
+  .task .cb {
+    width: 22px; height: 22px; flex: none; border-radius: 6px;
+    border: 1.5px solid var(--tea); position: relative;
+  }
+  .task .cb::after { content: ""; position: absolute; inset: -11px; } /* 44px 热区 */
+  .task .due { margin-left: auto; font-size: 11px; color: var(--red-status); font-weight: 700; white-space: nowrap; }
+  .task .due.soft { color: var(--ink-soft); font-weight: 400; }
+  .task.done { opacity: 0.45; }
+  .task.done .desc { text-decoration: line-through; }
+  .task.done .cb { background: var(--tea); }
+  .task.done .cb::before { content: "✓"; color: #fff; position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 13px; }
+
+  .mfilters { display: flex; gap: 4px; background: var(--paper-deep); border-radius: 99px; padding: 4px; margin-top: 14px; overflow: hidden; position: relative; }
+  .mfilters::after {
+    content: ""; position: absolute; right: 0; top: 0; bottom: 0; width: 36px;
+    background: linear-gradient(to right, transparent, var(--paper-deep));
+    pointer-events: none;
+  }
+  .mfilters span { padding: 8px 13px; border-radius: 99px; font-size: 12px; color: var(--ink-soft); white-space: nowrap; flex: none; }
+  .mfilters span.on { background: var(--card); color: var(--ink); font-weight: 700; box-shadow: 0 2px 8px rgba(57,47,32,0.1); }
+
+  .mrow {
+    background: var(--card); border: 1px solid var(--line-soft);
+    border-radius: var(--r-row); padding: 12px 14px; margin-top: 8px; font-size: 12px;
+  }
+  .mrow .l1 { display: flex; align-items: center; gap: 8px; }
+  .mrow .name { font-weight: 700; font-size: 14px; }
+  .mrow .when { margin-left: auto; font-size: 11px; color: var(--ink-soft); }
+  .mrow .when.bad { color: var(--red-status); font-weight: 700; }
+  .mrow .co { color: var(--ink-soft); font-size: 11px; margin: 3px 0 0 18px; }
+  .mrow .next { color: var(--ink-soft); margin: 5px 0 0 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .mrow .next b { color: var(--ink); }
+
+  .mstats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 14px; }
+  .mstat { background: var(--card); border: 1px solid var(--line-soft); border-radius: 14px; padding: 14px 8px; text-align: center; }
+  .mstat .n { font-family: var(--font-numerals); font-size: 30px; font-weight: 700; color: var(--tea-deep); }
+  .mstat .n.warn { color: var(--persimmon); }
+  .mstat .cap { font-size: 11px; color: var(--ink-soft); margin-top: 3px; }
+</style>
+</head>
+<body>
+
+<div class="annot" style="margin-bottom:28px">
+  <b>设计稿 v2 · 2026-06-11</b> — 审查修复后的目标态预览。改动点：① P0 字体生效（Noto Serif SC 标题 / Fraunces 数字 / Noto Sans SC 正文）② 半径层级（容器 22px → 行 10px → chips 全圆）③ 去掉红色左彩边 ④ Home 空态给行动出口 ⑤ 筛选 pills 右缘渐隐 ⑥ 周报手机 ←返回 + 中文日期 ⑦ Login 迁入纸面系统 ⑧ 复选框 44px 热区。wordmark 暂用 ApexPulse（F2 待 Chao 确认）。
+</div>
+
+<div class="section-label">0 · 字体样张 <small>P0 修复前后对比——这是"AI 味"的根源</small></div>
+<div class="specimen">
+  <div>
+    <h1>先把每一次沟通，<br>记在该记的人名下。</h1>
+    <p class="body-demo">修复后：标题用 Noto Serif SC 黑宋，正文用 Noto Sans SC。语法 <code>font-(family-name:--font-serif-display)</code>。</p>
+    <div class="spec-old">
+      <h2>先把每一次沟通，记在该记的人名下。</h2>
+      <p>修复前（现状）：Tailwind 类被静默丢弃，渲染 Avenir Next / 蘋方 —— 通用模板脸。</p>
+    </div>
+  </div>
+  <div>
+    <div class="nums">3 · 4 · <em>17</em></div>
+    <p class="numcap">数字一律 Fraunces：触达 3 · 新客户 4 · 逾期 17 天。数据是 CRM 的主角，数字字体是最便宜的身份记号。</p>
+  </div>
+</div>
+
+<div class="section-label">1 · 今日（桌面） <small>F4 空态出口 + F5 去彩边 + F12 导航毛玻璃底</small></div>
+<div class="desktop">
+  <nav class="topnav">
+    <span class="wordmark">Apex<span>Pulse</span></span>
+    <a class="active">今日</a>
+    <a>待确认<span class="badge">1</span></a>
+    <a>客户</a>
+    <a>任务</a>
+    <a>周报</a>
+    <span class="cta">＋ 录入</span>
+    <a class="quit">退出</a>
+  </nav>
+  <div class="canvas">
+    <h1>6月11日 星期四</h1>
+    <div class="grid2">
+      <div class="card">
+        <h2 class="urgent">需要先处理</h2>
+        <div class="empty">
+          <p class="ok">没有逾期或今天到期的任务 ✓</p>
+          <p style="margin-top:6px">今天还没记录任何沟通</p>
+          <a>＋ 录入今天的第一条 →</a>
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:16px">
+        <a class="pend">
+          <span class="n">1</span>
+          <span>条待确认<small>点击进入轻审查</small></span>
+          <span class="arrow">→</span>
+        </a>
+        <div class="card week">
+          <div class="head"><h2 style="color:var(--ink-soft);font-size:13px">本周</h2><a>看周报 →</a></div>
+          <div class="statrow">
+            <div><div class="n">3</div><div class="cap">触达客户</div></div>
+            <div><div class="n">4</div><div class="cap">新客户</div></div>
+            <div><div class="n warn">0</div><div class="cap">逾期</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="annot">改动：左卡空态从一行灰字 → 状态确认 + 录入出口（低数据时页面有事可做）；红色左边线删除，紧急度由标题红字表达；subline "1 条待确认" 删除（与右卡重复）；顶导航加 82% 纸色毛玻璃底 + 当前页茶绿下划线加粗。</div>
+
+<div class="section-label">2 · 客户列表（桌面） <small>F6 行半径降级，行阴影减淡</small></div>
+<div class="desktop">
+  <nav class="topnav">
+    <span class="wordmark">Apex<span>Pulse</span></span>
+    <a>今日</a>
+    <a>待确认<span class="badge">1</span></a>
+    <a class="active">客户</a>
+    <a>任务</a>
+    <a>周报</a>
+    <span class="cta">＋ 录入</span>
+    <a class="quit">退出</a>
+  </nav>
+  <div class="canvas">
+    <h1>客户</h1>
+    <div class="filters">
+      <span class="on">全部<span class="cnt">4</span></span>
+      <span>该跟进<span class="cnt">0</span></span>
+      <span>快到期<span class="cnt">1</span></span>
+      <span>正常</span>
+      <span>没计划<span class="cnt">0</span></span>
+    </div>
+    <div class="rows">
+      <div class="row">
+        <span class="dot gold"></span>
+        <span><span class="name">刘总</span><br><span class="co">Demo Capital · Token2049 展会</span></span>
+        <span class="when">17 天前沟通</span>
+        <span class="next"><b>下一步</b>刘总在展会后继续了解 OTC 出入金方案、当前重点是确认公司主体…</span>
+      </div>
+      <div class="row">
+        <span class="dot green"></span>
+        <span><span class="name">Florian</span><br><span class="co">airwallex · hashkey活动</span></span>
+        <span class="when">今天沟通过</span>
+        <span class="next"><b>下一步</b>在HashKey活动认识服装出海商家Florian，有每月约10M…</span>
+      </div>
+      <div class="row">
+        <span class="dot red"></span>
+        <span><span class="name">王行长</span><br><span class="co">未记录公司</span></span>
+        <span class="when bad">逾期 3 天</span>
+        <span class="next"><b>下一步</b>约线下见面确认 KYC 材料清单</span>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="annot">改动：行半径 16px → 10px（与外层容器 22px 拉开层级，"行"读起来是条目不是卡片）；行阴影减淡到 4px 级；标题 38px 黑宋。结构不动——信息架构本来是对的。</div>
+
+<div class="section-label">3 · 登录 <small>F1 迁入纸面系统，砍 M1.14 pill</small></div>
+<div class="desktop">
+  <div class="login-wrap">
+    <div>
+      <h1>先确认是谁在使用。</h1>
+      <p class="lsub">本地登录只为了让录入、确认和任务都落到当前用户身上。</p>
+    </div>
+    <div class="login-card">
+      <label>邮箱</label>
+      <input value="chao.local@example.com">
+      <label>密码</label>
+      <input type="password" value="••••••••">
+      <button>登录</button>
+    </div>
+  </div>
+</div>
+<div class="annot">改动：黑块表单 → 纸面卡；M1.14 pill 删除；说明三段砍成一句；标题 text-wrap: balance 不再断出孤字。dev 密码提示卡保留到上线前（豁免项），但移到表单卡底部小字。</div>
+
+<div class="section-label">4 · 手机端 <small>今日空态 / 客户 pills 渐隐 / 周报 ←返回 + 中文日期 / 44px 热区</small></div>
+<div class="phones">
+  <div class="phone">
+    <div class="pc">
+      <h1>6月11日 星期四</h1>
+      <div class="mcard">
+        <h2 class="urgent">需要先处理</h2>
+        <div class="task"><span class="cb"></span><span class="desc"><b>王行长</b> 约线下见面确认材料</span><span class="due">逾期 3 天</span></div>
+        <div class="task"><span class="cb"></span><span class="desc"><b>刘总</b> 发 OTC 出入金方案</span><span class="due soft">今天</span></div>
+        <div class="task done"><span class="cb"></span><span class="desc">整理开户材料清单发给刘总</span><span class="due soft">完成 ✓</span></div>
+      </div>
+      <div class="mcard" style="background:linear-gradient(to right,#fff8ea,#fdf2dd)">
+        <div style="display:flex;align-items:center;gap:12px">
+          <span style="font-family:var(--font-numerals);font-size:28px;font-weight:700;color:var(--persimmon)">1</span>
+          <span style="font-size:13px;font-weight:700">条待确认<br><small style="font-weight:400;color:var(--ink-soft)">点击进入轻审查</small></span>
+          <span style="margin-left:auto;color:var(--tea)">→</span>
+        </div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <span class="tab on"><span class="ic">☀</span>今日</span>
+      <span class="tab"><span class="ic">◎</span>客户</span>
+      <span class="fab">＋</span>
+      <span class="tab"><span class="ic">☑<span class="bdg">1</span></span>待确认</span>
+      <span class="tab"><span class="ic">≡</span>任务</span>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="pc">
+      <h1>客户</h1>
+      <div class="mfilters">
+        <span class="on">全部 4</span><span>该跟进 0</span><span>快到期 1</span><span>正常</span><span>没计划 0</span>
+      </div>
+      <div class="mrow">
+        <div class="l1"><span class="dot gold"></span><span class="name">刘总</span><span class="when">17 天前沟通</span></div>
+        <div class="co">Demo Capital · Token2049 展会</div>
+        <div class="next"><b>下一步</b> 刘总在展会后继续了解 OTC 出入金方案…</div>
+      </div>
+      <div class="mrow">
+        <div class="l1"><span class="dot green"></span><span class="name">Florian</span><span class="when">今天沟通过</span></div>
+        <div class="co">airwallex · hashkey活动</div>
+        <div class="next"><b>下一步</b> 在HashKey活动认识服装出海商家Florian…</div>
+      </div>
+      <div class="mrow">
+        <div class="l1"><span class="dot red"></span><span class="name">王行长</span><span class="when bad">逾期 3 天</span></div>
+        <div class="co">未记录公司</div>
+        <div class="next"><b>下一步</b> 约线下见面确认 KYC 材料清单</div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <span class="tab"><span class="ic">☀</span>今日</span>
+      <span class="tab on"><span class="ic">◎</span>客户</span>
+      <span class="fab">＋</span>
+      <span class="tab"><span class="ic">☑<span class="bdg">1</span></span>待确认</span>
+      <span class="tab"><span class="ic">≡</span>任务</span>
+    </div>
+  </div>
+
+  <div class="phone">
+    <div class="pc">
+      <div class="backbar">← 返回今日</div>
+      <h1>周报</h1>
+      <p class="sub" style="font-family:var(--font-numerals);font-size:14px">6月8日 – 6月14日 · 第 24 周</p>
+      <div class="mstats">
+        <div class="mstat"><div class="n">3</div><div class="cap">触达客户</div></div>
+        <div class="mstat"><div class="n">1</div><div class="cap">完成任务</div></div>
+        <div class="mstat"><div class="n">4</div><div class="cap">新增客户</div></div>
+        <div class="mstat"><div class="n warn">3</div><div class="cap">遗留待办</div></div>
+      </div>
+      <div class="mcard">
+        <h2>本周触达</h2>
+        <div class="task"><span style="font-weight:700">Florian</span><span style="color:var(--ink-soft);font-size:11px">airwallex · 1 次沟通</span><span class="due soft">6月10日</span></div>
+        <div class="task"><span style="font-weight:700">Florian</span><span style="color:var(--ink-soft);font-size:11px">未记录公司 · 1 次沟通</span><span class="due soft">6月10日</span></div>
+      </div>
+    </div>
+    <div class="tabbar">
+      <span class="tab on"><span class="ic">☀</span>今日</span>
+      <span class="tab"><span class="ic">◎</span>客户</span>
+      <span class="fab">＋</span>
+      <span class="tab"><span class="ic">☑<span class="bdg">1</span></span>待确认</span>
+      <span class="tab"><span class="ic">≡</span>任务</span>
+    </div>
+  </div>
+</div>
+<div class="annot">手机改动：① 复选框 22px 视觉 + ::after 扩成 44px 热区 ② 客户筛选 pills 右缘渐隐提示可横滚 ③ 周报顶部 "← 返回今日"（PWA standalone 没有浏览器返回）④ 周报日期 "6月8日 – 6月14日" 替代 "8/6 - 14/6" ⑤ 已完成任务划线 + 45% 透明（落地时加 0.3s 过渡动效，F11 一并做）。</div>
+
+</body>
+</html>

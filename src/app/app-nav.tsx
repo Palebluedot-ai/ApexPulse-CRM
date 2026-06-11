@@ -20,7 +20,7 @@ function isActive(pathname: string, href: string): boolean {
 function Badge({ count }: { count: number }) {
   if (count <= 0) return null;
   return (
-    <span className="ml-1 rounded-full bg-[var(--persimmon)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
+    <span className="ml-1 rounded-full bg-[var(--persimmon-deep)] px-1.5 py-0.5 text-[10px] font-bold leading-none text-white">
       {count}
     </span>
   );
@@ -60,7 +60,7 @@ export function AppNav() {
       <header className="sticky top-0 z-20 hidden border-b border-[var(--line-soft)] bg-[rgba(250,244,232,0.88)] px-8 py-3 backdrop-blur-xl lg:block">
         <nav className="mx-auto flex max-w-5xl items-center gap-6">
           <Link
-            className="mr-2 font-[var(--font-serif-display)] text-lg font-black"
+            className="mr-2 font-(family-name:--font-serif-display) text-lg font-black"
             href="/"
           >
             OTC·CRM
@@ -163,7 +163,7 @@ function TabItem({
       href={href}
     >
       {badgeCount > 0 ? (
-        <span className="absolute -top-1 right-1 rounded-full bg-[var(--persimmon)] px-1.5 text-[9px] font-bold leading-4 text-white">
+        <span className="absolute -top-1 right-1 rounded-full bg-[var(--persimmon-deep)] px-1.5 text-[9px] font-bold leading-4 text-white">
           {badgeCount}
         </span>
       ) : null}

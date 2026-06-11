@@ -10,7 +10,7 @@
   --accent-strong: #134e4a;
   --line: rgba(25, 23, 20, 0.14);
   --font-display: "Iowan Old Style", "Palatino", "Book Antiqua", serif;
-  --font-sans: "Avenir Next", "Gill Sans", "Trebuchet MS", sans-serif;
+  --font-sans: "Noto Sans SC", "Avenir Next", "Gill Sans", "Trebuchet MS", sans-serif;
 
   /* R1 redesign tokens (context/32 §3) */
   --paper: #faf4e8;
@@ -19,9 +19,10 @@
   --ink: #1f1c17;
   --ink-soft: #6b6357;
   --line-soft: #e4d9c3;
-  --tea: #2f5d50;
-  --tea-deep: #234739;
-  --persimmon: #d4622a;
+  --tea: #38705f;
+  --tea-deep: #2b5547;
+  --persimmon: #dd7240;
+  --persimmon-deep: #d4622a;
   --gold: #b98a2f;
   --red-status: #c2452d;
   --ok-bg: #e9f2ec;

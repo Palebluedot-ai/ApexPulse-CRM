@@ -166,7 +166,7 @@ export function CaptureClient() {
     <main className="mx-auto flex min-h-screen w-full max-w-6xl flex-col px-5 py-8 sm:px-8 lg:px-10">
       <header className="mb-8 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
-          <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+          <h1 className="font-(family-name:--font-serif-display) text-3xl font-bold sm:text-4xl">
             录入
           </h1>
           <p className="mt-2 max-w-2xl text-sm text-[var(--ink-soft)]">

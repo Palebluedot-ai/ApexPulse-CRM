@@ -39,3 +39,4 @@ Thumbs.db
 *.dump
 data/
 data/attachments/
+.gstack/

@@ -53,9 +53,9 @@ export default async function WeeklyReportPage() {
 
     return (
       <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
-        <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+        <h1 className="font-(family-name:--font-serif-display) text-3xl font-bold sm:text-4xl">
           周报
-          <span className="mt-1 block font-[var(--font-numerals)] text-base font-medium text-[var(--ink-soft)] sm:ml-3 sm:mt-0 sm:inline sm:text-lg">
+          <span className="mt-1 block font-(family-name:--font-numerals) text-base font-medium text-[var(--ink-soft)] sm:ml-3 sm:mt-0 sm:inline sm:text-lg">
             {formatDay(report.weekRange.start)} – {formatDay(weekEnd)} · 第{" "}
             {weekNumber(weekEnd)} 周
           </span>
@@ -68,7 +68,7 @@ export default async function WeeklyReportPage() {
               key={stat.label}
             >
               <p
-                className={`font-[var(--font-numerals)] text-3xl font-bold ${stat.warn ? "text-[var(--persimmon)]" : "text-[var(--tea-deep)]"}`}
+                className={`font-(family-name:--font-numerals) text-3xl font-bold ${stat.warn ? "text-[var(--persimmon)]" : "text-[var(--tea-deep)]"}`}
               >
                 {stat.value}
               </p>
@@ -137,7 +137,7 @@ export default async function WeeklyReportPage() {
             <section className={`${card} min-w-0`}>
               <h2 className="text-sm font-bold">
                 遗留待办{" "}
-                <span className="font-[var(--font-numerals)] text-[var(--persimmon)]">
+                <span className="font-(family-name:--font-numerals) text-[var(--persimmon)]">
                   {report.openTodos.length}
                 </span>
               </h2>
@@ -172,7 +172,7 @@ export default async function WeeklyReportPage() {
             <section className={`${card} min-w-0`}>
               <h2 className="text-sm font-bold">
                 本周已完成{" "}
-                <span className="font-[var(--font-numerals)] text-[var(--tea-deep)]">
+                <span className="font-(family-name:--font-numerals) text-[var(--tea-deep)]">
                   {report.completedTasks.length}
                 </span>
               </h2>
