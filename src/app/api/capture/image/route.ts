@@ -4,7 +4,10 @@ import {
   requireCurrentUser,
 } from "@/server/auth/current-user";
 import { runCaptureAutoExtraction } from "@/server/capture/auto-extract";
-import { createImageCapture } from "@/server/capture/image-capture";
+import {
+  createImageCapture,
+  findRecentDuplicateImageCapture,
+} from "@/server/capture/image-capture";
 import { saveImageEvidence } from "@/server/capture/image-storage-provider";
 import { createDb } from "@/server/db";
 
@@ -20,6 +23,24 @@ export async function POST(request: Request) {
 
     if (!(imageFile instanceof File) || !imageFile.name) {
       throw new Error("Image file is required");
+    }
+
+    const duplicate = await findRecentDuplicateImageCapture(db, {
+      fileName: imageFile.name,
+      fileSize: imageFile.size,
+      createdByUserId: currentUser.id,
+    });
+
+    if (duplicate) {
+      return NextResponse.json(
+        {
+          eventId: duplicate.event.id,
+          attachmentId: duplicate.attachment.id,
+          reviewStatus: duplicate.event.reviewStatus,
+          duplicated: true,
+        },
+        { status: 200 },
+      );
     }
 
     const bytes = Buffer.from(await imageFile.arrayBuffer());

@@ -39,6 +39,7 @@ export function CaptureClient() {
   const [imageUploadResults, setImageUploadResults] = useState<
     ImageUploadResult[]
   >([]);
+  const [imageUploading, setImageUploading] = useState(false);
   const [textState, setTextState] = useState<SubmissionState>({
     status: "idle",
     message: "文字备注会保存为 pending review 事件。",
@@ -80,6 +81,8 @@ export function CaptureClient() {
 
   async function submitImage(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (imageUploading) return;
+
     const formElement = event.currentTarget;
     const form = new FormData(formElement);
     const imageFile = form.get("imageFile");
@@ -100,6 +103,8 @@ export function CaptureClient() {
       return;
     }
 
+    setImageUploading(true);
+
     try {
       const response = await fetch("/api/capture/image", {
         method: "POST",
@@ -111,6 +116,16 @@ export function CaptureClient() {
         throw new Error(
           typeof result.error === "string" ? result.error : "提交失败",
         );
+      }
+
+      if (result.duplicated === true) {
+        setImageState({
+          status: "success",
+          message: "这张图刚刚已经上传过了，不会重复创建待确认记录。",
+        });
+        setSelectedImagePreview(null);
+        formElement.reset();
+        return;
       }
 
       const eventId = String(result.eventId);
@@ -135,6 +150,8 @@ export function CaptureClient() {
         status: "error",
         message: error instanceof Error ? error.message : "提交失败",
       });
+    } finally {
+      setImageUploading(false);
     }
   }
 
@@ -261,10 +278,11 @@ export function CaptureClient() {
             />
           </div>
           <button
-            className="mt-4 rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)]"
+            className="mt-4 rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)] disabled:opacity-60"
+            disabled={imageUploading}
             type="submit"
           >
-            保存图片证据
+            {imageUploading ? "上传中…" : "保存图片证据"}
           </button>
           <p
             className={

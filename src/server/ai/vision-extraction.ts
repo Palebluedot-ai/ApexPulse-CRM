@@ -249,6 +249,8 @@ export function buildVisionExtractionRequest(input: {
       },
     ],
     response_format: { type: "json_object" },
+    // 同图重复提取时输出抖动很大(连客户名都会变),固定 0 保证结果可复核
+    temperature: 0,
   };
 }
 
@@ -287,5 +289,6 @@ export function buildTextExtractionRequest(input: {
       },
     ],
     response_format: { type: "json_object" },
+    temperature: 0,
   };
 }
