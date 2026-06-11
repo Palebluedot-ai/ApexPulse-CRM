@@ -222,7 +222,7 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
 
   return (
     <main className="mx-auto w-full max-w-4xl px-5 py-8 sm:px-8">
-      <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+      <h1 className="font-(family-name:--font-serif-display) text-3xl font-bold sm:text-4xl">
         任务
       </h1>
 
@@ -274,7 +274,7 @@ export function TasksClient({ customers, initialTasks }: TasksClientProps) {
       <section className="mt-6">
         <h2 className="mb-2 text-xs font-bold tracking-widest text-[var(--red-status)]">
           逾期 / 今天{" "}
-          <span className="font-[var(--font-numerals)] text-sm">
+          <span className="font-(family-name:--font-numerals) text-sm">
             {groups.urgent.length}
           </span>
         </h2>

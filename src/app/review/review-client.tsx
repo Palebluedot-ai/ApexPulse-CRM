@@ -328,7 +328,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
 
   const emptyQueue = (
     <section className="rounded-[1.4rem] border border-[var(--line-soft)] bg-[var(--card)] p-8 text-center shadow-[0_14px_40px_rgba(57,47,32,0.08)]">
-      <p className="font-[var(--font-serif-display)] text-3xl font-bold text-[var(--tea-deep)]">
+      <p className="font-(family-name:--font-serif-display) text-3xl font-bold text-[var(--tea-deep)]">
         队列已清空 ✓
       </p>
       <p className="mt-2 text-[var(--ink-soft)]">
@@ -347,21 +347,21 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
     <main className="mx-auto flex min-h-screen w-full max-w-4xl flex-col px-5 py-8 sm:px-8">
       <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="font-[var(--font-serif-display)] text-4xl font-bold tracking-[-0.02em]">
+          <h1 className="font-(family-name:--font-serif-display) text-4xl font-bold tracking-[-0.02em]">
             待确认 <span className="text-[var(--tea)]">·</span> 轻审查
           </h1>
           <p className="mt-2 text-sm text-[var(--ink-soft)]">
             AI 已自动提取并预归类，扫一眼 → 确认。改和跳过是例外。
             <span className="ml-3 hidden lg:inline">
-              <kbd className="rounded-md border border-[var(--line-soft)] bg-[var(--card)] px-1.5 font-[var(--font-numerals)]">
+              <kbd className="rounded-md border border-[var(--line-soft)] bg-[var(--card)] px-1.5 font-(family-name:--font-numerals)">
                 Y
               </kbd>{" "}
               确认{" "}
-              <kbd className="rounded-md border border-[var(--line-soft)] bg-[var(--card)] px-1.5 font-[var(--font-numerals)]">
+              <kbd className="rounded-md border border-[var(--line-soft)] bg-[var(--card)] px-1.5 font-(family-name:--font-numerals)">
                 E
               </kbd>{" "}
               修改{" "}
-              <kbd className="rounded-md border border-[var(--line-soft)] bg-[var(--card)] px-1.5 font-[var(--font-numerals)]">
+              <kbd className="rounded-md border border-[var(--line-soft)] bg-[var(--card)] px-1.5 font-(family-name:--font-numerals)">
                 S
               </kbd>{" "}
               跳过
@@ -377,7 +377,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
             ⚲ 筛选{showFilters ? " ▴" : ""}
           </button>
           <div className="flex items-center gap-2 rounded-2xl border border-[var(--line-soft)] bg-[var(--card)] px-4 py-2">
-            <span className="font-[var(--font-numerals)] text-2xl font-bold text-[var(--persimmon)]">
+            <span className="font-(family-name:--font-numerals) text-2xl font-bold text-[var(--persimmon)]">
               {visibleItems.length}
             </span>
             <span className="text-xs leading-tight text-[var(--ink-soft)]">
@@ -426,7 +426,7 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
         {sessionTotal > 0 ? (
           <div className="mb-4">
             <p className="mb-1.5 text-sm font-semibold text-[var(--ink-soft)]">
-              <span className="font-[var(--font-numerals)] text-[var(--tea-deep)]">
+              <span className="font-(family-name:--font-numerals) text-[var(--tea-deep)]">
                 {Math.min(doneCount + 1, sessionTotal)} / {sessionTotal}
               </span>
             </p>

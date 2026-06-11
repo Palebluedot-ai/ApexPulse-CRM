@@ -51,7 +51,7 @@ export function CustomerTodos({
     <section className="rounded-[1.4rem] border border-[var(--line-soft)] bg-[var(--card)] p-5 shadow-[0_14px_40px_rgba(57,47,32,0.08)]">
       <h2 className="text-sm font-bold">
         待办{" "}
-        <span className="font-[var(--font-numerals)] text-[var(--persimmon)]">
+        <span className="font-(family-name:--font-numerals) text-[var(--persimmon)]">
           {remaining.length}
         </span>
       </h2>
@@ -177,7 +177,7 @@ export function CustomerTimeline({
             className="flex gap-3 border-b border-dashed border-[var(--line-soft)] py-3 text-sm last:border-0"
             key={entry.eventId}
           >
-            <span className="w-12 flex-none pt-0.5 font-[var(--font-numerals)] text-xs text-[var(--ink-soft)]">
+            <span className="w-12 flex-none pt-0.5 font-(family-name:--font-numerals) text-xs text-[var(--ink-soft)]">
               {entry.dateLabel}
             </span>
             {entry.thumbnailUrl ? (

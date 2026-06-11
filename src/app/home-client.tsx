@@ -98,7 +98,7 @@ export function HomeClient({
 
   return (
     <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
-      <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+      <h1 className="font-(family-name:--font-serif-display) text-3xl font-bold sm:text-4xl">
         {dateHeading}
       </h1>
       <p className="mt-2 text-sm text-[var(--ink-soft)]">{subline}</p>
@@ -132,7 +132,7 @@ export function HomeClient({
             className="flex items-center gap-4 rounded-[1.4rem] border border-[var(--line-soft)] bg-gradient-to-r from-[#fff8ea] to-[#fdf2dd] p-5 text-sm font-bold shadow-[0_14px_40px_rgba(57,47,32,0.08)]"
             href="/review"
           >
-            <span className="font-[var(--font-numerals)] text-3xl text-[var(--persimmon)]">
+            <span className="font-(family-name:--font-numerals) text-3xl text-[var(--persimmon)]">
               {pendingCount}
             </span>
             <span>
@@ -159,19 +159,19 @@ export function HomeClient({
             </div>
             <div className="mt-3 flex justify-around text-center">
               <div>
-                <p className="font-[var(--font-numerals)] text-3xl font-bold text-[var(--tea-deep)]">
+                <p className="font-(family-name:--font-numerals) text-3xl font-bold text-[var(--tea-deep)]">
                   {weekStats.touchedCustomers}
                 </p>
                 <p className="mt-1 text-xs text-[var(--ink-soft)]">触达客户</p>
               </div>
               <div>
-                <p className="font-[var(--font-numerals)] text-3xl font-bold text-[var(--tea-deep)]">
+                <p className="font-(family-name:--font-numerals) text-3xl font-bold text-[var(--tea-deep)]">
                   {weekStats.newCustomers}
                 </p>
                 <p className="mt-1 text-xs text-[var(--ink-soft)]">新客户</p>
               </div>
               <div>
-                <p className="font-[var(--font-numerals)] text-3xl font-bold text-[var(--persimmon)]">
+                <p className="font-(family-name:--font-numerals) text-3xl font-bold text-[var(--persimmon)]">
                   {weekStats.overdueCustomers}
                 </p>
                 <p className="mt-1 text-xs text-[var(--ink-soft)]">逾期</p>

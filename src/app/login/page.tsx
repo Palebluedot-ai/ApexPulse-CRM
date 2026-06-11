@@ -18,7 +18,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             <p className="mb-5 w-fit rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]">
               M1.14 · local password
             </p>
-            <h1 className="font-[var(--font-display)] text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
+            <h1 className="font-(family-name:--font-display) text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
               先确认是谁在使用。
             </h1>
             <p className="mt-5 max-w-xl text-lg leading-8 text-[var(--muted)]">

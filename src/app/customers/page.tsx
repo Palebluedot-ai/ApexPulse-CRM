@@ -125,7 +125,7 @@ export default async function CustomersPage({
     return (
       <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
         <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
-          <h1 className="font-[var(--font-serif-display)] text-3xl font-bold sm:text-4xl">
+          <h1 className="font-(family-name:--font-serif-display) text-3xl font-bold sm:text-4xl">
             客户
           </h1>
           <p className="text-xs text-[var(--ink-soft)]">
