@@ -120,7 +120,7 @@ export function DecisionCard({
             </p>
             <p className="mt-2 flex items-center gap-2 text-sm font-semibold text-[var(--gold)]">
               <span className="inline-block h-3 w-3 animate-spin rounded-full border-2 border-[var(--gold)] border-t-transparent" />
-              AI 正在提取，几秒后字段自动出现
+              AI 正在提取，约 20 秒内字段自动出现
             </p>
             <div className="mt-3 space-y-2">
               <div className="h-3 w-3/4 rounded-full bg-[var(--paper-deep)] [animation:shimmer_1.6s_ease-in-out_infinite]" />
