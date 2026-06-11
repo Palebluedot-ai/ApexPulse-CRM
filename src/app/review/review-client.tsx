@@ -368,19 +368,19 @@ export function ReviewClient({ customers, initialItems }: ReviewClientProps) {
             </span>
           </p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-stretch gap-2.5">
           <button
-            className="rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 py-2 text-sm font-semibold text-[var(--ink-soft)]"
+            className="rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm font-semibold text-[var(--ink-soft)]"
             onClick={() => setShowFilters((current) => !current)}
             type="button"
           >
             ⚲ 筛选{showFilters ? " ▴" : ""}
           </button>
-          <div className="flex items-center gap-2 rounded-2xl border border-[var(--line-soft)] bg-[var(--card)] px-4 py-2">
-            <span className="font-(family-name:--font-numerals) text-2xl font-bold text-[var(--persimmon)]">
+          <div className="flex items-center gap-1.5 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 py-1.5">
+            <span className="font-(family-name:--font-numerals) text-xl font-bold leading-none text-[var(--persimmon)]">
               {visibleItems.length}
             </span>
-            <span className="text-xs leading-tight text-[var(--ink-soft)]">
+            <span className="text-[13px] text-[var(--ink-soft)]">
               条待确认
             </span>
           </div>

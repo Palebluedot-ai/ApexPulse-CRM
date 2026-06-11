@@ -31,6 +31,7 @@ export interface CustomerDashboardStats {
   total: number;
   dueSoon: number;
   overdue: number;
+  upToDate: number;
   unknown: number;
 }
 
@@ -141,6 +142,9 @@ export function buildCustomerDashboardStats(
       .length,
     overdue: customers.filter((customer) => customer.followupStatus === "overdue")
       .length,
+    upToDate: customers.filter(
+      (customer) => customer.followupStatus === "up_to_date",
+    ).length,
     unknown: customers.filter((customer) => customer.followupStatus === "unknown")
       .length,
   };

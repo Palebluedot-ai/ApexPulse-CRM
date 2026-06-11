@@ -220,11 +220,18 @@ describe("customer dashboard", () => {
           displayName: "Stan",
           followupStatus: "unknown",
         }),
+        buildCustomerListItem({
+          ...baseParty,
+          id: "66666666-6666-6666-6666-666666666666",
+          displayName: "Alice",
+          followupStatus: "up_to_date",
+        }),
       ]),
     ).toEqual({
-      total: 3,
+      total: 4,
       dueSoon: 1,
       overdue: 1,
+      upToDate: 1,
       unknown: 1,
     });
   });
