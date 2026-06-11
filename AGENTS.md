@@ -56,15 +56,15 @@
 - Avoid corporate jargon.
 - Prefer concrete tradeoffs over vague reassurance.
 
-## Snapshot Status (updated on 2026-06-02)
+## Snapshot Status (updated on 2026-06-11)
 
-- 全面 review 完成：M1.23D 已落地，进入 M1.23E（真实云端部署 + C1 手机真实使用）。
-- 新建核心路径图：context/31_M1_23E_首次云端部署与C1验收路径.md（自包含，含 full picture、TDD 步骤、Chao 确认）。
-- 发现并纳入路径：vision-extract 不支持 supabase-images/（必须在 E 中 TDD 修复）。
-- Chao 确认：立即真实部署、vision 云端支持优先、C1 标准=checklist+“愿意继续每天用”、暂不加 PWA icons、聚焦部署与基础闭环。
-- Snapshot 文件：docs/snapshots/2026-06-02-230914.md（按 snapshot skill 结构，中文）。
-- system log：context/system_logs/2026-06-02_M1_23E_Review与路径图.md。
-- 00_文档总览.md 已更新指向 31_ 作为最新。
-- 下一步：按 31_ 执行 Step 0 基线 + Step 1 TDD 修 vision（先测试后代码），所有变更必须 pnpm check + build 通过。
-- 参考：docs/snapshots/2026-06-02-230914.md + context/31_ + context/00_文档总览.md。
+- M1.23E 云端部署全部完成：Supabase 建表、登录用户、Storage bucket、Vercel 环境变量、线上全端点验证通过。
+- 已合并 PR：#20 CI 自动化、#21 云端 Vision 支持、#22 字体配色修复。
+- 线上状态：`https://apex-pulse-crm.vercel.app` health/login/全页面均 HTTP 200。
+- 本地状态：main 干净，pnpm check 通过（32 文件、156 测试）。
+- 当前阶段：进入 C1 手机端真实 E2E 验收。Chao 需用手机跑完金路径（登录→截图→AI→确认→客户→任务→周报）。
+- C1 验收标准：checklist 全过 + Chao 主观 gate”愿意继续每天用”。
+- system log：context/system_logs/2026-06-11_M1_23E_云端部署完成与C1验收启动.md。
+- 踩坑记录：migration 必须用 session 模式（端口 5432），不能用 transaction pooler（6543）；Vercel 环境变量不配会导致登录 500。
+- 下一步：C1 手机验收 → 1-2 周真实使用 → M2 优先级澄清。
 - 规则不变：任何产品边界变更必须停下问 Chao；TDD 铁律保留于业务规则。
