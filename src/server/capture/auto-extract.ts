@@ -1,14 +1,14 @@
-import { readFile } from "node:fs/promises";
 import { eq } from "drizzle-orm";
 import {
   buildVisionProviderConfig,
   extractImageWithVisionProvider,
   extractTextWithVisionProvider,
+  type VisionProviderConfig,
 } from "@/server/ai/vision-provider";
-import { localAttachmentPath } from "@/server/capture/local-image-storage";
 import { createDb } from "@/server/db";
 import { attachments, events, type Attachment, type Event } from "@/server/db/schema";
 import { editReviewEvent } from "@/server/review/review-queue";
+import { readExtractableImageEvidence } from "@/server/review/vision-extract-evidence";
 import { buildVisionReviewPatch } from "@/server/review/vision-review";
 
 export function shouldAutoExtract(event: {
@@ -19,23 +19,30 @@ export function shouldAutoExtract(event: {
   return !event.extractedFieldsJson.aiExtractionSource;
 }
 
-async function runExtraction(event: Event, attachment: Attachment | null) {
-  const config = buildVisionProviderConfig();
+export interface RunExtractionDeps {
+  config?: VisionProviderConfig;
+  readEvidence?: (storageKey: string) => Promise<Buffer>;
+  extractImage?: typeof extractImageWithVisionProvider;
+  extractText?: typeof extractTextWithVisionProvider;
+}
+
+export async function runExtraction(
+  event: Event,
+  attachment: Attachment | null,
+  deps: RunExtractionDeps = {},
+) {
+  const config = deps.config ?? buildVisionProviderConfig();
 
   if (event.contentType === "image") {
-    if (
-      !attachment ||
-      !attachment.storageKey.startsWith("local-images/") ||
-      !attachment.mimeType.startsWith("image/")
-    ) {
-      return null;
-    }
-
-    const imageBytes = await readFile(localAttachmentPath(attachment.storageKey));
-    const extraction = await extractImageWithVisionProvider({
+    const { imageBytes, mimeType } = await readExtractableImageEvidence(
+      attachment,
+      deps.readEvidence,
+    );
+    const extraction = await (deps.extractImage ??
+      extractImageWithVisionProvider)({
       config,
       imageBytes,
-      mimeType: attachment.mimeType,
+      mimeType,
       note: event.rawText,
     });
 
@@ -45,7 +52,10 @@ async function runExtraction(event: Event, attachment: Attachment | null) {
   const rawText = event.rawText?.trim();
   if (!rawText) return null;
 
-  const extraction = await extractTextWithVisionProvider({ config, rawText });
+  const extraction = await (deps.extractText ?? extractTextWithVisionProvider)({
+    config,
+    rawText,
+  });
   return { extraction, source: "text_api" as const };
 }
 
