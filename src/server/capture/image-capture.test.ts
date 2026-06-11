@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildImageCaptureRows } from "./image-capture";
+import {
+  buildImageCaptureRows,
+  matchesRecentImageDuplicate,
+} from "./image-capture";
 
 describe("image capture", () => {
   it("creates a pending review image event and first-class attachment row", () => {
@@ -65,5 +68,70 @@ describe("image capture", () => {
         fileSize: 0,
       }),
     ).toThrow("Positive file size is required");
+  });
+});
+
+describe("matchesRecentImageDuplicate", () => {
+  const now = new Date("2026-06-11T14:53:10+08:00");
+  const input = {
+    fileName: "IMG_4134.png",
+    fileSize: 470_074,
+    createdByUserId: "user-1",
+  };
+
+  function buildCandidate(overrides: Record<string, unknown> = {}) {
+    return {
+      fileName: "IMG_4134.png",
+      fileSize: 470_074,
+      createdByUserId: "user-1",
+      capturedAt: new Date("2026-06-11T14:53:09+08:00"),
+      ...overrides,
+    };
+  }
+
+  it("treats the same file from the same user seconds ago as a duplicate", () => {
+    expect(matchesRecentImageDuplicate(buildCandidate(), input, now)).toBe(
+      true,
+    );
+  });
+
+  it("allows re-uploading the same file outside the dedupe window", () => {
+    expect(
+      matchesRecentImageDuplicate(
+        buildCandidate({ capturedAt: new Date("2026-06-11T14:48:00+08:00") }),
+        input,
+        now,
+      ),
+    ).toBe(false);
+  });
+
+  it("does not dedupe different files of the same size", () => {
+    expect(
+      matchesRecentImageDuplicate(
+        buildCandidate({ fileName: "IMG_4135.png" }),
+        input,
+        now,
+      ),
+    ).toBe(false);
+  });
+
+  it("does not dedupe the same file name with different content size", () => {
+    expect(
+      matchesRecentImageDuplicate(
+        buildCandidate({ fileSize: 470_075 }),
+        input,
+        now,
+      ),
+    ).toBe(false);
+  });
+
+  it("does not dedupe uploads from a different user", () => {
+    expect(
+      matchesRecentImageDuplicate(
+        buildCandidate({ createdByUserId: "user-2" }),
+        input,
+        now,
+      ),
+    ).toBe(false);
   });
 });

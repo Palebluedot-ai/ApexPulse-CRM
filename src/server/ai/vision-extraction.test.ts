@@ -205,6 +205,25 @@ describe("text extraction helpers", () => {
     expect(request.response_format).toEqual({ type: "json_object" });
   });
 
+  it("pins extraction sampling at temperature 0 for stable repeated output", async () => {
+    const { buildTextExtractionRequest, buildVisionExtractionRequest } =
+      await import("./vision-extraction");
+
+    expect(
+      buildTextExtractionRequest({
+        model: "test-model",
+        rawText: "和刘总聊了开户",
+      }).temperature,
+    ).toBe(0);
+    expect(
+      buildVisionExtractionRequest({
+        model: "test-model",
+        imageBytes: Buffer.from("img"),
+        mimeType: "image/png",
+      }).temperature,
+    ).toBe(0);
+  });
+
   it("keeps the same field schema in the text prompt", async () => {
     const { buildTextExtractionPrompt } = await import("./vision-extraction");
     const prompt = buildTextExtractionPrompt();

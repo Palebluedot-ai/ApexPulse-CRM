@@ -24,17 +24,37 @@
 - [x] 生产实测验证(已完成):
   - 手动调用 `/api/review/vision-extract` 提取卡住的 2 条记录,13-16 秒成功返回字段。
   - 证明 Vision API(tokenrouter + grok-4.3)从 Vercel 出口可达,Supabase 图片下载正常。
-- [ ] TDD 修复:
+- [x] TDD 修复(PR #23 已合并):
   - 先在 `src/server/capture/auto-extract.test.ts` 加失败测试:`supabase-images/` storageKey 也应触发提取。
   - 改 `runExtraction()` 复用 `src/server/review/vision-extract-evidence.ts` 的 `readExtractableImageEvidence()`(与手动路径同一来源)。
   - 错误时不再静默 `return null`,console.error 留下日志便于 Vercel 排查。
-- [ ] `pnpm check` + `pnpm build` 通过。
+- [x] `pnpm check` + `pnpm build` 通过。
 - [ ] PR 合并后,手机再传 1 张新截图验证自动提取真正出字段。
 
 ### 2.2 提取等待文案与实际耗时不符(小)
 
-- [ ] 实测提取需要 13-16 秒,文案写"几秒后字段自动出现"会让人以为卡死。
-- [ ] 改成"AI 正在提取,约 20 秒内自动出现",降低误判。
+- [x] 实测提取需要 13-16 秒,文案写"几秒后字段自动出现"会让人以为卡死。
+- [x] 改成"AI 正在提取,约 20 秒内自动出现",降低误判(PR #23)。
+
+## 2B. 第二批 P0(2026-06-11 下午手机实测新发现)
+
+### 2B.1 同一张截图被建成两条待确认记录
+
+- [x] 根因:手机上传慢,`submitImage` 没有上传中状态,按钮可以连点;Supabase 里同名同大小文件间隔 0.8 秒传了两次,实锤双击。
+- [x] 客户端:上传期间禁用按钮 + 显示"上传中…" + in-flight 守卫。
+- [x] 服务端:TDD 防重复——同一用户、同名同大小文件、2 分钟窗口内、仍在 pending_review,直接复用已有事件返回 `duplicated: true`,不再建新记录。
+
+### 2B.2 网页卡顿 + 提取 16 秒过慢
+
+- [x] 实测定位:本地直连 Vision API 只要 6-7 秒;生产 13-16 秒。差值在 Vercel 侧——函数默认跑在美东 iad1,数据库/存储在东京,每个请求 4-5 次跨太平洋往返(~170ms/次)。页面卡顿同因:每页 2-5 次 DB 查询都跨region。
+- [x] 修复:`vercel.json` 把函数固定到 hnd1(东京),贴着 Supabase。
+- [x] 实测发现图片压缩对延迟几乎无影响(470KB PNG 7.0s vs 59KB JPEG 6.7s),瓶颈是模型推理,不做压缩。
+- [x] 同图三次提取结果不一致(客户名分别为 杨德智/CJ/CJ)→ 提取请求 temperature 固定为 0。
+
+### 2B.3 提取质量观察(待真实使用积累后处理)
+
+- [ ] 内部群聊截图会被误判出"客户"(把同事当客户名)。prompt 已有"不要把我方当客户"规则但覆盖不全。
+- [ ] 建议:积累 5-10 张典型截图做 golden set,再迭代 prompt(加"识别为内部沟通时 customerName 留空 + not_a_lead"规则);也可在 tokenrouter 上换更快的 vision 模型对比质量(改 VISION_API_MODEL 环境变量即可,不用改代码)。
 
 ## 3. P1 UI 专业度修复(按页面)
 
