@@ -119,30 +119,31 @@ export default async function CustomersPage({
       all: stats.total,
       overdue: stats.overdue,
       due_soon: stats.dueSoon,
+      up_to_date: stats.upToDate,
       unknown: stats.unknown,
     };
 
     return (
       <main className="mx-auto w-full max-w-5xl px-5 py-8 sm:px-8">
-        <header className="mb-5 flex flex-wrap items-end justify-between gap-3">
+        <header className="mb-5 flex flex-wrap items-baseline justify-between gap-x-4 gap-y-2">
           <h1 className="font-(family-name:--font-serif-display) text-3xl font-bold sm:text-4xl">
             客户
           </h1>
-          <p className="text-xs text-[var(--ink-soft)]">
-            <span className="mr-3">
-              <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[var(--red-status)]" />
+          <p className="flex flex-wrap items-center gap-x-3.5 gap-y-1 text-[13px] text-[var(--ink-soft)]">
+            <span className="inline-flex items-center gap-1.5">
+              <i className="inline-block h-2.5 w-2.5 rounded-full bg-[var(--red-status)]" />
               该跟进
             </span>
-            <span className="mr-3">
-              <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[var(--gold)]" />
+            <span className="inline-flex items-center gap-1.5">
+              <i className="inline-block h-2.5 w-2.5 rounded-full bg-[var(--gold)]" />
               快到期
             </span>
-            <span className="mr-3">
-              <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#5d9b7c]" />
+            <span className="inline-flex items-center gap-1.5">
+              <i className="inline-block h-2.5 w-2.5 rounded-full bg-[#5d9b7c]" />
               正常
             </span>
-            <span>
-              <i className="mr-1 inline-block h-2 w-2 rounded-full bg-[#cbc2af]" />
+            <span className="inline-flex items-center gap-1.5">
+              <i className="inline-block h-2.5 w-2.5 rounded-full bg-[#cbc2af]" />
               没计划
             </span>
           </p>
@@ -150,16 +151,16 @@ export default async function CustomersPage({
 
         <form
           action="/customers"
-          className="mb-3 flex flex-wrap items-center gap-2"
+          className="mb-3 grid grid-cols-[1fr_auto] gap-2 sm:grid-cols-[1fr_13rem_auto]"
         >
           <input
-            className="min-h-11 min-w-0 basis-full rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)] sm:flex-1 sm:basis-auto"
+            className="col-span-2 min-h-11 min-w-0 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 text-sm outline-none focus:border-[var(--tea)] sm:col-span-1"
             defaultValue={query}
             name="q"
             placeholder="⌕ 搜客户名 / 公司 / 需求 / 标签"
           />
           <select
-            className="min-h-11 min-w-0 max-w-full flex-1 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-3 text-sm font-semibold outline-none focus:border-[var(--tea)] sm:flex-none"
+            className="min-h-11 min-w-0 rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-3 text-sm font-semibold outline-none focus:border-[var(--tea)]"
             defaultValue={sort}
             name="sort"
           >
@@ -180,10 +181,7 @@ export default async function CustomersPage({
           </button>
         </form>
 
-        <div
-          className="mb-5 flex gap-1 overflow-x-auto rounded-full bg-[var(--paper-deep)] p-1 text-sm"
-          style={{ scrollbarWidth: "none" }}
-        >
+        <div className="mb-5 grid grid-cols-5 gap-1 rounded-full bg-[var(--paper-deep)] p-1">
           {followupFilters.map((filter) => {
             const active = followupStatus === filter.value;
             const count = filterCounts[filter.value];
@@ -191,8 +189,8 @@ export default async function CustomersPage({
               <Link
                 className={
                   active
-                    ? "whitespace-nowrap rounded-full bg-[var(--card)] px-4 py-1.5 font-bold shadow-[0_2px_8px_rgba(57,47,32,0.1)]"
-                    : "whitespace-nowrap rounded-full px-4 py-1.5 font-medium text-[var(--ink-soft)]"
+                    ? "whitespace-nowrap rounded-full bg-[var(--card)] px-1 py-1.5 text-center text-[13px] font-bold shadow-[0_2px_8px_rgba(57,47,32,0.1)]"
+                    : "whitespace-nowrap rounded-full px-1 py-1.5 text-center text-[13px] font-medium text-[var(--ink-soft)]"
                 }
                 href={customerFilterHref({
                   query,

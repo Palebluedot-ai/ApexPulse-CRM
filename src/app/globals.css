@@ -1,5 +1,11 @@
 @import "tailwindcss";
 
+@theme {
+  /* C1 dogfood 反馈:12px 辅助文字在手机上太小,全站底线提到 13px */
+  --text-xs: 13px;
+  --text-xs--line-height: 1.45;
+}
+
 :root {
   --background: #f4efe5;
   --foreground: #191714;
