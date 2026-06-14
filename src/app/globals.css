@@ -59,8 +59,12 @@ body {
   font-family: var(--font-sans);
 }
 
-a {
-  color: inherit;
+@layer base {
+  /* 链接默认继承文字色,但放进 base layer,让 Tailwind text-* 工具类能覆盖
+     (无 layer 规则会压过 @layer utilities,导致 <a> 上的 text-white 失效) */
+  a {
+    color: inherit;
+  }
 }
 
 button,
