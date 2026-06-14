@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -15,6 +15,84 @@ const desktopNavItems = [
 function isActive(pathname: string, href: string): boolean {
   if (href === "/") return pathname === "/";
   return pathname === href || pathname.startsWith(`${href}/`);
+}
+
+// 统一的内联 SVG 图标:同一套 24x24 描边风格,currentColor 跟随文字色,
+// 避免 unicode 字形被系统渲染成彩色 emoji / 粗细不一致。
+function Icon({
+  children,
+  className,
+  strokeWidth = 2,
+}: {
+  children: ReactNode;
+  className?: string;
+  strokeWidth?: number;
+}) {
+  return (
+    <svg
+      className={className}
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      strokeWidth={strokeWidth}
+      viewBox="0 0 24 24"
+    >
+      {children}
+    </svg>
+  );
+}
+
+function SunIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <circle cx="12" cy="12" r="4" />
+      <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41" />
+    </Icon>
+  );
+}
+
+function UsersIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" />
+      <circle cx="9" cy="7" r="4" />
+      <path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75" />
+    </Icon>
+  );
+}
+
+function ReviewIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2" />
+      <rect height="4" rx="1" width="8" x="8" y="2" />
+      <path d="m9 14 2 2 4-4" />
+    </Icon>
+  );
+}
+
+function TasksIcon({ className }: { className?: string }) {
+  return (
+    <Icon className={className}>
+      <path d="m3 7 2 2 4-4M3 17l2 2 4-4" />
+      <path d="M13 6h8M13 12h8M13 18h8" />
+    </Icon>
+  );
+}
+
+function PlusIcon({
+  className,
+  strokeWidth = 2,
+}: {
+  className?: string;
+  strokeWidth?: number;
+}) {
+  return (
+    <Icon className={className} strokeWidth={strokeWidth}>
+      <path d="M5 12h14M12 5v14" />
+    </Icon>
+  );
 }
 
 function Badge({ count }: { count: number }) {
@@ -84,10 +162,11 @@ export function AppNav() {
           })}
           <div className="ml-auto flex items-center gap-3">
             <Link
-              className="rounded-full bg-[var(--tea)] px-5 py-2 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)]"
+              className="flex items-center gap-1.5 rounded-full bg-[var(--tea)] px-5 py-2 text-sm font-bold text-[#fdfbf4] shadow-[0_6px_16px_rgba(47,93,80,0.28)]"
               href="/capture"
             >
-              ＋ 录入
+              <PlusIcon className="h-4 w-4" strokeWidth={2.75} />
+              录入
             </Link>
             <form action="/api/auth/logout" method="post">
               <button
@@ -106,33 +185,33 @@ export function AppNav() {
         <TabItem
           active={pathname === "/"}
           href="/"
-          icon="☀"
+          icon={<SunIcon className="h-[22px] w-[22px]" />}
           label="今日"
         />
         <TabItem
           active={isActive(pathname, "/customers")}
           href="/customers"
-          icon="◎"
+          icon={<UsersIcon className="h-[22px] w-[22px]" />}
           label="客户"
         />
         <Link
           aria-label="录入"
-          className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full border-4 border-[var(--paper)] bg-[var(--tea)] text-2xl text-white shadow-[0_10px_24px_rgba(47,93,80,0.4)]"
+          className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full border-4 border-[var(--paper)] bg-[var(--tea)] text-white shadow-[0_10px_24px_rgba(47,93,80,0.4)]"
           href="/capture"
         >
-          ＋
+          <PlusIcon className="h-8 w-8" strokeWidth={3} />
         </Link>
         <TabItem
           active={isActive(pathname, "/review")}
           badgeCount={pendingCount}
           href="/review"
-          icon="☑"
+          icon={<ReviewIcon className="h-[22px] w-[22px]" />}
           label="待确认"
         />
         <TabItem
           active={isActive(pathname, "/tasks")}
           href="/tasks"
-          icon="≣"
+          icon={<TasksIcon className="h-[22px] w-[22px]" />}
           label="任务"
         />
       </nav>
@@ -148,7 +227,7 @@ function TabItem({
   badgeCount = 0,
 }: {
   href: string;
-  icon: string;
+  icon: ReactNode;
   label: string;
   active: boolean;
   badgeCount?: number;
@@ -167,7 +246,7 @@ function TabItem({
           {badgeCount}
         </span>
       ) : null}
-      <span className="text-lg leading-none">{icon}</span>
+      {icon}
       {label}
     </Link>
   );
