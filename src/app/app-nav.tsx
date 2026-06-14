@@ -199,7 +199,7 @@ export function AppNav() {
           className="-mt-7 flex h-14 w-14 items-center justify-center rounded-full border-4 border-[var(--paper)] bg-[var(--tea)] text-white shadow-[0_10px_24px_rgba(47,93,80,0.4)]"
           href="/capture"
         >
-          <PlusIcon className="h-8 w-8" strokeWidth={3} />
+          <PlusIcon className="h-7 w-7" strokeWidth={2.25} />
         </Link>
         <TabItem
           active={isActive(pathname, "/review")}
