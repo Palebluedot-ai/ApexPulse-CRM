@@ -15,7 +15,7 @@ const variants = [
   {
     id: "plus" as const,
     name: "A. 极简加号",
-    intent: "最接近“看到加号就知道上传”，首屏只给一个动作。",
+    intent: "16:9 证据投入口，首屏只有一个明确上传动作。",
   },
   {
     id: "stack" as const,
@@ -186,39 +186,56 @@ function PlusVariant({
   preview: PreviewState | null;
 }) {
   return (
-    <article className="rounded-[2rem] border border-[var(--line-soft)] bg-[var(--card)] p-5 shadow-[0_24px_70px_rgba(31,28,23,0.1)]">
+    <article className="overflow-hidden rounded-[2rem] border border-[rgba(56,112,95,0.18)] bg-[linear-gradient(180deg,#fffdf7_0%,#f6efe2_100%)] p-5 shadow-[0_26px_80px_rgba(31,28,23,0.12)]">
       <HiddenImageInput inputRef={inputRef} onFile={onFile} />
-      <p className="text-sm font-bold text-[var(--tea)]">方案 A</p>
-      <h2 className="mt-2 text-2xl font-black text-[var(--ink)]">
-        一个加号，直接上传
-      </h2>
-      <p className="mt-2 text-sm leading-6 text-[var(--ink-soft)]">
-        上传截图，AI 先提取，你确认后入库。
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-sm font-bold text-[var(--tea)]">方案 A</p>
+          <h2 className="mt-2 text-2xl font-black text-[var(--ink)]">
+            证据投入口
+          </h2>
+        </div>
+        <span className="rounded-full border border-[rgba(56,112,95,0.18)] bg-white/65 px-3 py-1 text-xs font-black text-[var(--tea-deep)]">
+          16:9
+        </span>
+      </div>
+      <p className="mt-3 max-w-72 text-sm leading-6 text-[var(--ink-soft)]">
+        上传一张截图，AI 先整理，你确认后入库。
       </p>
       <button
-        className="mt-6 flex min-h-[17rem] w-full flex-col items-center justify-center rounded-[2rem] border border-dashed border-[var(--tea)] bg-[linear-gradient(145deg,#fffdf7,#edf5ef)] text-center transition hover:scale-[1.01]"
+        aria-label="上传一张截图"
+        className="group relative mt-6 aspect-video w-full overflow-hidden rounded-[2rem] border border-[rgba(56,112,95,0.2)] bg-[radial-gradient(circle_at_50%_38%,rgba(255,255,255,0.96)_0%,rgba(242,247,239,0.94)_36%,rgba(221,235,224,0.92)_100%)] p-5 text-center shadow-[inset_0_1px_0_rgba(255,255,255,0.86),0_22px_60px_rgba(56,112,95,0.16)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.9),0_28px_72px_rgba(56,112,95,0.22)]"
         onClick={onPick}
         type="button"
       >
-        <span className="flex size-24 items-center justify-center rounded-full bg-[var(--tea)] text-6xl font-light leading-none text-white shadow-[0_18px_40px_rgba(56,112,95,0.28)]">
-          +
-        </span>
-        <span className="mt-5 text-xl font-black text-[var(--ink)]">
-          上传截图
-        </span>
-        <span className="mt-2 max-w-52 text-sm leading-6 text-[var(--ink-soft)]">
-          微信聊天、名片、展会线索都可以先丢进来
+        <span className="pointer-events-none absolute inset-x-7 top-5 h-px bg-[linear-gradient(90deg,transparent,rgba(56,112,95,0.24),transparent)]" />
+        <span className="pointer-events-none absolute -left-12 top-8 size-28 rounded-full bg-[rgba(201,145,92,0.12)] blur-2xl" />
+        <span className="pointer-events-none absolute -right-10 bottom-2 size-32 rounded-full bg-[rgba(56,112,95,0.16)] blur-2xl" />
+        <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(135deg,rgba(255,255,255,0.34),transparent_46%,rgba(56,112,95,0.08))]" />
+
+        <span className="relative flex h-full flex-col items-center justify-center">
+          <span className="relative flex size-24 items-center justify-center rounded-full bg-[linear-gradient(145deg,#1f4f43,#3f8a71)] shadow-[0_18px_42px_rgba(31,79,67,0.32),inset_0_1px_0_rgba(255,255,255,0.22)] transition duration-300 group-hover:scale-[1.04]">
+            <span className="absolute inset-[-0.55rem] rounded-full border border-[rgba(56,112,95,0.16)]" />
+            <span className="absolute h-12 w-1 rounded-full bg-[#fffdf7]" />
+            <span className="absolute h-1 w-12 rounded-full bg-[#fffdf7]" />
+          </span>
+          <span className="mt-5 text-xl font-black text-[var(--ink)]">
+            上传截图
+          </span>
+          <span className="mt-2 max-w-56 text-sm leading-6 text-[var(--ink-soft)]">
+            微信聊天、名片、展会线索都可以先丢进来
+          </span>
         </span>
       </button>
       <ImagePreview preview={preview} />
       {preview ? (
         <div className="mt-4 space-y-3">
           <textarea
-            className="min-h-24 w-full rounded-[1.3rem] border border-[var(--line-soft)] bg-white/80 p-4 text-sm leading-6 outline-none focus:border-[var(--tea)]"
+            className="min-h-24 w-full rounded-[1.3rem] border border-[rgba(56,112,95,0.18)] bg-white/82 p-4 text-sm leading-6 outline-none focus:border-[var(--tea)]"
             placeholder="可选备注：这张截图是什么场景？"
           />
           <button
-            className="min-h-11 w-full rounded-full bg-[var(--tea)] px-5 text-sm font-black text-white"
+            className="min-h-11 w-full rounded-full bg-[var(--tea)] px-5 text-sm font-black text-white shadow-[0_14px_32px_rgba(56,112,95,0.22)]"
             type="button"
           >
             上传到待确认
