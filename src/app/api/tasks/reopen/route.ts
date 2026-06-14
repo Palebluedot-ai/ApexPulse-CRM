@@ -11,9 +11,10 @@ export async function POST(request: Request) {
   const { client, db } = createDb();
 
   try {
-    await requireCurrentUser(db);
+    const currentUser = await requireCurrentUser(db);
     const task = await reopenTask(db, {
       taskId: typeof body.taskId === "string" ? body.taskId : "",
+      currentUserId: currentUser.id,
     });
 
     return NextResponse.json({ task });

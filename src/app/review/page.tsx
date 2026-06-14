@@ -1,3 +1,4 @@
+import { requireCurrentUser } from "@/server/auth/current-user";
 import { listCustomerListItems } from "@/server/customers/customer-dashboard";
 import { createDb } from "@/server/db";
 import {
@@ -13,9 +14,10 @@ export default async function ReviewPage() {
   const { client, db } = createDb();
 
   try {
+    const currentUser = await requireCurrentUser(db);
     const [pendingItems, customers] = await Promise.all([
-      listPendingReviewItems(db),
-      listCustomerListItems(db),
+      listPendingReviewItems(db, currentUser.id),
+      listCustomerListItems(db, currentUser.id),
     ]);
 
     return (

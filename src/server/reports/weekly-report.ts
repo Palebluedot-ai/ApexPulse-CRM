@@ -216,6 +216,7 @@ export function buildWeeklyReport(input: {
 
 export async function getWeeklyReport(
   db: Db,
+  currentUserId: string,
   referenceDate = new Date(),
 ): Promise<WeeklyReport> {
   const weekRange = getHongKongWeekRange(referenceDate);
@@ -228,7 +229,13 @@ export async function getWeeklyReport(
         createdAt: parties.createdAt,
       })
       .from(parties)
-      .where(and(gte(parties.createdAt, weekRange.start), lt(parties.createdAt, weekRange.end))),
+      .where(
+        and(
+          eq(parties.createdByUserId, currentUserId),
+          gte(parties.createdAt, weekRange.start),
+          lt(parties.createdAt, weekRange.end),
+        ),
+      ),
     db
       .select({
         id: events.id,
@@ -242,7 +249,12 @@ export async function getWeeklyReport(
       })
       .from(events)
       .leftJoin(parties, eq(parties.id, events.partyId))
-      .where(eq(events.reviewStatus, "confirmed"))
+      .where(
+        and(
+          eq(events.reviewStatus, "confirmed"),
+          eq(events.createdByUserId, currentUserId),
+        ),
+      )
       .orderBy(asc(events.capturedAt)),
     db
       .select({
@@ -258,12 +270,15 @@ export async function getWeeklyReport(
       .from(tasks)
       .leftJoin(parties, eq(parties.id, tasks.partyId))
       .where(
-        or(
-          eq(tasks.status, "open"),
-          and(
-            eq(tasks.status, "done"),
-            gte(tasks.completedAt, weekRange.start),
-            lt(tasks.completedAt, weekRange.end),
+        and(
+          eq(tasks.createdByUserId, currentUserId),
+          or(
+            eq(tasks.status, "open"),
+            and(
+              eq(tasks.status, "done"),
+              gte(tasks.completedAt, weekRange.start),
+              lt(tasks.completedAt, weekRange.end),
+            ),
           ),
         ),
       )

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireCurrentUser } from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import {
   buildCustomerDashboardStats,
@@ -107,7 +108,8 @@ export default async function CustomersPage({
   const { client, db } = createDb();
 
   try {
-    const customers = await listCustomerListItems(db);
+    const currentUser = await requireCurrentUser(db);
+    const customers = await listCustomerListItems(db, currentUser.id);
     const stats = buildCustomerDashboardStats(customers);
     const visibleCustomers = sortCustomerListItems(
       filterCustomerListItems(customers, { query, followupStatus }),

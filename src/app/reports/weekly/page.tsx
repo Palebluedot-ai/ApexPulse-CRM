@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { requireCurrentUser } from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import {
   buildStalledCustomers,
@@ -33,7 +34,8 @@ export default async function WeeklyReportPage() {
   const { client, db } = createDb();
 
   try {
-    const report = await getWeeklyReport(db);
+    const currentUser = await requireCurrentUser(db);
+    const report = await getWeeklyReport(db, currentUser.id);
     const stalled = buildStalledCustomers(report);
     const weekEnd = new Date(report.weekRange.end.getTime() - 1);
 

@@ -1,4 +1,4 @@
-import { asc, eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 import {
   parties,
@@ -100,7 +100,10 @@ export async function createTask(db: Db, input: CreateTaskInput) {
   return task;
 }
 
-export async function listTasks(db: Db): Promise<TaskListItem[]> {
+export async function listTasks(
+  db: Db,
+  currentUserId: string,
+): Promise<TaskListItem[]> {
   const rows = await db
     .select({
       task: tasks,
@@ -108,6 +111,7 @@ export async function listTasks(db: Db): Promise<TaskListItem[]> {
     })
     .from(tasks)
     .leftJoin(parties, eq(parties.id, tasks.partyId))
+    .where(eq(tasks.createdByUserId, currentUserId))
     .orderBy(asc(tasks.status), asc(tasks.dueAt), asc(tasks.createdAt));
 
   return rows.map((row) => ({
@@ -125,12 +129,17 @@ export async function listTasks(db: Db): Promise<TaskListItem[]> {
 
 export async function completeTask(
   db: Db,
-  input: CompleteTaskInput & { taskId: string },
+  input: CompleteTaskInput & { taskId: string; currentUserId: string },
 ) {
   const [task] = await db
     .update(tasks)
     .set(buildCompleteTaskUpdate(input))
-    .where(eq(tasks.id, requireTaskId(input.taskId)))
+    .where(
+      and(
+        eq(tasks.id, requireTaskId(input.taskId)),
+        eq(tasks.createdByUserId, input.currentUserId),
+      ),
+    )
     .returning();
 
   if (!task) throw new Error("Task not found");
@@ -140,12 +149,17 @@ export async function completeTask(
 
 export async function reopenTask(
   db: Db,
-  input: ReopenTaskInput & { taskId: string },
+  input: ReopenTaskInput & { taskId: string; currentUserId: string },
 ) {
   const [task] = await db
     .update(tasks)
     .set(buildReopenTaskUpdate(input))
-    .where(eq(tasks.id, requireTaskId(input.taskId)))
+    .where(
+      and(
+        eq(tasks.id, requireTaskId(input.taskId)),
+        eq(tasks.createdByUserId, input.currentUserId),
+      ),
+    )
     .returning();
 
   if (!task) throw new Error("Task not found");

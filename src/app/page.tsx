@@ -1,3 +1,4 @@
+import { requireCurrentUser } from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import {
   buildCustomerDashboardStats,
@@ -16,11 +17,12 @@ export default async function Home() {
   const { client, db } = createDb();
 
   try {
+    const currentUser = await requireCurrentUser(db);
     const [tasks, customers, pendingItems, weeklyReport] = await Promise.all([
-      listTasks(db),
-      listCustomerListItems(db),
-      listPendingReviewItems(db, 100),
-      getWeeklyReport(db),
+      listTasks(db, currentUser.id),
+      listCustomerListItems(db, currentUser.id),
+      listPendingReviewItems(db, currentUser.id, 100),
+      getWeeklyReport(db, currentUser.id),
     ]);
 
     const now = new Date();
