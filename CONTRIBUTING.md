@@ -356,7 +356,73 @@ codex/weekly-report-mobile-readability
 如果出问题，能不能单独 revert？
 ```
 
-## 8. 标准开发流程
+## 8. Issue -> Branch -> PR 流程
+
+所有非紧急开发都先开 GitHub Issue，再开 branch，再开 PR。
+
+Issue 用来定义问题边界。
+
+Branch 用来隔离实现。
+
+PR 用来审阅和合并。
+
+标准顺序是：
+
+```text
+Issue -> Branch -> Commit -> Push -> PR -> CI -> Review -> Merge
+```
+
+Issue 类型先用 GitHub 默认 label，不额外造复杂分类：
+
+```text
+feature / 新功能 / 改进: enhancement
+bug / 已经坏掉的行为: bug
+文档补充: documentation
+需要讨论或澄清: question
+```
+
+Feature issue 必须写清楚：
+
+- 背景。
+- 目标。
+- 范围。
+- 不做什么。
+- 验收标准。
+- 推荐分支名。
+- 风险。
+
+Bug issue 必须写清楚：
+
+- 复现步骤。
+- 期望结果。
+- 实际结果。
+- 影响范围。
+- 截图或错误日志，如果有。
+- 已尝试的排查。
+
+分支名应该对应 issue 的目标，例如：
+
+```text
+codex/c1-capture-a-polish
+codex/c1-beta-accounts
+codex/ci-pr-guardrails
+```
+
+PR 标题或描述必须关联 issue。
+
+推荐写法：
+
+```text
+Closes #29
+```
+
+这样 PR merge 后 GitHub 会自动关闭对应 issue。
+
+一个 PR 默认只关闭一个 issue。
+
+如果一个 PR 需要关闭多个 issue，必须在 PR 描述里解释为什么这些 issue 不能拆开。
+
+## 9. 标准开发流程
 
 每次开始工作前，先确认本地干净，并拉最新代码：
 
@@ -408,7 +474,15 @@ git push -u origin codex/short-task-name
 
 然后在 GitHub 创建 PR。
 
-## 9. PR 合并规则
+## 10. PR 合并规则
+
+每个 PR 必须使用仓库里的 PR 模板。
+
+模板文件是：
+
+```text
+.github/pull_request_template.md
+```
 
 每个 PR 必须说明：
 
@@ -417,6 +491,7 @@ git push -u origin codex/short-task-name
 - 怎么验证。
 - 有没有产品边界变化。
 - 有没有数据库、部署、secret、真实数据风险。
+- 关联哪个 GitHub Issue。
 
 推荐 PR 描述模板：
 
@@ -438,9 +513,23 @@ git push -u origin codex/short-task-name
 
 - `pnpm check` 通过。
 - 如果涉及部署或 Next.js 边界，`pnpm build` 通过。
+- GitHub Actions 的 `pnpm check` 通过。
+- GitHub Actions 的 PR guardrails 通过。
 - 没有 `.env.local`、真实截图、真实客户数据、API key、数据库连接串。
 - 没有未经确认的产品边界变化。
 - Chao 或指定 reviewer 看过。
+
+PR guardrails 当前会自动检查 Git 已追踪文件里是否包含：
+
+- `.env`
+- `.env.local`
+- `.env.*.local`
+- `data/`
+- `data/attachments/`
+
+这些检查不能替代人的判断。
+
+它们只负责挡住最明显、最危险的误提交。
 
 推荐合并方式：
 
@@ -454,7 +543,7 @@ Squash and merge
 
 禁止为了好看历史而 force push `main`。
 
-## 10. 如何一个一个看 commit
+## 11. 如何一个一个看 commit
 
 看最近提交：
 
@@ -494,7 +583,7 @@ git log --oneline --reverse <old-sha>..<new-sha>
 https://github.com/Palebluedot-ai/apexpulse-crm/pull/16
 ```
 
-## 11. 如果发现已合并的代码有问题
+## 12. 如果发现已合并的代码有问题
 
 禁止使用：
 
@@ -522,7 +611,7 @@ git push -u origin codex/revert-bad-change
 
 然后创建 PR。
 
-## 12. 禁止提交的内容
+## 13. 禁止提交的内容
 
 禁止提交：
 
@@ -549,7 +638,7 @@ git push -u origin codex/revert-bad-change
 
 `.env.example` 只能写变量名和示例占位值，不能写真值。
 
-## 13. 数据库和 migration 规则
+## 14. 数据库和 migration 规则
 
 禁止未经 Chao 确认就做：
 
@@ -571,7 +660,7 @@ git push -u origin codex/revert-bad-change
 - 如何回滚。
 - 是否涉及真实客户数据。
 
-## 14. 产品边界规则
+## 15. 产品边界规则
 
 当前产品方向是：
 
@@ -600,7 +689,7 @@ PWA-first personal CRM for Chao's OTC sales follow-up workflow.
 
 可以做技术准备，但不能偷偷改变产品主线。
 
-## 15. 测试规则
+## 16. 测试规则
 
 业务规则必须先写测试。
 
@@ -627,7 +716,7 @@ pnpm check
 pnpm build
 ```
 
-## 16. 给 AI agent 的硬规则
+## 17. 给 AI agent 的硬规则
 
 AI agent 禁止做以下事情：
 
@@ -647,7 +736,7 @@ AI agent 每次交付时必须说明：
 - 还有什么风险。
 - 是否需要 Chao 决策。
 
-## 17. 管理员建议
+## 18. 管理员建议
 
 Chao 作为管理员，建议在 GitHub 设置：
 
