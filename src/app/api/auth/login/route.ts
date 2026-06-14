@@ -4,6 +4,7 @@ import {
   buildLoginRedirectUrl,
   sanitizeLoginRedirect,
 } from "@/server/auth/login";
+import { verifyDbLogin } from "@/server/auth/db-login";
 import {
   AUTH_SESSION_COOKIE,
   createSessionToken,
@@ -55,31 +56,53 @@ function invalidLoginResponse(request: Request, wantsJson: boolean) {
 export async function POST(request: Request) {
   const payload = await readLoginPayload(request);
   const config = getLocalAuthConfig();
-  const validation = validateLocalLogin(payload, config);
-
-  if (!validation.ok) {
-    return invalidLoginResponse(request, payload.wantsJson);
-  }
 
   const { client, db } = createDb();
 
   try {
-    const [user] = await db
-      .select()
-      .from(users)
-      .where(eq(users.email, validation.email))
-      .limit(1);
+    const dbResult = await verifyDbLogin(
+      { email: payload.email, password: payload.password },
+      async (normalizedEmail) => {
+        const [row] = await db
+          .select({
+            id: users.id,
+            email: users.email,
+            passwordHash: users.passwordHash,
+            isActive: users.isActive,
+          })
+          .from(users)
+          .where(eq(users.email, normalizedEmail))
+          .limit(1);
+        return row ?? null;
+      },
+    );
 
-    if (!user || !user.isActive) {
+    let identity: { userId: string; email: string } | null = null;
+
+    if (dbResult.ok) {
+      identity = { userId: dbResult.userId, email: dbResult.email };
+    } else {
+      // Env fallback: only used when DB has no active user with a hash for this email.
+      const envValidation = validateLocalLogin(payload, config);
+      if (envValidation.ok) {
+        const [user] = await db
+          .select()
+          .from(users)
+          .where(eq(users.email, envValidation.email))
+          .limit(1);
+        if (user && user.isActive) {
+          identity = { userId: user.id, email: user.email };
+        }
+      }
+    }
+
+    if (!identity) {
       return invalidLoginResponse(request, payload.wantsJson);
     }
 
-    const token = createSessionToken(
-      { userId: user.id, email: user.email },
-      config,
-    );
+    const token = createSessionToken(identity, config);
     const response = payload.wantsJson
-      ? NextResponse.json({ ok: true, userId: user.id })
+      ? NextResponse.json({ ok: true, userId: identity.userId })
       : NextResponse.redirect(
           buildLoginRedirectUrl({
             next: payload.next,
@@ -89,9 +112,7 @@ export async function POST(request: Request) {
               request.headers.get("host"),
             protocol: request.headers.get("x-forwarded-proto"),
           }),
-          {
-            status: 303,
-          },
+          { status: 303 },
         );
 
     response.cookies.set(AUTH_SESSION_COOKIE, token, {
