@@ -9,7 +9,7 @@
 <style>
 :root{
   --paper:#faf4e8; --paper-deep:#f3ead8; --card:#fffdf7; --ink:#1f1c17; --ink-soft:#6b6357;
-  --line:#e4d9c3; --tea:#2f5d50; --tea-deep:#234739; --persimmon:#d4622a; --gold:#b98a2f;
+  --line:#e4d9c3; --tea:#15805a; --tea-deep:#0f6044; --persimmon:#d4622a; --gold:#b98a2f;
   --ok-bg:#e9f2ec; --red:#c2452d; --shadow:0 20px 60px rgba(57,47,32,.10);
 }
 *{margin:0;padding:0;box-sizing:border-box}
@@ -35,7 +35,7 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
   transition:all .2s;box-shadow:0 4px 14px rgba(57,47,32,.06);
 }
 .tab:hover{border-color:var(--tea);color:var(--tea)}
-.tab.on{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.tab.on{background:var(--tea);color:#fff;border-color:var(--tea)}
 .view{display:none;animation:fade .35s both}
 .view.on{display:block}
 @keyframes fade{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
@@ -96,7 +96,7 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
 .btn-tea{background:var(--tea);color:#fdfbf4;box-shadow:0 6px 18px rgba(47,93,80,.3)}
 .btn-ghost{background:transparent;border:1px solid var(--line);color:var(--ink)}
 .dot{width:9px;height:9px;border-radius:50%;flex:none}
-.dot.r{background:var(--red)}.dot.o{background:var(--gold)}.dot.g{background:#5d9b7c}.dot.gr{background:#cbc2af}
+.dot.r{background:var(--red)}.dot.o{background:var(--gold)}.dot.g{background:var(--tea)}.dot.gr{background:#c9bfa9}
 .muted{color:var(--ink-soft)}
 .annos{margin-top:30px;display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:16px}
 .anno{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:15px 18px}
@@ -336,7 +336,7 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
         <p class="col-title">桌面 — 拖进来就行</p>
         <div class="browser"><div class="bar"><i></i><i></i><i></i><span class="url">crm.apexpulse.dev / 录入</span></div>
         <div class="bview">
-          <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a>待确认<span class="badge">3</span></a><a>客户</a><a>任务</a><a>周报</a><span class="cta" style="background:var(--ink)">录入中</span></div>
+          <div class="topnav"><span class="logo">OTC·CRM</span><a>今日</a><a>待确认<span class="badge">3</span></a><a>客户</a><a>任务</a><a>周报</a><span class="cta" style="background:var(--tea-deep)">录入中</span></div>
           <div class="cap-grid">
             <div>
               <div class="dropzone"><span class="ico">⇪</span><b>拖入截图 / 粘贴 / 点击选择</b><span>支持多张连传,传完即开始 AI 提取</span></div>
@@ -374,10 +374,10 @@ h1.master em{font-family:"Fraunces",serif;font-style:normal;color:var(--tea);bor
               <div class="ph-card-s" style="display:flex;gap:8px;align-items:center;margin-top:7px">🖼 <span>IMG_2842</span><span style="margin-left:auto;color:var(--tea);font-weight:700;font-size:11.5px">✓ 刘总</span></div>
               <div class="ph-card-s" style="display:flex;gap:8px;align-items:center;margin-top:7px">🖼 <span>IMG_2843</span><span style="margin-left:auto;color:var(--gold);font-weight:700;font-size:11.5px">⏳ 提取中</span></div>
             </div>
-            <div class="ph-sticky-cta"><div class="ph-bigbtn" style="background:var(--ink)">去待确认 (3) →</div></div>
+            <div class="ph-sticky-cta"><div class="ph-bigbtn">去待确认 (3) →</div></div>
             <div class="tabbar">
               <span class="ti"><b>☀</b>今日</span><span class="ti"><b>◎</b>客户</span>
-              <span class="fab" style="background:var(--ink)">＋</span>
+              <span class="fab">＋</span>
               <span class="ti"><span class="bdg">3</span><b>☑</b>待确认</span><span class="ti"><b>≣</b>任务</span>
             </div>
           </div>
