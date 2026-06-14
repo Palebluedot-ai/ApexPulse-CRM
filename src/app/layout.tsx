@@ -3,12 +3,16 @@ import { AppNav } from "./app-nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "ApexPulse CRM",
+  title: "HashKey OTC",
   description: "Personal OTC sales follow-up CRM, PWA-first.",
-  applicationName: "OTC CRM",
+  applicationName: "HashKey OTC",
   appleWebApp: {
     capable: true,
-    title: "OTC CRM",
+    title: "HashKey OTC",
+  },
+  icons: {
+    icon: "/favicon.png",
+    apple: "/apple-touch-icon.png",
   },
 };
 
