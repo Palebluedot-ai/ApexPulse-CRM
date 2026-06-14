@@ -26,7 +26,7 @@ export default async function MobileDogfoodPage() {
           </p>
         </div>
         <Link
-          className="w-fit rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(31,157,107,0.28)]"
+          className="w-fit rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(21,128,90,0.28)]"
           href="/capture"
         >
           开始上传
@@ -84,7 +84,7 @@ export default async function MobileDogfoodPage() {
         </div>
         <div className="mt-6 flex flex-wrap gap-2">
           <Link
-            className="rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(31,157,107,0.28)]"
+            className="rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(21,128,90,0.28)]"
             href="/capture"
           >
             去上传截图

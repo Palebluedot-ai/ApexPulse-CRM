@@ -61,7 +61,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
             </p>
           ) : null}
           <button
-            className="mt-5 w-full rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(31,157,107,0.28)]"
+            className="mt-5 w-full rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(21,128,90,0.28)]"
             type="submit"
           >
             登录

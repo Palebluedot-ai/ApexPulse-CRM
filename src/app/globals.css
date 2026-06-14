@@ -12,9 +12,9 @@
   --muted: #6f675e;
   --panel: #fffaf0;
   --panel-strong: #efe0c4;
-  /* legacy accent 别名到新鲜亮绿,统一全站绿色 */
-  --accent: #1f9d6b;
-  --accent-strong: #15805a;
+  /* legacy accent 别名到统一主绿,全站同一个绿 */
+  --accent: #15805a;
+  --accent-strong: #0f6044;
   --line: rgba(25, 23, 20, 0.14);
   --font-display: "Iowan Old Style", "Palatino", "Book Antiqua", serif;
   --font-sans: "Noto Sans SC", "Avenir Next", "Gill Sans", "Trebuchet MS", sans-serif;
@@ -26,14 +26,14 @@
   --ink: #1f1c17;
   --ink-soft: #6b6357;
   --line-soft: #e4d9c3;
-  --tea: #1f9d6b;
-  --tea-deep: #15805a;
+  --tea: #15805a;
+  --tea-deep: #0f6044;
   --persimmon: #dd7240;
   --persimmon-deep: #d4622a;
   --gold: #b98a2f;
   --red-status: #c2452d;
   --ok-bg: #e9f2ec;
-  --ok: #1f9d6b;
+  --ok: #15805a;
   --dot-unknown: #c9bfa9;
   --font-serif-display: "Noto Serif SC", "Iowan Old Style", serif;
   --font-numerals: "Fraunces", serif;
@@ -46,7 +46,7 @@
 html {
   min-height: 100%;
   background:
-    radial-gradient(circle at 20% 10%, rgba(31, 157, 107, 0.16), transparent 32rem),
+    radial-gradient(circle at 20% 10%, rgba(21, 128, 90, 0.16), transparent 32rem),
     radial-gradient(circle at 80% 0%, rgba(185, 122, 42, 0.16), transparent 30rem),
     var(--background);
 }

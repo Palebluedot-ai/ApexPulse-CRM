@@ -64,7 +64,7 @@ export function CaptureLabClient() {
             onClick={() => inputRef.current?.click()}
             type="button"
           >
-            <span className="relative flex size-24 items-center justify-center rounded-full bg-[var(--tea)] shadow-[0_18px_44px_rgba(31,157,107,0.28),inset_0_1px_0_rgba(255,255,255,0.18)] transition duration-300 group-hover:scale-[1.03] sm:size-28">
+            <span className="relative flex size-24 items-center justify-center rounded-full bg-[var(--tea)] shadow-[0_18px_44px_rgba(21,128,90,0.28),inset_0_1px_0_rgba(255,255,255,0.18)] transition duration-300 group-hover:scale-[1.03] sm:size-28">
               <span className="absolute h-10 w-[3px] rounded-full bg-[#fffdf8] sm:h-12" />
               <span className="absolute h-[3px] w-10 rounded-full bg-[#fffdf8] sm:w-12" />
             </span>
