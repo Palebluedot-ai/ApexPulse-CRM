@@ -21,10 +21,16 @@ export interface DemoSeedData {
   task: NewTask;
 }
 
+export interface DemoSeedOptions {
+  passwordHash: string | null;
+}
+
 const now = new Date("2026-05-24T18:00:00+08:00");
 const nextFollowupAt = new Date("2026-05-26T10:00:00+08:00");
 
-export function buildDemoSeedData(): DemoSeedData {
+export function buildDemoSeedData(
+  options: DemoSeedOptions = { passwordHash: null },
+): DemoSeedData {
   const aiSummary =
     "刘总在展会后继续了解 OTC 出入金方案，当前重点是确认公司主体、预计体量和开户材料。";
 
@@ -34,6 +40,7 @@ export function buildDemoSeedData(): DemoSeedData {
       displayName: "Chao",
       roleType: "owner",
       isActive: true,
+      passwordHash: options.passwordHash,
     },
     party: {
       displayName: "刘总",
@@ -88,8 +95,11 @@ export function buildDemoSeedData(): DemoSeedData {
 
 type Db = PostgresJsDatabase<typeof import("./schema")>;
 
-export async function seedDemoData(db: Db) {
-  const seed = buildDemoSeedData();
+export async function seedDemoData(
+  db: Db,
+  options: DemoSeedOptions = { passwordHash: null },
+) {
+  const seed = buildDemoSeedData(options);
 
   const [user] = await db
     .insert(users)
@@ -100,6 +110,7 @@ export async function seedDemoData(db: Db) {
         displayName: seed.user.displayName,
         roleType: seed.user.roleType,
         isActive: seed.user.isActive,
+        passwordHash: seed.user.passwordHash,
         updatedAt: new Date(),
       },
     })

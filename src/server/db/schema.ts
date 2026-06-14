@@ -69,6 +69,7 @@ export const users = pgTable(
       { onDelete: "set null" },
     ),
     isActive: boolean("is_active").default(true).notNull(),
+    passwordHash: text("password_hash"),
     ...timestamps,
   },
   (table) => [

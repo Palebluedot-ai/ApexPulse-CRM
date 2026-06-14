@@ -20,4 +20,12 @@ describe("demo seed data", () => {
     expect(seed.party.followupStatus).toBe("due_soon");
     expect(seed.task.description).toContain("刘总");
   });
+
+  it("includes passwordHash null by default and accepts an override", () => {
+    const defaulted = buildDemoSeedData();
+    expect(defaulted.user.passwordHash).toBeNull();
+
+    const withHash = buildDemoSeedData({ passwordHash: "scrypt$1$a$b" });
+    expect(withHash.user.passwordHash).toBe("scrypt$1$a$b");
+  });
 });
