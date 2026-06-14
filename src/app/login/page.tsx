@@ -15,7 +15,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <section className="grid w-full gap-6 rounded-[2rem] border border-[var(--line)] bg-[rgba(255,250,240,0.86)] p-6 shadow-[0_24px_80px_rgba(25,23,20,0.12)] md:grid-cols-[1fr_0.9fr] md:p-10">
         <div className="flex flex-col justify-between gap-10">
           <div>
-            <p className="mb-5 w-fit rounded-full bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--panel)]">
+            <p className="mb-5 w-fit rounded-full border border-[var(--line-soft)] bg-[var(--card)] px-4 py-2 text-sm font-semibold text-[var(--tea-deep)]">
               M1.14 · local password
             </p>
             <h1 className="font-(family-name:--font-display) text-5xl font-semibold tracking-[-0.04em] sm:text-6xl">
@@ -33,14 +33,14 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
 
         <form
           action="/api/auth/login"
-          className="rounded-[1.5rem] bg-[var(--foreground)] p-5 text-[var(--panel)]"
+          className="rounded-[1.5rem] border border-[var(--line-soft)] bg-[var(--card)] p-5 text-[var(--ink)] shadow-[0_14px_40px_rgba(57,47,32,0.08)]"
           method="post"
         >
           <input name="next" type="hidden" value={next} />
           <label className="grid gap-2 text-sm font-semibold">
             邮箱
             <input
-              className="min-h-12 rounded-2xl border border-white/10 bg-white/[0.08] px-4 text-base text-[var(--panel)] outline-none focus:border-[var(--accent)]"
+              className="min-h-12 rounded-2xl border border-[var(--line-soft)] bg-white px-4 text-base text-[var(--ink)] outline-none focus:border-[var(--tea)]"
               defaultValue="chao.local@example.com"
               name="email"
               type="email"
@@ -49,19 +49,19 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
           <label className="mt-4 grid gap-2 text-sm font-semibold">
             密码
             <input
-              className="min-h-12 rounded-2xl border border-white/10 bg-white/[0.08] px-4 text-base text-[var(--panel)] outline-none focus:border-[var(--accent)]"
+              className="min-h-12 rounded-2xl border border-[var(--line-soft)] bg-white px-4 text-base text-[var(--ink)] outline-none focus:border-[var(--tea)]"
               name="password"
               placeholder="local-dev-password"
               type="password"
             />
           </label>
           {hasError ? (
-            <p className="mt-4 rounded-2xl border border-red-300/40 bg-red-400/10 p-3 text-sm text-red-100">
+            <p className="mt-4 rounded-2xl border border-[var(--red-status)]/30 bg-[#fdeee9] p-3 text-sm text-[var(--red-status)]">
               邮箱或密码不对。先确认本地 seed 用户和 .env 配置。
             </p>
           ) : null}
           <button
-            className="mt-5 w-full rounded-full bg-[var(--panel)] px-5 py-3 text-sm font-semibold text-[var(--foreground)]"
+            className="mt-5 w-full rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(21,128,90,0.28)]"
             type="submit"
           >
             登录
