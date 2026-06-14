@@ -26,7 +26,7 @@ export default async function MobileDogfoodPage() {
           </p>
         </div>
         <Link
-          className="w-fit rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
+          className="w-fit rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(31,157,107,0.28)]"
           href="/capture"
         >
           开始上传
@@ -52,12 +52,12 @@ export default async function MobileDogfoodPage() {
           </p>
         </div>
 
-        <div className="rounded-[1.8rem] border border-[var(--line)] bg-[var(--foreground)] p-6 text-[var(--panel)] shadow-[0_24px_80px_rgba(25,23,20,0.16)]">
+        <div className="rounded-[1.8rem] border border-[var(--line-soft)] bg-[var(--card)] p-6 text-[var(--ink)] shadow-[0_14px_40px_rgba(57,47,32,0.08)]">
           <h2 className="text-2xl font-semibold">上线前先确认</h2>
           <ul className="mt-5 grid gap-3">
             {model.checks.map((check) => (
               <li
-                className="rounded-2xl border border-white/10 bg-white/[0.06] p-4 text-sm font-semibold leading-6"
+                className="rounded-2xl border border-[var(--line-soft)] bg-[var(--paper-deep)] p-4 text-sm font-semibold leading-6"
                 key={check}
               >
                 {check}
@@ -84,7 +84,7 @@ export default async function MobileDogfoodPage() {
         </div>
         <div className="mt-6 flex flex-wrap gap-2">
           <Link
-            className="rounded-full bg-[var(--foreground)] px-5 py-3 text-sm font-semibold text-[var(--panel)]"
+            className="rounded-full bg-[var(--tea)] px-5 py-3 text-sm font-semibold text-white shadow-[0_6px_16px_rgba(31,157,107,0.28)]"
             href="/capture"
           >
             去上传截图
