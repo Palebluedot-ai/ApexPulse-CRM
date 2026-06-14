@@ -18,7 +18,8 @@
     "db:migrate": "drizzle-kit migrate",
     "db:migrate:local": "DATABASE_URL=postgres://postgres:postgres@localhost:5432/apexpulse_crm drizzle-kit migrate",
     "db:check": "tsx scripts/check-db.ts",
-    "db:seed:local": "DATABASE_URL=postgres://postgres:postgres@localhost:5432/apexpulse_crm tsx src/server/db/seed-local.ts"
+    "db:seed:local": "DATABASE_URL=postgres://postgres:postgres@localhost:5432/apexpulse_crm tsx src/server/db/seed-local.ts",
+    "user:create": "tsx scripts/user-create.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
