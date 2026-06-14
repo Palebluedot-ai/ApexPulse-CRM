@@ -7,8 +7,8 @@ export default function manifest(): MetadataRoute.Manifest {
     description: "Personal OTC sales follow-up CRM.",
     start_url: "/",
     display: "standalone",
-    background_color: "#f4efe5",
-    theme_color: "#0f766e",
+    background_color: "#faf4e8",
+    theme_color: "#faf4e8",
     icons: [
       {
         src: "/icons/icon-192.png",
