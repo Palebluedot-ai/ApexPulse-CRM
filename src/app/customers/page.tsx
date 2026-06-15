@@ -34,8 +34,8 @@ const sortOptions: Array<{ label: string; value: CustomerSort }> = [
 const dotClasses: Record<CustomerListItem["followupStatus"], string> = {
   overdue: "bg-[var(--red-status)]",
   due_soon: "bg-[var(--gold)]",
-  up_to_date: "bg-[#5d9b7c]",
-  unknown: "bg-[#cbc2af]",
+  up_to_date: "bg-[var(--ok)]",
+  unknown: "bg-[var(--dot-unknown)]",
 };
 
 function lastContactLabel(customer: CustomerListItem, now: Date): {
@@ -141,11 +141,11 @@ export default async function CustomersPage({
               快到期
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <i className="inline-block h-2.5 w-2.5 rounded-full bg-[#5d9b7c]" />
+              <i className="inline-block h-2.5 w-2.5 rounded-full bg-[var(--ok)]" />
               正常
             </span>
             <span className="inline-flex items-center gap-1.5">
-              <i className="inline-block h-2.5 w-2.5 rounded-full bg-[#cbc2af]" />
+              <i className="inline-block h-2.5 w-2.5 rounded-full bg-[var(--dot-unknown)]" />
               没计划
             </span>
           </p>

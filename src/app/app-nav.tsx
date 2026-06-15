@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
@@ -60,10 +61,18 @@ export function AppNav() {
       <header className="sticky top-0 z-20 hidden border-b border-[var(--line-soft)] bg-[rgba(250,244,232,0.88)] px-8 py-3 backdrop-blur-xl lg:block">
         <nav className="mx-auto flex max-w-5xl items-center gap-6">
           <Link
-            className="mr-2 font-(family-name:--font-serif-display) text-lg font-black"
+            aria-label="回到首页"
+            className="mr-3 flex h-9 items-center"
             href="/"
           >
-            OTC·CRM
+            <Image
+              alt="HashKey"
+              className="h-8 w-auto"
+              height={33}
+              priority
+              src="/brand/hashkey-logo.svg"
+              width={103}
+            />
           </Link>
           {desktopNavItems.map((item) => {
             const active = isActive(pathname, item.href);
