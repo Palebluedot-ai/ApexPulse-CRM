@@ -2,6 +2,8 @@ import { describe, expect, it } from "vitest";
 import {
   appendImageUploadResult,
   buildImageUploadSuccessMessage,
+  buildOversizeImageMessage,
+  buildUploadFailureMessage,
 } from "./capture-feedback";
 
 describe("capture feedback", () => {
@@ -40,5 +42,29 @@ describe("capture feedback", () => {
         fileName: "wechat-2.png",
       },
     ]);
+  });
+});
+
+describe("upload failure messaging", () => {
+  it("surfaces the server-provided error when the body is valid JSON", () => {
+    expect(buildUploadFailureMessage(400, "Image file is required")).toBe(
+      "Image file is required",
+    );
+  });
+
+  it("maps a 413 with no JSON body to an oversize hint", () => {
+    expect(buildUploadFailureMessage(413)).toContain("4 MB");
+  });
+
+  it("falls back to the HTTP status for unknown non-JSON failures", () => {
+    expect(buildUploadFailureMessage(500)).toBe(
+      "上传失败（HTTP 500），请稍后重试。",
+    );
+  });
+
+  it("reports the file size and the limit when an image is too large", () => {
+    const message = buildOversizeImageMessage(6 * 1024 * 1024);
+    expect(message).toContain("6.0 MB");
+    expect(message).toContain("4 MB");
   });
 });

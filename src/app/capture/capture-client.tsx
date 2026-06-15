@@ -5,6 +5,9 @@ import Link from "next/link";
 import {
   appendImageUploadResult,
   buildImageUploadSuccessMessage,
+  buildOversizeImageMessage,
+  buildUploadFailureMessage,
+  MAX_IMAGE_UPLOAD_BYTES,
   type ImageUploadResult,
 } from "@/lib/capture-feedback";
 
@@ -103,6 +106,14 @@ export function CaptureClient() {
       return;
     }
 
+    if (imageFile.size > MAX_IMAGE_UPLOAD_BYTES) {
+      setImageState({
+        status: "error",
+        message: buildOversizeImageMessage(imageFile.size),
+      });
+      return;
+    }
+
     setImageUploading(true);
 
     try {
@@ -110,11 +121,16 @@ export function CaptureClient() {
         method: "POST",
         body: form,
       });
-      const result = (await response.json()) as Record<string, unknown>;
+      // iOS Safari throws a cryptic DOMException when .json() hits a non-JSON
+      // body (e.g. a platform 413 or a 500), so parse defensively.
+      const result = (await response.json().catch(() => null)) as Record<
+        string,
+        unknown
+      > | null;
 
-      if (!response.ok) {
+      if (!response.ok || !result) {
         throw new Error(
-          typeof result.error === "string" ? result.error : "提交失败",
+          buildUploadFailureMessage(response.status, result?.error),
         );
       }
 
