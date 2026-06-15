@@ -111,6 +111,7 @@ export function buildSkipReviewUpdate(input: SkipReviewInput): ReviewEventUpdate
 
 export async function listPendingReviewItems(
   db: Db,
+  currentUserId: string,
   limit = 50,
 ): Promise<PendingReviewItem[]> {
   const rows = await db
@@ -120,7 +121,12 @@ export async function listPendingReviewItems(
     })
     .from(events)
     .leftJoin(attachments, eq(attachments.eventId, events.id))
-    .where(eq(events.reviewStatus, "pending_review"))
+    .where(
+      and(
+        eq(events.reviewStatus, "pending_review"),
+        eq(events.createdByUserId, currentUserId),
+      ),
+    )
     .orderBy(desc(events.capturedAt))
     .limit(limit);
 
@@ -144,7 +150,7 @@ export async function listPendingReviewItems(
 
 export async function confirmReviewEvent(
   db: Db,
-  input: ConfirmReviewInput & { eventId: string },
+  input: ConfirmReviewInput & { eventId: string; currentUserId: string },
 ) {
   const event = await db.transaction(async (tx) => {
     const [pendingEvent] = await tx
@@ -154,6 +160,7 @@ export async function confirmReviewEvent(
         and(
           eq(events.id, requireEventId(input.eventId)),
           eq(events.reviewStatus, "pending_review"),
+          eq(events.createdByUserId, input.currentUserId),
         ),
       )
       .limit(1);
@@ -199,6 +206,7 @@ export async function confirmReviewEvent(
         and(
           eq(events.id, requireEventId(input.eventId)),
           eq(events.reviewStatus, "pending_review"),
+          eq(events.createdByUserId, input.currentUserId),
         ),
       )
       .returning();
@@ -244,7 +252,7 @@ export async function confirmReviewEvent(
 
 export async function editReviewEvent(
   db: Db,
-  input: EditReviewInput & { eventId: string },
+  input: EditReviewInput & { eventId: string; currentUserId: string },
 ) {
   const [event] = await db
     .update(events)
@@ -253,6 +261,7 @@ export async function editReviewEvent(
       and(
         eq(events.id, requireEventId(input.eventId)),
         eq(events.reviewStatus, "pending_review"),
+        eq(events.createdByUserId, input.currentUserId),
       ),
     )
     .returning();
@@ -264,7 +273,7 @@ export async function editReviewEvent(
 
 export async function skipReviewEvent(
   db: Db,
-  input: SkipReviewInput & { eventId: string },
+  input: SkipReviewInput & { eventId: string; currentUserId: string },
 ) {
   const [event] = await db
     .update(events)
@@ -273,6 +282,7 @@ export async function skipReviewEvent(
       and(
         eq(events.id, requireEventId(input.eventId)),
         eq(events.reviewStatus, "pending_review"),
+        eq(events.createdByUserId, input.currentUserId),
       ),
     )
     .returning();

@@ -11,7 +11,7 @@ export async function POST(request: Request) {
   const { client, db } = createDb();
 
   try {
-    await requireCurrentUser(db);
+    const currentUser = await requireCurrentUser(db);
     const event = await editReviewEvent(db, {
       eventId: typeof body.eventId === "string" ? body.eventId : "",
       summary: typeof body.summary === "string" ? body.summary : "",
@@ -19,6 +19,7 @@ export async function POST(request: Request) {
         typeof body.extractedFields === "object" && body.extractedFields != null
           ? (body.extractedFields as Record<string, unknown>)
           : {},
+      currentUserId: currentUser.id,
     });
 
     return NextResponse.json({ event });

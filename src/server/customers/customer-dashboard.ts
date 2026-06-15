@@ -351,10 +351,14 @@ export function buildCustomerMorningBrief(input: {
   return [latestLine, nextLine, `风险提示：${input.actionPanel.reason}`];
 }
 
-export async function listCustomerListItems(db: Db): Promise<CustomerListItem[]> {
+export async function listCustomerListItems(
+  db: Db,
+  currentUserId: string,
+): Promise<CustomerListItem[]> {
   const rows = await db
     .select()
     .from(parties)
+    .where(eq(parties.createdByUserId, currentUserId))
     .orderBy(desc(parties.lastContactAt), asc(parties.displayName));
 
   return rows.map(buildCustomerListItem);
@@ -363,11 +367,14 @@ export async function listCustomerListItems(db: Db): Promise<CustomerListItem[]>
 export async function getCustomerFirstScreen(
   db: Db,
   customerId: string,
+  currentUserId: string,
 ): Promise<CustomerFirstScreen | null> {
   const [party] = await db
     .select()
     .from(parties)
-    .where(eq(parties.id, customerId))
+    .where(
+      and(eq(parties.id, customerId), eq(parties.createdByUserId, currentUserId)),
+    )
     .limit(1);
 
   if (!party) return null;
@@ -434,16 +441,23 @@ export async function getCustomerFirstScreen(
 export async function listCustomerTimeline(
   db: Db,
   customerId: string,
+  currentUserId: string,
   limit = 20,
 ): Promise<CustomerTimelineEntry[]> {
-  const eventRows = await db
+  const rows = await db
     .select()
     .from(events)
+    .innerJoin(parties, eq(parties.id, events.partyId))
     .where(
-      and(eq(events.partyId, customerId), eq(events.reviewStatus, "confirmed")),
+      and(
+        eq(events.partyId, customerId),
+        eq(events.reviewStatus, "confirmed"),
+        eq(parties.createdByUserId, currentUserId),
+      ),
     )
     .orderBy(sql`coalesce(${events.occurredAt}, ${events.capturedAt}) desc`)
     .limit(limit);
+  const eventRows = rows.map((row) => row.events);
 
   const attachmentRows =
     eventRows.length > 0

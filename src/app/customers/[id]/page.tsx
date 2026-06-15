@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { requireCurrentUser } from "@/server/auth/current-user";
 import { createDb } from "@/server/db";
 import {
   getCustomerFirstScreen,
@@ -62,9 +63,10 @@ export default async function CustomerDetailPage({
   const { client, db } = createDb();
 
   try {
+    const currentUser = await requireCurrentUser(db);
     const [firstScreen, timeline] = await Promise.all([
-      getCustomerFirstScreen(db, id),
-      listCustomerTimeline(db, id),
+      getCustomerFirstScreen(db, id, currentUser.id),
+      listCustomerTimeline(db, id, currentUser.id),
     ]);
     if (!firstScreen) notFound();
 

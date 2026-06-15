@@ -74,6 +74,7 @@ export async function POST(request: Request) {
       occurredAt: dateOrUndefined(body.occurredAt),
       followupStatus: followupStatusOrUndefined(body.followupStatus),
       reviewedByUserId: currentUser.id,
+      currentUserId: currentUser.id,
     });
 
     return NextResponse.json({ event });

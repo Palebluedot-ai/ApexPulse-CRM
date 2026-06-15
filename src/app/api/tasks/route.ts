@@ -26,8 +26,8 @@ export async function GET() {
   const { client, db } = createDb();
 
   try {
-    await requireCurrentUser(db);
-    const items = await listTasks(db);
+    const currentUser = await requireCurrentUser(db);
+    const items = await listTasks(db, currentUser.id);
     return NextResponse.json({ items });
   } finally {
     await client.end();

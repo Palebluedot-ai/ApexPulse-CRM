@@ -14,6 +14,7 @@ export async function POST(request: Request) {
     const currentUser = await requireCurrentUser(db);
     const task = await completeTask(db, {
       taskId: typeof body.taskId === "string" ? body.taskId : "",
+      currentUserId: currentUser.id,
       completedByUserId: currentUser.id,
     });
 

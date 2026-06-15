@@ -75,6 +75,9 @@ export async function runCaptureAutoExtraction(eventId: string): Promise<void> {
 
     if (!row?.event || !shouldAutoExtract(row.event)) return;
 
+    const ownerUserId = row.event.createdByUserId;
+    if (!ownerUserId) return;
+
     const result = await runExtraction(row.event, row.attachment);
     if (!result) return;
 
@@ -90,6 +93,7 @@ export async function runCaptureAutoExtraction(eventId: string): Promise<void> {
       eventId,
       summary: patch.summary,
       extractedFields: patch.extractedFields,
+      currentUserId: ownerUserId,
     });
   } catch (error) {
     console.error(

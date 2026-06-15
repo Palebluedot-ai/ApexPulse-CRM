@@ -15,6 +15,7 @@ export async function POST(request: Request) {
     const event = await skipReviewEvent(db, {
       eventId: typeof body.eventId === "string" ? body.eventId : "",
       reviewedByUserId: currentUser.id,
+      currentUserId: currentUser.id,
     });
 
     return NextResponse.json({ event });

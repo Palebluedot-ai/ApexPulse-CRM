@@ -30,7 +30,7 @@ export async function POST(request: Request) {
   const { client, db } = createDb();
 
   try {
-    await requireCurrentUser(db);
+    const currentUser = await requireCurrentUser(db);
 
     const [row] = await db
       .select({
@@ -43,6 +43,7 @@ export async function POST(request: Request) {
         and(
           eq(events.id, eventId),
           eq(events.reviewStatus, "pending_review"),
+          eq(events.createdByUserId, currentUser.id),
         ),
       );
 
@@ -87,6 +88,7 @@ export async function POST(request: Request) {
       eventId,
       summary: patch.summary,
       extractedFields: patch.extractedFields,
+      currentUserId: currentUser.id,
     });
 
     return NextResponse.json({
